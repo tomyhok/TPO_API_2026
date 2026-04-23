@@ -9,6 +9,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 const teamRoutes = require('./routes/teamRoutes');
+const playerRoutes = require('./routes/playerRoutes');
 
 // Basic route to check if API is running
 app.get('/', (req, res) => {
@@ -16,5 +17,6 @@ app.get('/', (req, res) => {
 });
 
 app.use('/api/teams', teamRoutes);
+app.use('/api/players', playerRoutes);
 
 module.exports = app;
