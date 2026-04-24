@@ -20,17 +20,22 @@ src/
 ├── config/
 │   └── db.js               # SQL Server database connection setup using mssql
 ├── controllers/
+│   ├── authController.js   # Handles JWT login logic
 │   ├── matchController.js  # Handles business logic and database interactions for Matches
 │   ├── playerController.js # Handles business logic and database interactions for Players
 │   ├── standingsController.js # Handles logic for fetching league standings
 │   └── teamController.js   # Handles business logic and database interactions for Teams
-├── middlewares/            # Custom Express middlewares (e.g., error handlers, auth validation)
+├── middlewares/            # Custom Express middlewares
+│   └── authMiddleware.js   # JWT verification middleware
 ├── models/                 # Database models and data structures
 ├── routes/
+│   ├── authRoutes.js       # Express router definitions for Auth endpoints
 │   ├── matchRoutes.js      # Express router definitions for Match endpoints
 │   ├── playerRoutes.js     # Express router definitions for Player endpoints
 │   ├── standingsRoutes.js  # Express router definitions for Standings endpoints
 │   └── teamRoutes.js       # Express router definitions for Team endpoints
+├── scripts/
+│   └── seedAdmin.js        # Script to create initial admin user
 ├── app.js                  # Express application setup, applying middlewares and routes
 └── server.js               # Entry point of the application, starts the HTTP server
 ```
@@ -71,6 +76,10 @@ npm run dev
 
 You should see output indicating that the server is running on port 3000 and has successfully connected to the database.
 
+## Authentication Requirement
+
+> **Security Note**: All `POST`, `PUT`, and `DELETE` endpoints require an `Authorization: Bearer <token>` header. You can obtain a token by logging in via the `/api/auth/login` endpoint. `GET` endpoints are public and do not require authentication.
+
 ## Teams API Endpoints
 
 The API provides endpoints under the `/api/teams` prefix to manage basketball teams.
@@ -100,7 +109,7 @@ The API provides endpoints under the `/api/teams` prefix to manage basketball te
   }
   ```
 - **Success Response**: `201 Created` (Returns the newly created team object)
-- **Error Response**: `400 Bad Request` (If `Name` or `Coach` are missing)
+- **Error Response**: `400 Bad Request` (If `Name` or `Coach` are missing), `401 Unauthorized` (If token is missing or invalid)
 
 ### 4. Update a Team
 - **URL**: `/api/teams/:id`
@@ -114,14 +123,14 @@ The API provides endpoints under the `/api/teams` prefix to manage basketball te
   ```
   *(You can provide either `Name`, `Coach`, or both).*
 - **Success Response**: `200 OK` (Returns the updated team object)
-- **Error Response**: `400 Bad Request` (If no fields are provided to update), `404 Not Found` (If the team ID does not exist)
+- **Error Response**: `400 Bad Request` (If no fields are provided to update), `404 Not Found` (If the team ID does not exist), `401 Unauthorized` (If token is missing or invalid)
 
 ### 5. Delete a Team
 - **URL**: `/api/teams/:id`
 - **Method**: `DELETE`
 - **Description**: Deletes a team from the database by its ID.
 - **Success Response**: `200 OK` (Returns `{"message": "Team deleted successfully."}`)
-- **Error Response**: `404 Not Found` (If the team ID does not exist)
+- **Error Response**: `404 Not Found` (If the team ID does not exist), `401 Unauthorized` (If token is missing or invalid)
 
 ## Players API Endpoints
 
@@ -160,7 +169,7 @@ The API provides endpoints under the `/api/players` prefix to manage players wit
   }
   ```
 - **Success Response**: `201 Created` (Returns the newly created player object)
-- **Error Response**: `400 Bad Request` (If `TeamID`, `FirstName`, `LastName`, or `Category` are missing)
+- **Error Response**: `400 Bad Request` (If `TeamID`, `FirstName`, `LastName`, or `Category` are missing), `401 Unauthorized` (If token is missing or invalid)
 
 ### 5. Update a Player
 - **URL**: `/api/players/:id`
@@ -174,14 +183,14 @@ The API provides endpoints under the `/api/players` prefix to manage players wit
   ```
   *(You can provide any combination of `TeamID`, `FirstName`, `LastName`, or `Category`).*
 - **Success Response**: `200 OK` (Returns the updated player object)
-- **Error Response**: `400 Bad Request` (If no fields are provided to update), `404 Not Found` (If the player ID does not exist)
+- **Error Response**: `400 Bad Request` (If no fields are provided to update), `404 Not Found` (If the player ID does not exist), `401 Unauthorized` (If token is missing or invalid)
 
 ### 6. Delete a Player
 - **URL**: `/api/players/:id`
 - **Method**: `DELETE`
 - **Description**: Deletes a player from the database by their ID.
 - **Success Response**: `200 OK` (Returns `{"message": "Player deleted successfully."}`)
-- **Error Response**: `404 Not Found` (If the player ID does not exist)
+- **Error Response**: `404 Not Found` (If the player ID does not exist), `401 Unauthorized` (If token is missing or invalid)
 
 ## Matches API Endpoints
 
@@ -215,7 +224,7 @@ The API provides endpoints under the `/api/matches` prefix to manage match sched
   }
   ```
 - **Success Response**: `201 Created` (Returns the newly created match object)
-- **Error Response**: `400 Bad Request` (If fields are missing, or if `LocalTeamID` and `VisitorTeamID` are the same)
+- **Error Response**: `400 Bad Request` (If fields are missing, or if `LocalTeamID` and `VisitorTeamID` are the same), `401 Unauthorized` (If token is missing or invalid)
 
 ### 4. Update Match Details
 - **URL**: `/api/matches/:id`
@@ -230,7 +239,7 @@ The API provides endpoints under the `/api/matches` prefix to manage match sched
   ```
   *(You can provide any combination of `MatchDate`, `MatchTime`, or `Location`).*
 - **Success Response**: `200 OK` (Returns the updated match object)
-- **Error Response**: `400 Bad Request` (If no detail fields are provided), `404 Not Found` (If the match ID does not exist)
+- **Error Response**: `400 Bad Request` (If no detail fields are provided), `404 Not Found` (If the match ID does not exist), `401 Unauthorized` (If token is missing or invalid)
 
 ### 5. Update Match Score
 - **URL**: `/api/matches/:id/score`
@@ -244,14 +253,14 @@ The API provides endpoints under the `/api/matches` prefix to manage match sched
   }
   ```
 - **Success Response**: `200 OK` (Returns the updated match object)
-- **Error Response**: `400 Bad Request` (If points are missing), `404 Not Found` (If the match ID does not exist)
+- **Error Response**: `400 Bad Request` (If points are missing), `404 Not Found` (If the match ID does not exist), `401 Unauthorized` (If token is missing or invalid)
 
 ### 6. Delete a Match
 - **URL**: `/api/matches/:id`
 - **Method**: `DELETE`
 - **Description**: Deletes a match from the database by its ID.
 - **Success Response**: `200 OK` (Returns `{"message": "Match deleted successfully."}`)
-- **Error Response**: `404 Not Found` (If the match ID does not exist)
+- **Error Response**: `404 Not Found` (If the match ID does not exist), `401 Unauthorized` (If token is missing or invalid)
 
 ## Standings API Endpoints
 
@@ -263,3 +272,21 @@ The API provides endpoints under the `/api/standings` prefix to fetch the automa
 - **Description**: Retrieves the current league standings, ordered by total points in descending order.
 - **Success Response**: `200 OK` (Returns an array of standing objects)
 - **Error Response**: `500 Internal Server Error` (If there is a database issue)
+
+## Auth API Endpoints
+
+The API provides endpoints under the `/api/auth` prefix for admin authentication.
+
+### 1. Login
+- **URL**: `/api/auth/login`
+- **Method**: `POST`
+- **Description**: Authenticates an administrator and returns a JWT token.
+- **Request Body** (JSON):
+  ```json
+  {
+    "Username": "admin",
+    "Password": "your_password"
+  }
+  ```
+- **Success Response**: `200 OK` (Returns `{"token": "eyJhbG..."}`)
+- **Error Response**: `400 Bad Request` (If username or password missing), `401 Unauthorized` (If credentials are invalid)
