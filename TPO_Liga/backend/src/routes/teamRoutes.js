@@ -3,7 +3,7 @@ const router = express.Router();
 const teamController = require('../controllers/teamController');
 const authMiddleware = require('../middlewares/authMiddleware');
 
-// Define CRUD routes for Teams
+// Define rutas CRUD para Equipos (Teams)
 router.post('/', authMiddleware, teamController.createTeam);
 router.get('/', teamController.getAllTeams);
 router.get('/:id', teamController.getTeamById);

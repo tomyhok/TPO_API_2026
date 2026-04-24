@@ -1,52 +1,52 @@
-# Youth Basketball League API
+# API de la Liga de Básquet Juvenil
 
-This is the backend API for the Youth Basketball League platform, built to manage teams, matches, and league statistics. This service provides the core endpoints necessary to create, retrieve, update, and delete team information and connects to a SQL Server database.
+Esta es la API backend para la plataforma de la Liga de Básquet Juvenil, construida para gestionar equipos, partidos y estadísticas de la liga. Este servicio proporciona los endpoints principales necesarios para crear, obtener, actualizar y eliminar información de equipos, y se conecta a una base de datos SQL Server.
 
-## Tech Stack
+## Stack Tecnológico
 
-- **Node.js**: JavaScript runtime environment.
-- **Express.js**: Fast, unopinionated, minimalist web framework for Node.js.
-- **SQL Server**: Relational database management system.
-- **mssql**: Microsoft SQL Server client for Node.js.
-- **dotenv**: Module to load environment variables from a `.env` file.
-- **cors**: Middleware for enabling Cross-Origin Resource Sharing.
+- **Node.js**: Entorno de ejecución de JavaScript.
+- **Express.js**: Framework web rápido, sin opiniones y minimalista para Node.js.
+- **SQL Server**: Sistema de gestión de bases de datos relacionales.
+- **mssql**: Cliente de Microsoft SQL Server para Node.js.
+- **dotenv**: Módulo para cargar variables de entorno desde un archivo `.env`.
+- **cors**: Middleware para habilitar el Intercambio de Recursos de Origen Cruzado (CORS).
 
-## Project Structure
+## Estructura del Proyecto
 
-Our `src` folder is organized as follows:
+Nuestra carpeta `src` está organizada de la siguiente manera:
 
 ```text
 src/
 ├── config/
-│   └── db.js               # SQL Server database connection setup using mssql
+│   └── db.js               # Configuración de conexión a la base de datos SQL Server usando mssql
 ├── controllers/
-│   ├── authController.js   # Handles JWT login logic
-│   ├── matchController.js  # Handles business logic and database interactions for Matches
-│   ├── playerController.js # Handles business logic and database interactions for Players
-│   ├── standingsController.js # Handles logic for fetching league standings
-│   └── teamController.js   # Handles business logic and database interactions for Teams
-├── middlewares/            # Custom Express middlewares
-│   └── authMiddleware.js   # JWT verification middleware
-├── models/                 # Database models and data structures
+│   ├── authController.js   # Maneja la lógica de inicio de sesión JWT
+│   ├── matchController.js  # Maneja la lógica de negocio y las interacciones con la base de datos para Matches
+│   ├── playerController.js # Maneja la lógica de negocio y las interacciones con la base de datos para Players
+│   ├── standingsController.js # Maneja la lógica para obtener la tabla de posiciones de la liga
+│   └── teamController.js   # Maneja la lógica de negocio y las interacciones con la base de datos para Teams
+├── middlewares/            # Middlewares personalizados de Express
+│   └── authMiddleware.js   # Middleware de verificación JWT
+├── models/                 # Modelos de bases de datos y estructuras de datos
 ├── routes/
-│   ├── authRoutes.js       # Express router definitions for Auth endpoints
-│   ├── matchRoutes.js      # Express router definitions for Match endpoints
-│   ├── playerRoutes.js     # Express router definitions for Player endpoints
-│   ├── standingsRoutes.js  # Express router definitions for Standings endpoints
-│   └── teamRoutes.js       # Express router definitions for Team endpoints
+│   ├── authRoutes.js       # Definiciones de router de Express para endpoints de Auth
+│   ├── matchRoutes.js      # Definiciones de router de Express para endpoints de Match
+│   ├── playerRoutes.js     # Definiciones de router de Express para endpoints de Player
+│   ├── standingsRoutes.js  # Definiciones de router de Express para endpoints de Standings
+│   └── teamRoutes.js       # Definiciones de router de Express para endpoints de Team
 ├── scripts/
-│   └── seedAdmin.js        # Script to create initial admin user
-├── app.js                  # Express application setup, applying middlewares and routes
-└── server.js               # Entry point of the application, starts the HTTP server
+│   └── seedAdmin.js        # Script para crear el usuario administrador inicial
+├── app.js                  # Configuración de la aplicación Express, aplicando middlewares y rutas
+└── server.js               # Punto de entrada de la aplicación, inicia el servidor HTTP
 ```
 
-## Setup & Execution
+## Configuración y Ejecución
 
-Follow these step-by-step instructions to set up the environment and run the server locally.
+Siga estas instrucciones paso a paso para configurar el entorno y ejecutar el servidor localmente.
 
-### 1. Configure the Environment Variables
+### 1. Configurar las Variables de Entorno
 
-Create a file named `.env` in the root of the `backend` directory (if it doesn't already exist) and configure your database settings. Your `.env` file should look like this:
+Cree un archivo llamado `.env` en la raíz del directorio `backend` (si aún no existe) y configure los ajustes de su base de datos. Su archivo `.env` debería verse así:
 
 ```env
 PORT=3000
@@ -56,110 +56,110 @@ DB_NAME=YouthBasketballLeague
 
 JWT_SECRET=supersecret_youth_league_key
 ```
-> **Note**: Adjust the `DB_SERVER`, `DB_PORT`, and `DB_NAME` values to match your local SQL Server instance.
+> **Nota**: Ajuste los valores de `DB_SERVER`, `DB_PORT` y `DB_NAME` para que coincidan con su instancia local de SQL Server.
 
-### 2. Install Dependencies
+### 2. Instalar Dependencias
 
-Ensure you have Node.js installed, then install the required dependencies:
+Asegúrese de tener Node.js instalado, luego instale las dependencias requeridas:
 
 ```bash
 npm install
 ```
 
-### 3. Run the Server
+### 3. Ejecutar el Servidor
 
-To start the server in development mode using `nodemon` (which will automatically restart the server upon file changes):
+Para iniciar el servidor en modo de desarrollo usando `nodemon` (que reiniciará automáticamente el servidor tras cambios en los archivos):
 
 ```bash
 npm run dev
 ```
 
-You should see output indicating that the server is running on port 3000 and has successfully connected to the database.
+Debería ver una salida indicando que el servidor se está ejecutando en el puerto 3000 y se ha conectado exitosamente a la base de datos.
 
-## Authentication Requirement
+## Requisito de Autenticación
 
-> **Security Note**: All `POST`, `PUT`, and `DELETE` endpoints require an `Authorization: Bearer <token>` header. You can obtain a token by logging in via the `/api/auth/login` endpoint. `GET` endpoints are public and do not require authentication.
+> **Nota de Seguridad**: Todos los endpoints `POST`, `PUT` y `DELETE` requieren un encabezado `Authorization: Bearer <token>`. Puede obtener un token iniciando sesión a través del endpoint `/api/auth/login`. Los endpoints `GET` son públicos y no requieren autenticación.
 
-## Teams API Endpoints
+## Endpoints de la API Teams
 
-The API provides endpoints under the `/api/teams` prefix to manage basketball teams.
+La API proporciona endpoints bajo el prefijo `/api/teams` para gestionar equipos de básquet.
 
-### 1. Get All Teams
+### 1. Obtener Todos los Equipos
 - **URL**: `/api/teams`
 - **Method**: `GET`
-- **Description**: Retrieves a list of all teams in the league.
-- **Success Response**: `200 OK` (Returns an array of team objects)
+- **Descripción**: Recupera una lista de todos los equipos en la liga.
+- **Respuesta Exitosa**: `200 OK` (Devuelve un array de objetos de equipo)
 
-### 2. Get Team by ID
+### 2. Obtener Equipo por ID
 - **URL**: `/api/teams/:id`
 - **Method**: `GET`
-- **Description**: Retrieves a specific team by its integer ID.
-- **Success Response**: `200 OK` (Returns a single team object)
-- **Error Response**: `404 Not Found` (If the team ID does not exist)
+- **Descripción**: Recupera un equipo específico por su ID entero.
+- **Respuesta Exitosa**: `200 OK` (Devuelve un único objeto de equipo)
+- **Respuesta de Error**: `404 Not Found` (Si el ID del equipo no existe)
 
-### 3. Create a Team
+### 3. Crear un Equipo
 - **URL**: `/api/teams`
 - **Method**: `POST`
-- **Description**: Creates a new team in the database.
-- **Request Body** (JSON):
+- **Descripción**: Crea un nuevo equipo en la base de datos.
+- **Cuerpo de la Solicitud** (JSON):
   ```json
   {
     "Name": "Golden Eagles",
     "Coach": "John Doe"
   }
   ```
-- **Success Response**: `201 Created` (Returns the newly created team object)
-- **Error Response**: `400 Bad Request` (If `Name` or `Coach` are missing), `401 Unauthorized` (If token is missing or invalid)
+- **Respuesta Exitosa**: `201 Created` (Devuelve el objeto de equipo recién creado)
+- **Respuesta de Error**: `400 Bad Request` (Si faltan `Name` o `Coach`), `401 Unauthorized` (Si el token falta o es inválido)
 
-### 4. Update a Team
+### 4. Actualizar un Equipo
 - **URL**: `/api/teams/:id`
 - **Method**: `PUT`
-- **Description**: Updates an existing team's Name or Coach.
-- **Request Body** (JSON):
+- **Descripción**: Actualiza el Nombre o Entrenador de un equipo existente.
+- **Cuerpo de la Solicitud** (JSON):
   ```json
   {
     "Name": "Silver Hawks" 
   }
   ```
-  *(You can provide either `Name`, `Coach`, or both).*
-- **Success Response**: `200 OK` (Returns the updated team object)
-- **Error Response**: `400 Bad Request` (If no fields are provided to update), `404 Not Found` (If the team ID does not exist), `401 Unauthorized` (If token is missing or invalid)
+  *(Puede proporcionar `Name`, `Coach` o ambos).*
+- **Respuesta Exitosa**: `200 OK` (Devuelve el objeto de equipo actualizado)
+- **Respuesta de Error**: `400 Bad Request` (Si no se proporcionan campos para actualizar), `404 Not Found` (Si el ID del equipo no existe), `401 Unauthorized` (Si el token falta o es inválido)
 
-### 5. Delete a Team
+### 5. Eliminar un Equipo
 - **URL**: `/api/teams/:id`
 - **Method**: `DELETE`
-- **Description**: Deletes a team from the database by its ID.
-- **Success Response**: `200 OK` (Returns `{"message": "Team deleted successfully."}`)
-- **Error Response**: `404 Not Found` (If the team ID does not exist), `401 Unauthorized` (If token is missing or invalid)
+- **Descripción**: Elimina un equipo de la base de datos por su ID.
+- **Respuesta Exitosa**: `200 OK` (Devuelve `{"message": "Team deleted successfully."}`)
+- **Respuesta de Error**: `404 Not Found` (Si el ID del equipo no existe), `401 Unauthorized` (Si el token falta o es inválido)
 
-## Players API Endpoints
+## Endpoints de la API Players
 
-The API provides endpoints under the `/api/players` prefix to manage players within the league.
+La API proporciona endpoints bajo el prefijo `/api/players` para gestionar jugadores dentro de la liga.
 
-### 1. Get All Players
+### 1. Obtener Todos los Jugadores
 - **URL**: `/api/players`
 - **Method**: `GET`
-- **Description**: Retrieves a list of all players.
-- **Success Response**: `200 OK` (Returns an array of player objects)
+- **Descripción**: Recupera una lista de todos los jugadores.
+- **Respuesta Exitosa**: `200 OK` (Devuelve un array de objetos de jugador)
 
-### 2. Get Player by ID
+### 2. Obtener Jugador por ID
 - **URL**: `/api/players/:id`
 - **Method**: `GET`
-- **Description**: Retrieves a specific player by their integer ID.
-- **Success Response**: `200 OK` (Returns a single player object)
-- **Error Response**: `404 Not Found` (If the player ID does not exist)
+- **Descripción**: Recupera un jugador específico por su ID entero.
+- **Respuesta Exitosa**: `200 OK` (Devuelve un único objeto de jugador)
+- **Respuesta de Error**: `404 Not Found` (Si el ID del jugador no existe)
 
-### 3. Get Players by Team ID
+### 3. Obtener Jugadores por ID de Equipo
 - **URL**: `/api/players/team/:teamId`
 - **Method**: `GET`
-- **Description**: Retrieves all players belonging to a specific team.
-- **Success Response**: `200 OK` (Returns an array of player objects)
+- **Descripción**: Recupera todos los jugadores que pertenecen a un equipo específico.
+- **Respuesta Exitosa**: `200 OK` (Devuelve un array de objetos de jugador)
 
-### 4. Create a Player
+### 4. Crear un Jugador
 - **URL**: `/api/players`
 - **Method**: `POST`
-- **Description**: Creates a new player in the database.
-- **Request Body** (JSON):
+- **Descripción**: Crea un nuevo jugador en la base de datos.
+- **Cuerpo de la Solicitud** (JSON):
   ```json
   {
     "TeamID": 1,
@@ -168,52 +168,52 @@ The API provides endpoints under the `/api/players` prefix to manage players wit
     "Category": "Senior"
   }
   ```
-- **Success Response**: `201 Created` (Returns the newly created player object)
-- **Error Response**: `400 Bad Request` (If `TeamID`, `FirstName`, `LastName`, or `Category` are missing), `401 Unauthorized` (If token is missing or invalid)
+- **Respuesta Exitosa**: `201 Created` (Devuelve el objeto de jugador recién creado)
+- **Respuesta de Error**: `400 Bad Request` (Si faltan `TeamID`, `FirstName`, `LastName` o `Category`), `401 Unauthorized` (Si el token falta o es inválido)
 
-### 5. Update a Player
+### 5. Actualizar un Jugador
 - **URL**: `/api/players/:id`
 - **Method**: `PUT`
-- **Description**: Updates an existing player's information.
-- **Request Body** (JSON):
+- **Descripción**: Actualiza la información de un jugador existente.
+- **Cuerpo de la Solicitud** (JSON):
   ```json
   {
     "Category": "Pro" 
   }
   ```
-  *(You can provide any combination of `TeamID`, `FirstName`, `LastName`, or `Category`).*
-- **Success Response**: `200 OK` (Returns the updated player object)
-- **Error Response**: `400 Bad Request` (If no fields are provided to update), `404 Not Found` (If the player ID does not exist), `401 Unauthorized` (If token is missing or invalid)
+  *(Puede proporcionar cualquier combinación de `TeamID`, `FirstName`, `LastName` o `Category`).*
+- **Respuesta Exitosa**: `200 OK` (Devuelve el objeto de jugador actualizado)
+- **Respuesta de Error**: `400 Bad Request` (Si no se proporcionan campos para actualizar), `404 Not Found` (Si el ID del jugador no existe), `401 Unauthorized` (Si el token falta o es inválido)
 
-### 6. Delete a Player
+### 6. Eliminar un Jugador
 - **URL**: `/api/players/:id`
 - **Method**: `DELETE`
-- **Description**: Deletes a player from the database by their ID.
-- **Success Response**: `200 OK` (Returns `{"message": "Player deleted successfully."}`)
-- **Error Response**: `404 Not Found` (If the player ID does not exist), `401 Unauthorized` (If token is missing or invalid)
+- **Descripción**: Elimina un jugador de la base de datos por su ID.
+- **Respuesta Exitosa**: `200 OK` (Devuelve `{"message": "Player deleted successfully."}`)
+- **Respuesta de Error**: `404 Not Found` (Si el ID del jugador no existe), `401 Unauthorized` (Si el token falta o es inválido)
 
-## Matches API Endpoints
+## Endpoints de la API Matches
 
-The API provides endpoints under the `/api/matches` prefix to manage match scheduling and results.
+La API proporciona endpoints bajo el prefijo `/api/matches` para gestionar la programación y los resultados de los partidos.
 
-### 1. Get All Matches
+### 1. Obtener Todos los Partidos
 - **URL**: `/api/matches`
 - **Method**: `GET`
-- **Description**: Retrieves a list of all matches.
-- **Success Response**: `200 OK` (Returns an array of match objects)
+- **Descripción**: Recupera una lista de todos los partidos.
+- **Respuesta Exitosa**: `200 OK` (Devuelve un array de objetos de partido)
 
-### 2. Get Match by ID
+### 2. Obtener Partido por ID
 - **URL**: `/api/matches/:id`
 - **Method**: `GET`
-- **Description**: Retrieves a specific match by its integer ID.
-- **Success Response**: `200 OK` (Returns a single match object)
-- **Error Response**: `404 Not Found` (If the match ID does not exist)
+- **Descripción**: Recupera un partido específico por su ID entero.
+- **Respuesta Exitosa**: `200 OK` (Devuelve un único objeto de partido)
+- **Respuesta de Error**: `404 Not Found` (Si el ID del partido no existe)
 
-### 3. Schedule a Match
+### 3. Programar un Partido
 - **URL**: `/api/matches`
 - **Method**: `POST`
-- **Description**: Schedules a new match between two different teams.
-- **Request Body** (JSON):
+- **Descripción**: Programa un nuevo partido entre dos equipos diferentes.
+- **Cuerpo de la Solicitud** (JSON):
   ```json
   {
     "LocalTeamID": 1,
@@ -223,70 +223,70 @@ The API provides endpoints under the `/api/matches` prefix to manage match sched
     "Location": "Downtown Arena"
   }
   ```
-- **Success Response**: `201 Created` (Returns the newly created match object)
-- **Error Response**: `400 Bad Request` (If fields are missing, or if `LocalTeamID` and `VisitorTeamID` are the same), `401 Unauthorized` (If token is missing or invalid)
+- **Respuesta Exitosa**: `201 Created` (Devuelve el objeto de partido recién creado)
+- **Respuesta de Error**: `400 Bad Request` (Si faltan campos, o si `LocalTeamID` y `VisitorTeamID` son el mismo), `401 Unauthorized` (Si el token falta o es inválido)
 
-### 4. Update Match Details
+### 4. Actualizar Detalles del Partido
 - **URL**: `/api/matches/:id`
 - **Method**: `PUT`
-- **Description**: Updates the scheduling details of a match.
-- **Request Body** (JSON):
+- **Descripción**: Actualiza los detalles de programación de un partido.
+- **Cuerpo de la Solicitud** (JSON):
   ```json
   {
     "Location": "Uptown Sports Center",
     "MatchTime": "16:00:00"
   }
   ```
-  *(You can provide any combination of `MatchDate`, `MatchTime`, or `Location`).*
-- **Success Response**: `200 OK` (Returns the updated match object)
-- **Error Response**: `400 Bad Request` (If no detail fields are provided), `404 Not Found` (If the match ID does not exist), `401 Unauthorized` (If token is missing or invalid)
+  *(Puede proporcionar cualquier combinación de `MatchDate`, `MatchTime` o `Location`).*
+- **Respuesta Exitosa**: `200 OK` (Devuelve el objeto de partido actualizado)
+- **Respuesta de Error**: `400 Bad Request` (Si no se proporcionan campos de detalle), `404 Not Found` (Si el ID del partido no existe), `401 Unauthorized` (Si el token falta o es inválido)
 
-### 5. Update Match Score
+### 5. Actualizar Puntaje del Partido
 - **URL**: `/api/matches/:id/score`
 - **Method**: `PUT`
-- **Description**: Updates the results of a match.
-- **Request Body** (JSON):
+- **Descripción**: Actualiza los resultados de un partido.
+- **Cuerpo de la Solicitud** (JSON):
   ```json
   {
     "LocalPoints": 88,
     "VisitorPoints": 76
   }
   ```
-- **Success Response**: `200 OK` (Returns the updated match object)
-- **Error Response**: `400 Bad Request` (If points are missing), `404 Not Found` (If the match ID does not exist), `401 Unauthorized` (If token is missing or invalid)
+- **Respuesta Exitosa**: `200 OK` (Devuelve el objeto de partido actualizado)
+- **Respuesta de Error**: `400 Bad Request` (Si faltan los puntos), `404 Not Found` (Si el ID del partido no existe), `401 Unauthorized` (Si el token falta o es inválido)
 
-### 6. Delete a Match
+### 6. Eliminar un Partido
 - **URL**: `/api/matches/:id`
 - **Method**: `DELETE`
-- **Description**: Deletes a match from the database by its ID.
-- **Success Response**: `200 OK` (Returns `{"message": "Match deleted successfully."}`)
-- **Error Response**: `404 Not Found` (If the match ID does not exist), `401 Unauthorized` (If token is missing or invalid)
+- **Descripción**: Elimina un partido de la base de datos por su ID.
+- **Respuesta Exitosa**: `200 OK` (Devuelve `{"message": "Match deleted successfully."}`)
+- **Respuesta de Error**: `404 Not Found` (Si el ID del partido no existe), `401 Unauthorized` (Si el token falta o es inválido)
 
-## Standings API Endpoints
+## Endpoints de la API Standings
 
-The API provides endpoints under the `/api/standings` prefix to fetch the automated league standings.
+La API proporciona endpoints bajo el prefijo `/api/standings` para obtener la tabla de posiciones automatizada de la liga.
 
-### 1. Get League Standings
+### 1. Obtener Tabla de Posiciones de la Liga
 - **URL**: `/api/standings`
 - **Method**: `GET`
-- **Description**: Retrieves the current league standings, ordered by total points in descending order.
-- **Success Response**: `200 OK` (Returns an array of standing objects)
-- **Error Response**: `500 Internal Server Error` (If there is a database issue)
+- **Descripción**: Recupera la tabla de posiciones actual de la liga, ordenada por puntos totales en orden descendente.
+- **Respuesta Exitosa**: `200 OK` (Devuelve un array de objetos de posiciones)
+- **Respuesta de Error**: `500 Internal Server Error` (Si hay un problema con la base de datos)
 
-## Auth API Endpoints
+## Endpoints de la API Auth
 
-The API provides endpoints under the `/api/auth` prefix for admin authentication.
+La API proporciona endpoints bajo el prefijo `/api/auth` para la autenticación de administradores.
 
-### 1. Login
+### 1. Iniciar Sesión
 - **URL**: `/api/auth/login`
 - **Method**: `POST`
-- **Description**: Authenticates an administrator and returns a JWT token.
-- **Request Body** (JSON):
+- **Descripción**: Autentica a un administrador y devuelve un token JWT.
+- **Cuerpo de la Solicitud** (JSON):
   ```json
   {
     "Username": "admin",
     "Password": "your_password"
   }
   ```
-- **Success Response**: `200 OK` (Returns `{"token": "eyJhbG..."}`)
-- **Error Response**: `400 Bad Request` (If username or password missing), `401 Unauthorized` (If credentials are invalid)
+- **Respuesta Exitosa**: `200 OK` (Devuelve `{"token": "eyJhbG..."}`)
+- **Respuesta de Error**: `400 Bad Request` (Si faltan nombre de usuario o contraseña), `401 Unauthorized` (Si las credenciales son inválidas)

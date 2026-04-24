@@ -3,7 +3,7 @@ const router = express.Router();
 const matchController = require('../controllers/matchController');
 const authMiddleware = require('../middlewares/authMiddleware');
 
-// Define CRUD routes for Matches
+// Define rutas CRUD para Partidos (Matches)
 router.post('/', authMiddleware, matchController.createMatch);
 router.get('/', matchController.getAllMatches);
 router.get('/:id', matchController.getMatchById);

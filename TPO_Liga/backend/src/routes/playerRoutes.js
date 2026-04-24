@@ -3,7 +3,7 @@ const router = express.Router();
 const playerController = require('../controllers/playerController');
 const authMiddleware = require('../middlewares/authMiddleware');
 
-// Define CRUD routes for Players
+// Define rutas CRUD para Jugadores (Players)
 router.post('/', authMiddleware, playerController.createPlayer);
 router.get('/', playerController.getAllPlayers);
 router.get('/:id', playerController.getPlayerById);
