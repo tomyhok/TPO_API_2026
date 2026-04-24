@@ -22,12 +22,14 @@ src/
 ├── controllers/
 │   ├── matchController.js  # Handles business logic and database interactions for Matches
 │   ├── playerController.js # Handles business logic and database interactions for Players
+│   ├── standingsController.js # Handles logic for fetching league standings
 │   └── teamController.js   # Handles business logic and database interactions for Teams
 ├── middlewares/            # Custom Express middlewares (e.g., error handlers, auth validation)
 ├── models/                 # Database models and data structures
 ├── routes/
 │   ├── matchRoutes.js      # Express router definitions for Match endpoints
 │   ├── playerRoutes.js     # Express router definitions for Player endpoints
+│   ├── standingsRoutes.js  # Express router definitions for Standings endpoints
 │   └── teamRoutes.js       # Express router definitions for Team endpoints
 ├── app.js                  # Express application setup, applying middlewares and routes
 └── server.js               # Entry point of the application, starts the HTTP server
@@ -250,3 +252,14 @@ The API provides endpoints under the `/api/matches` prefix to manage match sched
 - **Description**: Deletes a match from the database by its ID.
 - **Success Response**: `200 OK` (Returns `{"message": "Match deleted successfully."}`)
 - **Error Response**: `404 Not Found` (If the match ID does not exist)
+
+## Standings API Endpoints
+
+The API provides endpoints under the `/api/standings` prefix to fetch the automated league standings.
+
+### 1. Get League Standings
+- **URL**: `/api/standings`
+- **Method**: `GET`
+- **Description**: Retrieves the current league standings, ordered by total points in descending order.
+- **Success Response**: `200 OK` (Returns an array of standing objects)
+- **Error Response**: `500 Internal Server Error` (If there is a database issue)
