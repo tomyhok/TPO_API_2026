@@ -53,8 +53,8 @@ exports.getTeamById = async (req, res) => {
     
     // Vincula el parámetro de ID de equipo y ejecuta una consulta
     const result = await pool.request()
-      .input('Id', sql.Int, id) // Mapea el parámetro de URL 'id' al parámetro SQL '@Id'
-      .query('SELECT * FROM Teams WHERE Id = @Id');
+      .input('TeamID', sql.Int, id) // Mapea el parámetro de URL 'id' al parámetro SQL '@Id'
+      .query('SELECT * FROM Teams WHERE TeamID = @TeamID');
 
     // Comprueba si la base de datos devolvió algún resultado
     if (result.recordset.length === 0) {
@@ -83,7 +83,7 @@ exports.updateTeam = async (req, res) => {
 
     const pool = await poolPromise;
     // Crea la solicitud de BD y vincula el ID de Equipo objetivo
-    const request = pool.request().input('Id', sql.Int, id);
+    const request = pool.request().input('TeamID', sql.Int, id);
     
     // Inicializa un array para almacenar cláusulas SET dinámicas
     let updates = [];
@@ -99,7 +99,7 @@ exports.updateTeam = async (req, res) => {
     }
     
     // Une el array updates en una cadena separada por comas para construir la consulta final
-    const query = `UPDATE Teams SET ${updates.join(', ')} OUTPUT INSERTED.* WHERE Id = @Id`;
+    const query = `UPDATE Teams SET ${updates.join(', ')} OUTPUT INSERTED.* WHERE TeamID = @TeamID`;
     const result = await request.query(query);
 
     // Si no se modificó ninguna fila, es probable que el ID de equipo especificado no existiera
@@ -124,8 +124,8 @@ exports.deleteTeam = async (req, res) => {
     
     // Ejecuta una consulta DELETE usando el parámetro vinculado
     const result = await pool.request()
-      .input('Id', sql.Int, id)
-      .query('DELETE FROM Teams WHERE Id = @Id');
+      .input('TeamID', sql.Int, id)
+      .query('DELETE FROM Teams WHERE TeamID = @TeamID');
 
     // Comprueba rowsAffected para confirmar que la eliminación tuvo éxito
     if (result.rowsAffected[0] === 0) {
@@ -136,6 +136,10 @@ exports.deleteTeam = async (req, res) => {
     res.json({ message: 'Team deleted successfully.' });
   } catch (error) {
     console.error('Error deleting team:', error);
+    // 547 es el código de error de SQL Server para violaciones de clave foránea (Foreign Key)
+    if (error.number === 547) {
+      return res.status(400).json({ message: 'Cannot delete team because it has associated players or matches.' });
+    }
     res.status(500).json({ message: 'Internal server error.' });
   }
 };
