@@ -44,27 +44,46 @@ exports.getAllTeams = async (req, res) => {
   }
 };
 
-// Exporta una función controladora para obtener un equipo específico por su ID (HTTP GET)
+// Exporta una función controladora para obtener el detalle completo de un equipo (HTTP GET)
 exports.getTeamById = async (req, res) => {
   try {
-    // Extrae el ID de equipo de los parámetros de la ruta URL
     const { id } = req.params;
     const pool = await poolPromise;
     
-    // Vincula el parámetro de ID de equipo y ejecuta una consulta
-    const result = await pool.request()
-      .input('TeamID', sql.Int, id) // Mapea el parámetro de URL 'id' al parámetro SQL '@Id'
+    // 1. Obtener información básica del equipo
+    const teamResult = await pool.request()
+      .input('TeamID', sql.Int, id)
       .query('SELECT * FROM Teams WHERE TeamID = @TeamID');
 
-    // Comprueba si la base de datos devolvió algún resultado
-    if (result.recordset.length === 0) {
+    if (teamResult.recordset.length === 0) {
       return res.status(404).json({ message: 'Team not found.' });
     }
+    const team = teamResult.recordset[0];
 
-    // Devuelve el primer objeto en el array de resultados
-    res.json(result.recordset[0]);
+    // 2. Obtener lista de jugadores del equipo
+    const playersResult = await pool.request()
+      .input('TeamID', sql.Int, id)
+      .query('SELECT * FROM Players WHERE TeamID = @TeamID');
+    team.Players = playersResult.recordset;
+
+    // 3. Obtener partidos asociados al equipo
+    const matchesResult = await pool.request()
+      .input('TeamID', sql.Int, id)
+      .query('SELECT * FROM Matches WHERE LocalTeamID = @TeamID OR VisitorTeamID = @TeamID ORDER BY MatchDate DESC');
+    
+    const allMatches = matchesResult.recordset;
+    
+    // Clasificar partidos en jugados (tienen resultado) y pendientes (no tienen resultado)
+    team.PlayedMatches = allMatches.filter(m => m.LocalPoints !== null && m.VisitorPoints !== null);
+    team.PendingMatches = allMatches.filter(m => m.LocalPoints === null || m.VisitorPoints === null);
+    
+    // Resultados obtenidos
+    team.Results = team.PlayedMatches;
+
+    // Devuelve el objeto del equipo con todos sus detalles anidados
+    res.json(team);
   } catch (error) {
-    console.error('Error fetching team:', error);
+    console.error('Error fetching team details:', error);
     res.status(500).json({ message: 'Internal server error.' });
   }
 };
