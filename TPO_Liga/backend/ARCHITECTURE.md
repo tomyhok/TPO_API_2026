@@ -6,9 +6,9 @@ Este documento describe la arquitectura técnica, los patrones de diseño y el f
 
 La aplicación adopta un patrón de diseño **Modelo-Vista-Controlador (MVC) Desacoplado**, adaptado para el desarrollo moderno de APIs RESTful.
 
-*   **View (Vista Desacoplada)**: Dado que esta es una API REST backend, la capa "View" está completamente desacoplada. El servidor no renderiza HTML (como el MVC tradicional con Pug o EJS). En su lugar, emite datos JSON crudos. La Vista real es manejada por una aplicación frontend separada (ej., React, Vue o Angular) que consume estos endpoints de la API.
-*   **Controller (Controlador)**: La lógica del Controlador se divide entre **Routes** (`src/routes/`) y **Controllers** (`src/controllers/`). Las Routes mapean los verbos HTTP y las rutas URL a funciones específicas, actuando como directores de tráfico. Los Controllers contienen la lógica real de la aplicación, analizando los datos de la solicitud y determinando qué respuesta enviar.
-*   **Model (Modelo)**: La lógica del "Model" se delega en gran medida a la **Base de Datos SQL Server**. En lugar de usar un ORM (Mapeador Objeto-Relacional) pesado como Sequelize o TypeORM, la aplicación utiliza consultas SQL crudas y Vistas de Base de Datos. El esquema de la base de datos, las restricciones y las vistas sirven como el verdadero Modelo, asegurando la integridad de los datos al nivel más bajo.
+*   **View (Vista Desacoplada)**: Dado que esta es una API REST backend, la capa "View" está completamente desacoplada. El servidor no renderiza HTML (como el MVC tradicional con Pug o EJS). En su lugar, emite datos JSON crudos. La Vista real es manejada por una aplicación cliente (ej., frontend web, app móvil) que consume estos endpoints de la API.
+*   **Controller (Controlador)**: Los controladores (`src/controllers/`) actúan como intermediarios puros. Reciben las solicitudes HTTP desde las rutas (`src/routes/`), desestructuran los datos, validan la entrada básica y luego delegan el acceso a datos a la capa de Modelo. Finalmente, toman los datos devueltos por el Modelo y los envían al cliente. No contienen consultas SQL directas.
+*   **Model (Modelo)**: La lógica del "Model" está centralizada en el directorio `src/models/`. Estas clases actúan como una capa de abstracción sobre la base de datos SQL Server, encapsulando todas las consultas SQL parametrizadas utilizando el paquete `mssql`. Sirven como la única capa de acceso a los datos.
 
 ## 2. Flujo de Datos de la Solicitud HTTP
 

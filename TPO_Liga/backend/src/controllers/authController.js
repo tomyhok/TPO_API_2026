@@ -2,8 +2,8 @@
 const jwt = require('jsonwebtoken');
 // Importa bcryptjs para verificar contraseñas hasheadas de forma segura
 const bcrypt = require('bcryptjs');
-// Importa el objeto SQL y el pool de conexiones a la base de datos desde la configuración de la BD
-const { sql, poolPromise } = require('../config/db');
+// Importa el modelo de Usuario
+const UserModel = require('../models/User');
 
 // Exporta una función controladora asincrónica de inicio de sesión para manejar solicitudes de autenticación
 exports.login = async (req, res) => {
@@ -17,17 +17,8 @@ exports.login = async (req, res) => {
       return res.status(400).json({ message: 'Username and Password are required.' });
     }
 
-    // Espera el pool de conexiones a la base de datos para asegurar que esté listo
-    const pool = await poolPromise;
-    // Crea un nuevo objeto de solicitud para ejecutar una consulta contra la BD
-    const result = await pool.request()
-      // Vincula el parámetro Nombre de Usuario para prevenir ataques de inyección SQL
-      .input('Username', sql.NVarChar, Username)
-      // Ejecuta una consulta SELECT para encontrar el usuario administrador con el nombre de usuario proporcionado
-      .query('SELECT * FROM Administrators WHERE Username = @Username');
-
-    // Extrae la primera fila coincidente del conjunto de resultados
-    const admin = result.recordset[0];
+    // Llama al Modelo para buscar el administrador por nombre de usuario
+    const admin = await UserModel.findByUsername(Username);
 
     // Si no se encuentra ningún usuario administrador con ese nombre de usuario
     if (!admin) {

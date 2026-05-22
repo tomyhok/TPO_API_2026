@@ -2,6 +2,8 @@
 
 El modelo de datos de la plataforma está diseñado bajo un esquema relacional tradicional (SQL), optimizado para mantener la integridad referencial y facilitar consultas eficientes sobre las estadísticas de la liga.
 
+> **Nota de Arquitectura**: En el backend de Node.js, cada una de estas entidades principales (y la vista de posiciones) cuenta con una representación en la capa de datos dentro del directorio `src/models/` (ej. `Team.js`, `Player.js`), garantizando el patrón MVC.
+
 ## 1. Diagrama de Entidad-Relación (DER)
 
 El siguiente diagrama ilustra las relaciones entre las entidades principales del sistema. 

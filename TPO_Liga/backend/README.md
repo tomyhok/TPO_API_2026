@@ -19,21 +19,26 @@ Nuestra carpeta `src` está organizada de la siguiente manera:
 src/
 ├── config/
 │   └── db.js               # Configuración de conexión a la base de datos SQL Server usando mssql
-├── controllers/
-│   ├── authController.js   # Maneja la lógica de inicio de sesión JWT
-│   ├── matchController.js  # Maneja la lógica de negocio y las interacciones con la base de datos para Matches
-│   ├── playerController.js # Maneja la lógica de negocio y las interacciones con la base de datos para Players
-│   ├── standingsController.js # Maneja la lógica para obtener la tabla de posiciones de la liga
-│   └── teamController.js   # Maneja la lógica de negocio y las interacciones con la base de datos para Teams
+├── controllers/            # Controladores HTTP (Manejan req, res y llaman a Models)
+│   ├── authController.js
+│   ├── matchController.js
+│   ├── playerController.js
+│   ├── standingsController.js
+│   └── teamController.js
 ├── middlewares/            # Middlewares personalizados de Express
 │   └── authMiddleware.js   # Middleware de verificación JWT
-├── models/                 # Modelos de bases de datos y estructuras de datos
-├── routes/
-│   ├── authRoutes.js       # Definiciones de router de Express para endpoints de Auth
-│   ├── matchRoutes.js      # Definiciones de router de Express para endpoints de Match
-│   ├── playerRoutes.js     # Definiciones de router de Express para endpoints de Player
-│   ├── standingsRoutes.js  # Definiciones de router de Express para endpoints de Standings
-│   └── teamRoutes.js       # Definiciones de router de Express para endpoints de Team
+├── models/                 # Modelos de bases de datos (Contienen todas las consultas SQL)
+│   ├── Match.js
+│   ├── Player.js
+│   ├── Standing.js
+│   ├── Team.js
+│   └── User.js
+├── routes/                 # Rutas de la API (Redirigen las peticiones a los Controllers)
+│   ├── authRoutes.js
+│   ├── matchRoutes.js
+│   ├── playerRoutes.js
+│   ├── standingsRoutes.js
+│   └── teamRoutes.js
 ├── scripts/
 │   └── seedAdmin.js        # Script para crear el usuario administrador inicial
 ├── app.js                  # Configuración de la aplicación Express, aplicando middlewares y rutas
