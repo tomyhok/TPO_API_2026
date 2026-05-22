@@ -18,7 +18,7 @@ export default function LoginPage() {
     try {
       const data = await apiRequest('/api/auth/login', {
         method: 'POST',
-        body: { username, password },
+        body: { Username: username, Password: password },
       });
 
       const token = data?.token;
