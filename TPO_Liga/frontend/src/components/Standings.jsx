@@ -8,7 +8,7 @@ const Standings = () => {
   useEffect(() => {
     const fetchStandings = async () => {
       try {
-        const response = await fetch('http://localhost:3000/api/standings');
+        const response = await fetch('/api/standings');
         if (!response.ok) {
           throw new Error('Failed to fetch standings data');
         }
@@ -58,12 +58,12 @@ const Standings = () => {
         </thead>
         <tbody className="divide-y divide-gray-700/50">
           {standings.map((team, index) => (
-            <tr 
-              key={team.TeamID} 
+            <tr
+              key={team.TeamID}
               className="bg-gray-900/40 hover:bg-gray-800/80 transition-all duration-200 ease-in-out"
             >
               <td className="px-6 py-4">
-                <span className={`inline-flex items-center justify-center w-8 h-8 rounded-full font-bold shadow-inner ${index === 0 ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30' : index === 1 ? 'bg-gray-400/20 text-gray-300 border border-gray-400/30' : index === 2 ? 'bg-amber-700/20 text-amber-500 border border-amber-700/30' : 'text-gray-400'}`}>
+                <span className="inline-flex items-center justify-center w-8 h-8 rounded-full font-bold shadow-inner bg-gray-700/30 border border-gray-700/40 text-gray-100">
                   {index + 1}
                 </span>
               </td>
@@ -72,8 +72,17 @@ const Standings = () => {
               <td className="px-6 py-4 font-medium text-gray-400">{team.PartidosJugados}</td>
               <td className="px-6 py-4 text-emerald-400 font-semibold">{team.PartidosGanados}</td>
               <td className="px-6 py-4 text-rose-400 font-semibold">{team.PartidosPerdidos}</td>
-              <td className={`px-6 py-4 font-bold ${team.DiferenciaDeTantos > 0 ? 'text-emerald-500' : team.DiferenciaDeTantos < 0 ? 'text-rose-500' : 'text-gray-400'}`}>
-                {team.DiferenciaDeTantos > 0 ? '+' : ''}{team.DiferenciaDeTantos}
+              <td
+                className={`px-6 py-4 font-bold ${
+                  team.DiferenciaDeTantos > 0
+                    ? 'text-emerald-500'
+                    : team.DiferenciaDeTantos < 0
+                      ? 'text-rose-500'
+                      : 'text-gray-400'
+                }`}
+              >
+                {team.DiferenciaDeTantos > 0 ? '+' : ''}
+                {team.DiferenciaDeTantos}
               </td>
             </tr>
           ))}
