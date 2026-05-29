@@ -18,8 +18,8 @@ const LoginForm = ({ onLoginSuccess }) => {
 
   const validate = () => {
     const nextErrors = {};
-    if (!username.trim()) nextErrors.username = 'El username es obligatorio';
-    if (!password.trim()) nextErrors.password = 'La password es obligatoria';
+    if (!username.trim()) nextErrors.username = 'El nombre de usuario es obligatorio';
+    if (!password.trim()) nextErrors.password = 'La contraseña es obligatoria';
     setFieldErrors(nextErrors);
     return Object.keys(nextErrors).length === 0;
   };

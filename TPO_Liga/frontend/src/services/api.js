@@ -23,7 +23,6 @@ export function clearToken() {
 
 export async function apiRequest(path, { method = 'GET', body, auth = false } = {}) {
   const headers = {};
-  const authScheme = String.fromCharCode(66, 101, 97, 114, 101, 114, 32);
 
   if (body !== undefined) {
     headers['Content-Type'] = 'application/json';
@@ -31,7 +30,7 @@ export async function apiRequest(path, { method = 'GET', body, auth = false } = 
 
   if (auth) {
     const token = getToken();
-    if (token) headers.Authorization = authScheme + token;
+    if (token) headers.Authorization = 'Bearer '.concat(token);
   }
 
   const response = await fetch(path, {
@@ -72,11 +71,16 @@ export async function login(username, password) {
       body: { username: normalizedUsername, password: normalizedPassword },
     });
   } catch (error) {
+    const backendMessage =
+      error instanceof ApiError && typeof error.data?.message === 'string' ? error.data.message : '';
     const requiresUppercaseBody =
       error instanceof ApiError &&
       error.status === 400 &&
-      typeof error.message === 'string' &&
-      error.message.toLowerCase().includes('required');
+      normalizedUsername.length > 0 &&
+      normalizedPassword.length > 0 &&
+      backendMessage.toLowerCase().includes('username') &&
+      backendMessage.toLowerCase().includes('password') &&
+      backendMessage.toLowerCase().includes('required');
 
     if (!requiresUppercaseBody) throw error;
 
