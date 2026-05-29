@@ -1,92 +1,158 @@
-import './App.css';
-import { Link, Routes, Route, Navigate } from 'react-router-dom';
-
+import { NavLink, Navigate, Route, Routes, useNavigate } from 'react-router-dom';
+import TeamList from './components/TeamList';
+import MatchList from './components/MatchList';
+import PlayerList from './components/PlayerList';
 import Standings from './components/Standings';
-import LoginPage from './pages/LoginPage';
-import TeamsPage from './pages/TeamsPage';
-import PlayersPage from './pages/PlayersPage';
-import MatchesPage from './pages/MatchesPage';
+import LoginForm from './components/LoginForm';
+import Card from './components/ui/Card';
+import PageHeader from './components/ui/PageHeader';
+import Button from './components/ui/Button';
+import Alert from './components/ui/Alert';
+import Skeleton from './components/ui/Skeleton';
+import { apiRequest, clearToken, getToken } from './services/api';
+import { useEffect, useState } from 'react';
 
-function Home() {
-  const card =
-    'block rounded-xl border border-gray-700/60 bg-gray-800/40 hover:bg-gray-800/80 transition p-6 shadow-lg';
+const navItems = [
+  { to: '/', label: 'Inicio' },
+  { to: '/standings', label: 'Standings' },
+  { to: '/matches', label: 'Partidos' },
+  { to: '/teams', label: 'Equipos' },
+  { to: '/players', label: 'Jugadores' },
+  { to: '/login', label: 'Login' },
+];
+
+function HomePage() {
+  const [counts, setCounts] = useState({ teams: 0, players: 0, matches: 0, standings: 0 });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    const loadCounts = async () => {
+      setLoading(true);
+      setError('');
+      try {
+        const [teams, players, matches, standings] = await Promise.all([
+          apiRequest('/api/teams'),
+          apiRequest('/api/players'),
+          apiRequest('/api/matches'),
+          apiRequest('/api/standings'),
+        ]);
+
+        setCounts({
+          teams: Array.isArray(teams) ? teams.length : 0,
+          players: Array.isArray(players) ? players.length : 0,
+          matches: Array.isArray(matches) ? matches.length : 0,
+          standings: Array.isArray(standings) ? standings.length : 0,
+        });
+      } catch (err) {
+        setError(err.message || 'No se pudo cargar el dashboard.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadCounts();
+  }, []);
+
+  const cards = [
+    { title: 'Equipos', value: counts.teams, to: '/teams' },
+    { title: 'Jugadores', value: counts.players, to: '/players' },
+    { title: 'Partidos', value: counts.matches, to: '/matches' },
+    { title: 'Tabla', value: counts.standings, to: '/standings' },
+  ];
 
   return (
-    <section className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-      <Link className={card} to="/standings">
-        <h2 className="text-xl font-bold text-gray-100 mb-2">Tabla / Standings</h2>
-        <p className="text-sm text-gray-300">Posiciones y puntos.</p>
-      </Link>
+    <div>
+      <PageHeader title="Dashboard" subtitle="Resumen rápido y accesos directos" />
+      {error && <Alert message={error} />}
 
-      <Link className={card} to="/matches">
-        <h2 className="text-xl font-bold text-gray-100 mb-2">Partidos</h2>
-        <p className="text-sm text-gray-300">Listado y gestión.</p>
-      </Link>
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {cards.map((card) => (
+          <Card key={card.title} className="space-y-2">
+            <p className="text-sm text-gray-400">{card.title}</p>
+            {loading ? (
+              <Skeleton className="h-8 w-16" />
+            ) : (
+              <p className="text-3xl font-bold text-gray-100">{card.value}</p>
+            )}
+            <NavLink className="text-sm font-semibold text-indigo-300 hover:text-indigo-200" to={card.to}>
+              Ver sección →
+            </NavLink>
+          </Card>
+        ))}
+      </div>
+    </div>
+  );
+}
 
-      <Link className={card} to="/teams">
-        <h2 className="text-xl font-bold text-gray-100 mb-2">Equipos</h2>
-        <p className="text-sm text-gray-300">Listado y gestión.</p>
-      </Link>
+function Layout() {
+  const navigate = useNavigate();
+  const [token, setToken] = useState(() => getToken());
 
-      <Link className={card} to="/players">
-        <h2 className="text-xl font-bold text-gray-100 mb-2">Jugadores</h2>
-        <p className="text-sm text-gray-300">Listado y gestión.</p>
-      </Link>
+  useEffect(() => {
+    const syncAuth = () => setToken(getToken());
+    window.addEventListener('storage', syncAuth);
+    return () => window.removeEventListener('storage', syncAuth);
+  }, []);
 
-      <Link className={card} to="/login">
-        <h2 className="text-xl font-bold text-gray-100 mb-2">Login</h2>
-        <p className="text-sm text-gray-300">Obtener token para crear/editar/borrar.</p>
-      </Link>
-    </section>
+  const onLogout = () => {
+    clearToken();
+    setToken(null);
+    navigate('/login');
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-900 text-gray-100">
+      <header className="border-b border-gray-700/50 bg-gray-950/60 px-4 py-4 sm:px-6">
+        <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-4">
+          <h1 className="text-2xl font-bold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-500">
+            Youth Basketball League Admin
+          </h1>
+          {token && (
+            <Button variant="ghost" onClick={onLogout}>
+              Cerrar sesión
+            </Button>
+          )}
+        </div>
+      </header>
+
+      <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 py-6 sm:px-6 lg:flex-row">
+        <aside className="w-full lg:w-60">
+          <nav className="flex flex-wrap gap-2 lg:flex-col">
+            {navItems.map((item) => (
+              <NavLink
+                key={item.to}
+                to={item.to}
+                className={({ isActive }) =>
+                  `rounded-lg border px-4 py-2 text-sm font-semibold transition ${
+                    isActive
+                      ? 'border-indigo-400/50 bg-indigo-500/25 text-indigo-100'
+                      : 'border-gray-700 bg-gray-800/50 text-gray-300 hover:bg-gray-700/60'
+                  }`
+                }
+              >
+                {item.label}
+              </NavLink>
+            ))}
+          </nav>
+        </aside>
+
+        <main className="flex-1">
+          <Routes>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/standings" element={<Standings />} />
+            <Route path="/matches" element={<MatchList />} />
+            <Route path="/teams" element={<TeamList />} />
+            <Route path="/players" element={<PlayerList />} />
+            <Route path="/login" element={<LoginForm onLoginSuccess={() => setToken(getToken())} />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </main>
+      </div>
+    </div>
   );
 }
 
 export default function App() {
-  const linkBase =
-    'px-4 py-2 rounded-lg bg-gray-800/40 border border-gray-700/60 text-gray-200 hover:bg-gray-800/70 transition';
-
-  return (
-    <div className="min-h-screen bg-gray-900 text-white p-8">
-      <header className="max-w-6xl mx-auto mb-10">
-        <h1 className="text-4xl font-extrabold text-center mt-6 mb-6 text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-500 drop-shadow-md">
-          Youth Basketball League
-        </h1>
-
-        <nav className="flex flex-wrap gap-3 justify-center">
-          <Link className={linkBase} to="/">
-            Inicio
-          </Link>
-          <Link className={linkBase} to="/standings">
-            Standings
-          </Link>
-          <Link className={linkBase} to="/matches">
-            Partidos
-          </Link>
-          <Link className={linkBase} to="/teams">
-            Equipos
-          </Link>
-          <Link className={linkBase} to="/players">
-            Jugadores
-          </Link>
-          <Link className={linkBase} to="/login">
-            Login
-          </Link>
-        </nav>
-      </header>
-
-      <main className="max-w-6xl mx-auto">
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/login" element={<LoginPage />} />
-
-          <Route path="/standings" element={<Standings />} />
-          <Route path="/matches" element={<MatchesPage />} />
-          <Route path="/teams" element={<TeamsPage />} />
-          <Route path="/players" element={<PlayersPage />} />
-
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </main>
-    </div>
-  );
+  return <Layout />;
 }

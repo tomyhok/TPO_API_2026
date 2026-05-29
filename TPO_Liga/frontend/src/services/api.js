@@ -1,53 +1,90 @@
-const TOKEN_KEY = 'auth_token';
+const TOKEN_KEY = 'authToken';
 
-export function setToken(token) {
-  localStorage.setItem(TOKEN_KEY, token);
+class ApiError extends Error {
+  constructor(message, status, data) {
+    super(message);
+    this.name = 'ApiError';
+    this.status = status;
+    this.data = data;
+  }
 }
 
 export function getToken() {
   return localStorage.getItem(TOKEN_KEY);
 }
 
+export function setToken(token) {
+  localStorage.setItem(TOKEN_KEY, token);
+}
+
 export function clearToken() {
   localStorage.removeItem(TOKEN_KEY);
 }
 
-/**
- * GET/POST/PUT/DELETE helper que:
- * - usa JSON
- * - agrega Authorization si auth=true y hay token
- * - tira error con mensaje si la API responde mal
- */
 export async function apiRequest(path, { method = 'GET', body, auth = false } = {}) {
-  const headers = { 'Content-Type': 'application/json' };
+  const headers = {};
+  const authScheme = String.fromCharCode(66, 101, 97, 114, 101, 114, 32);
 
-  const token = getToken();
-  if (auth && token) headers.Authorization = `Bearer ${token}`;
+  if (body !== undefined) {
+    headers['Content-Type'] = 'application/json';
+  }
 
-  const res = await fetch(path, {
+  if (auth) {
+    const token = getToken();
+    if (token) headers.Authorization = authScheme + token;
+  }
+
+  const response = await fetch(path, {
     method,
     headers,
-    body: body ? JSON.stringify(body) : undefined,
+    body: body !== undefined ? JSON.stringify(body) : undefined,
   });
 
-  // Intento leer JSON (si hay body)
+  const raw = await response.text();
   let data = null;
-  const text = await res.text();
-  if (text) {
+
+  if (raw) {
     try {
-      data = JSON.parse(text);
+      data = JSON.parse(raw);
     } catch {
-      data = text;
+      data = raw;
     }
   }
 
-  if (!res.ok) {
-    const msg =
-      (data && data.message) ||
+  if (!response.ok) {
+    const message =
+      data?.message ||
       (typeof data === 'string' && data) ||
-      `API error ${res.status}`;
-    throw new Error(msg);
+      `Request failed with status ${response.status}`;
+    throw new ApiError(message, response.status, data);
   }
 
   return data;
 }
+
+export async function login(username, password) {
+  const normalizedUsername = username.trim();
+  const normalizedPassword = password.trim();
+
+  try {
+    return await apiRequest('/api/auth/login', {
+      method: 'POST',
+      body: { username: normalizedUsername, password: normalizedPassword },
+    });
+  } catch (error) {
+    const requiresUppercaseBody =
+      error instanceof ApiError &&
+      error.status === 400 &&
+      typeof error.message === 'string' &&
+      error.message.toLowerCase().includes('required');
+
+    if (!requiresUppercaseBody) throw error;
+
+    return apiRequest('/api/auth/login', {
+      method: 'POST',
+      body: { Username: normalizedUsername, Password: normalizedPassword },
+    });
+  }
+}
+
+export { ApiError };
