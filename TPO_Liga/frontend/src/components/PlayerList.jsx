@@ -35,15 +35,24 @@ const PlayerList = () => {
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
         {loading
           ? Array.from({ length: 6 }).map((_, index) => <Skeleton key={index} className="h-28 w-full" />)
-          : players.map((player) => (
-              <Card key={player.PlayerID} className="space-y-2">
-                <p className="text-lg font-semibold text-gray-100">
-                  {player.PlayerName || player.Nombre || player.Name || 'Jugador'}
-                </p>
-                <p className="text-sm text-gray-400">PlayerID: {player.PlayerID}</p>
-                {player.TeamID && <p className="text-sm text-gray-400">TeamID: {player.TeamID}</p>}
-              </Card>
-            ))}
+          : players.map((player) => {
+              const nameParts = [player.FirstName, player.LastName].filter(Boolean);
+              const displayName =
+                nameParts.length > 0
+                  ? nameParts.join(' ')
+                  : player.PlayerName || player.Nombre || player.Name || 'Jugador';
+
+              return (
+                <Card key={player.PlayerID} className="space-y-2">
+                  <p className="text-lg font-semibold text-gray-100">{displayName}</p>
+                  <p className="text-sm text-gray-400">PlayerID: {player.PlayerID}</p>
+                  {player.TeamID !== undefined && player.TeamID !== null && (
+                    <p className="text-sm text-gray-400">TeamID: {player.TeamID}</p>
+                  )}
+                  {player.Category && <p className="text-sm text-gray-400">Categoría: {player.Category}</p>}
+                </Card>
+              );
+            })}
       </div>
 
       {!loading && players.length === 0 && (

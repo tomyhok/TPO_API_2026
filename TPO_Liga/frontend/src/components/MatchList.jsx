@@ -52,16 +52,33 @@ const MatchList = () => {
               </tr>
             </thead>
             <tbody>
-              {matches.map((match) => (
-                <tr key={match.MatchID} className="border-b border-gray-800/70">
-                  <td className="px-3 py-3 font-semibold text-indigo-300">{match.MatchID}</td>
-                  <td className="px-3 py-3">{match.HomeTeamName || match.Local || match.HomeTeamID || '-'}</td>
-                  <td className="px-3 py-3">{match.AwayTeamName || match.Visitante || match.AwayTeamID || '-'}</td>
-                  <td className="px-3 py-3">
-                    {match.HomeScore ?? '-'} - {match.AwayScore ?? '-'}
-                  </td>
-                </tr>
-              ))}
+              {matches.map((match) => {
+                const localTeam =
+                  match.HomeTeamName ||
+                  match.Local ||
+                  match.HomeTeamID ||
+                  match.LocalTeamID ||
+                  '-';
+                const visitorTeam =
+                  match.AwayTeamName ||
+                  match.Visitante ||
+                  match.AwayTeamID ||
+                  match.VisitorTeamID ||
+                  '-';
+                const localScore = match.HomeScore ?? match.LocalPoints ?? match.HomePoints;
+                const visitorScore = match.AwayScore ?? match.VisitorPoints ?? match.AwayPoints;
+
+                return (
+                  <tr key={match.MatchID} className="border-b border-gray-800/70">
+                    <td className="px-3 py-3 font-semibold text-indigo-300">{match.MatchID}</td>
+                    <td className="px-3 py-3">{localTeam}</td>
+                    <td className="px-3 py-3">{visitorTeam}</td>
+                    <td className="px-3 py-3">
+                      {localScore ?? '-'} - {visitorScore ?? '-'}
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         )}
