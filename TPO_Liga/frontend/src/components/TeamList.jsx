@@ -1,21 +1,40 @@
 import { useEffect, useState } from 'react';
-import { apiRequest } from '../services/api';
+import { apiRequest, getToken } from '../services/api';
+import { useSeason } from '../contexts/SeasonContext';
 import Alert from './ui/Alert';
 import Card from './ui/Card';
 import PageHeader from './ui/PageHeader';
 import Skeleton from './ui/Skeleton';
+import Button from './ui/Button';
+import Input from './ui/Input';
+import Modal from './ui/Modal';
 
 const TeamList = () => {
   const [teams, setTeams] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const isAdmin = !!getToken();
+  const { selectedSeasonId } = useSeason();
+  
+  // Modal & Form State
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingTeam, setEditingTeam] = useState(null);
+  const [formData, setFormData] = useState({ Name: '', Coach: '' });
+  const [saving, setSaving] = useState(false);
+
+  // View Team State
+  const [viewingTeam, setViewingTeam] = useState(null);
+  const [viewingTeamData, setViewingTeamData] = useState(null);
+  const [loadingTeam, setLoadingTeam] = useState(false);
 
   useEffect(() => {
+    if (!selectedSeasonId) return;
+
     const fetchTeams = async () => {
       setLoading(true);
       setError('');
       try {
-        const data = await apiRequest('/api/teams');
+        const data = await apiRequest(`/api/teams?seasonId=${selectedSeasonId}`);
         setTeams(Array.isArray(data) ? data : []);
       } catch (err) {
         setError(err.message || 'No se pudieron cargar los equipos.');
@@ -25,41 +44,214 @@ const TeamList = () => {
     };
 
     fetchTeams();
-  }, []);
+  }, [selectedSeasonId]);
+
+  const handleViewTeam = async (team) => {
+    setViewingTeam(team);
+    setLoadingTeam(true);
+    try {
+      const data = await apiRequest(`/api/teams/${team.TeamID}?seasonId=${selectedSeasonId}`);
+      setViewingTeamData(data);
+    } catch (err) {
+      console.error(err);
+      setError('Error al cargar datos del equipo');
+    } finally {
+      setLoadingTeam(false);
+    }
+  };
+
+  const openModal = (team = null) => {
+    if (team) {
+      setEditingTeam(team);
+      setFormData({ Name: team.TeamName || team.Name || '', Coach: team.Coach || '' });
+    } else {
+      setEditingTeam(null);
+      setFormData({ Name: '', Coach: '' });
+    }
+    setIsModalOpen(true);
+  };
+
+  const handleSave = async (e) => {
+    e.preventDefault();
+    setSaving(true);
+    setError('');
+    try {
+      if (editingTeam) {
+        const res = await apiRequest(`/api/teams/${editingTeam.TeamID}`, {
+          method: 'PUT',
+          body: formData,
+          auth: true
+        });
+        setTeams(teams.map(t => t.TeamID === editingTeam.TeamID ? { ...t, ...res } : t));
+      } else {
+        const res = await apiRequest('/api/teams', {
+          method: 'POST',
+          body: { ...formData, seasonId: selectedSeasonId },
+          auth: true
+        });
+        setTeams([...teams, res]);
+      }
+      setIsModalOpen(false);
+    } catch (err) {
+      setError(err.message || 'Error al guardar el equipo.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleDelete = async (id) => {
+    if (!window.confirm('¿Estás seguro de eliminar este equipo?')) return;
+    try {
+      await apiRequest(`/api/teams/${id}`, { method: 'DELETE', auth: true });
+      setTeams(teams.filter(t => t.TeamID !== id));
+    } catch (err) {
+      setError(err.message || 'Error al eliminar el equipo.');
+    }
+  };
 
   return (
-    <div>
-      <PageHeader title="Equipos" subtitle="Listado de equipos registrados" />
+    <div className="animate-fade-in">
+      <PageHeader 
+        title="Equipos" 
+        subtitle="Listado de equipos registrados en la liga" 
+        action={isAdmin && <Button onClick={() => openModal()}>+ Nuevo Equipo</Button>}
+      />
       <Alert message={error} />
 
-      <Card className="overflow-x-auto">
-        {loading ? (
-          <div className="space-y-2">
-            <Skeleton className="h-10 w-full" />
-            <Skeleton className="h-10 w-full" />
-            <Skeleton className="h-10 w-full" />
+      {loading ? (
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {[1, 2, 3, 4, 5, 6].map((i) => (
+            <Card key={i} className="h-32">
+              <Skeleton className="h-6 w-3/4 mb-4" />
+              <Skeleton className="h-4 w-1/2" />
+            </Card>
+          ))}
+        </div>
+      ) : teams.length === 0 ? (
+        <Card className="text-center py-12">
+          <div className="text-4xl mb-4 opacity-50">🛡️</div>
+          <p className="text-lg text-zinc-400">No hay equipos cargados actualmente.</p>
+        </Card>
+      ) : (
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {teams.map((team, idx) => {
+            const teamName = team.TeamName || team.Equipo || team.Name || 'Equipo Sin Nombre';
+            // Generate a deterministic gradient color based on index
+            const colors = [
+              'from-red-500/20 to-yellow-500/5',
+              'from-amber-500/20 to-pink-500/5',
+              'from-emerald-500/20 to-teal-500/5',
+              'from-orange-500/20 to-amber-500/5',
+              'from-rose-500/20 to-red-500/5',
+            ];
+            const bgClass = colors[idx % colors.length];
+
+            return (
+              <Card 
+                key={team.TeamID} 
+                className={`relative overflow-hidden group hover:-translate-y-1 transition-transform duration-300 cursor-pointer`}
+                onClick={() => handleViewTeam(team)}
+              >
+                <div className={`absolute inset-0 bg-gradient-to-br ${bgClass} opacity-50`}></div>
+                
+                {isAdmin && (
+                  <div className="absolute top-3 right-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity z-20">
+                    <button onClick={(e) => { e.stopPropagation(); openModal(team); }} className="p-1.5 rounded-lg bg-zinc-800/80 text-orange-400 hover:bg-zinc-700 hover:text-orange-300 transition-colors backdrop-blur-sm border border-zinc-700/50">
+                      ✏️
+                    </button>
+                    <button onClick={(e) => { e.stopPropagation(); handleDelete(team.TeamID); }} className="p-1.5 rounded-lg bg-zinc-800/80 text-red-500 hover:bg-zinc-700 hover:text-red-400 transition-colors backdrop-blur-sm border border-zinc-700/50">
+                      🗑️
+                    </button>
+                  </div>
+                )}
+                
+                <div className="relative z-10 flex items-start gap-4">
+                  <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-zinc-800/80 border border-zinc-700 flex items-center justify-center text-xl shadow-lg group-hover:scale-110 transition-transform">
+                    🛡️
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-lg text-zinc-100 group-hover:text-orange-300 transition-colors line-clamp-1" title={teamName}>
+                      {teamName}
+                    </h3>
+                    <p className="text-sm font-medium text-zinc-500 mt-1">
+                      ID: <span className="text-orange-400/80">{team.TeamID}</span>
+                    </p>
+                  </div>
+                </div>
+              </Card>
+            );
+          })}
+        </div>
+      )}
+
+      <Modal 
+        isOpen={isModalOpen} 
+        onClose={() => setIsModalOpen(false)} 
+        title={editingTeam ? 'Editar Equipo' : 'Nuevo Equipo'}
+      >
+        <form onSubmit={handleSave} className="space-y-4">
+          <Input 
+            label="Nombre del Equipo" 
+            value={formData.Name} 
+            onChange={e => setFormData({...formData, Name: e.target.value})} 
+            required 
+          />
+          <Input 
+            label="Entrenador" 
+            value={formData.Coach} 
+            onChange={e => setFormData({...formData, Coach: e.target.value})} 
+            required 
+          />
+          <div className="flex justify-end gap-3 mt-6">
+            <Button variant="ghost" type="button" onClick={() => setIsModalOpen(false)}>Cancelar</Button>
+            <Button type="submit" disabled={saving}>
+              {saving ? 'Guardando...' : 'Guardar'}
+            </Button>
           </div>
-        ) : teams.length === 0 ? (
-          <p className="text-center text-sm text-gray-400">No hay equipos cargados.</p>
-        ) : (
-          <table className="w-full min-w-[520px] text-left text-sm text-gray-200">
-            <thead className="border-b border-gray-700 text-xs uppercase text-gray-400">
-              <tr>
-                <th className="px-3 py-3">ID</th>
-                <th className="px-3 py-3">Nombre</th>
-              </tr>
-            </thead>
-            <tbody>
-              {teams.map((team) => (
-                <tr key={team.TeamID} className="border-b border-gray-800/70">
-                  <td className="px-3 py-3 font-semibold text-indigo-300">{team.TeamID}</td>
-                  <td className="px-3 py-3">{team.TeamName || team.Equipo || team.Name || '-'}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </Card>
+        </form>
+      </Modal>
+
+      {/* View Team Modal */}
+      <Modal 
+        isOpen={!!viewingTeam} 
+        onClose={() => { setViewingTeam(null); setViewingTeamData(null); }} 
+        title={viewingTeam?.TeamName || viewingTeam?.Name || 'Detalles del Equipo'}
+      >
+        {loadingTeam ? (
+          <div className="flex justify-center p-8">
+            <div className="w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
+          </div>
+        ) : viewingTeamData ? (
+          <div className="space-y-6">
+            <div>
+              <p className="text-zinc-400 mb-4 text-sm">
+                Entrenador: <strong className="text-zinc-200">{viewingTeamData.Coach || 'No asignado'}</strong>
+              </p>
+              <h3 className="text-lg font-semibold text-zinc-300 border-b border-zinc-700 pb-2 mb-4">Plantel</h3>
+              {viewingTeamData.Players && viewingTeamData.Players.length > 0 ? (
+                <ul className="space-y-2 max-h-60 overflow-y-auto pr-2 custom-scrollbar">
+                  {viewingTeamData.Players.map(p => (
+                    <li key={p.PlayerID} className="flex justify-between items-center bg-zinc-800/50 p-2.5 rounded-lg border border-zinc-700/50 hover:border-orange-500/30 transition-colors">
+                      <span className="font-medium text-zinc-200">{p.FirstName} {p.LastName}</span>
+                      <div className="flex gap-2">
+                        {p.Position && <span className="text-xs bg-zinc-700 px-2 py-1 rounded-md text-zinc-300">{p.Position}</span>}
+                        {p.JerseyNumber && <span className="text-xs bg-orange-500/20 text-orange-400 px-2 py-1 rounded-md font-bold">#{p.JerseyNumber}</span>}
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-zinc-500 text-sm italic bg-zinc-800/30 p-4 rounded-lg text-center border border-zinc-800">
+                  No hay jugadores registrados en este equipo.
+                </p>
+              )}
+            </div>
+            <div className="flex justify-end pt-4">
+              <Button variant="ghost" onClick={() => { setViewingTeam(null); setViewingTeamData(null); }}>Cerrar</Button>
+            </div>
+          </div>
+        ) : null}
+      </Modal>
     </div>
   );
 };

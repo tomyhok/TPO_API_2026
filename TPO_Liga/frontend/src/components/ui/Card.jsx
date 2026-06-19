@@ -1,7 +1,7 @@
-export default function Card({ children, className = '' }) {
+export default function Card({ children, className = '', ...props }) {
   return (
-    <section className={`rounded-xl border border-gray-700/60 bg-gray-800/40 p-5 shadow-lg ${className}`}>
+    <div className={`glass-card rounded-2xl p-6 ${className}`} {...props}>
       {children}
-    </section>
+    </div>
   );
 }

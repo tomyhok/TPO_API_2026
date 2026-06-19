@@ -7,8 +7,7 @@ const authMiddleware = require('../middlewares/authMiddleware');
 router.post('/', authMiddleware, matchController.createMatch);
 router.get('/', matchController.getAllMatches);
 router.get('/:id', matchController.getMatchById);
-router.put('/:id', authMiddleware, matchController.updateMatchDetails);
-router.put('/:id/score', authMiddleware, matchController.updateMatchScore);
+router.put('/:id', authMiddleware, matchController.updateMatch);
 router.delete('/:id', authMiddleware, matchController.deleteMatch);
 
 module.exports = router;

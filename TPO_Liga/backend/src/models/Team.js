@@ -1,23 +1,67 @@
 const { sql, poolPromise } = require('../config/db');
 
 class TeamModel {
-  static async create(Name, Coach) {
+  static async create(Name, Coach, seasonId) {
     const pool = await poolPromise;
-    const result = await pool.request()
-      .input('Name', sql.NVarChar, Name)
-      .input('Coach', sql.NVarChar, Coach)
-      .query('INSERT INTO Teams (Name, Coach) OUTPUT INSERTED.* VALUES (@Name, @Coach)');
-    return result.recordset[0];
+    const transaction = new sql.Transaction(pool);
+    await transaction.begin();
+    try {
+      const result = await transaction.request()
+        .input('Name', sql.NVarChar, Name)
+        .input('Coach', sql.NVarChar, Coach)
+        .query('INSERT INTO Teams (Name, Coach) OUTPUT INSERTED.* VALUES (@Name, @Coach)');
+      const newTeam = result.recordset[0];
+
+      let targetSeasonId = seasonId;
+      if (!targetSeasonId) {
+        const activeRes = await transaction.request().query('SELECT TOP 1 SeasonID FROM Seasons WHERE IsActive = 1');
+        if (activeRes.recordset.length > 0) {
+          targetSeasonId = activeRes.recordset[0].SeasonID;
+        }
+      }
+
+      if (targetSeasonId) {
+        await transaction.request()
+          .input('TeamID', sql.Int, newTeam.TeamID)
+          .input('SeasonID', sql.Int, targetSeasonId)
+          .query('INSERT INTO TeamSeasons (TeamID, SeasonID) VALUES (@TeamID, @SeasonID)');
+      }
+
+      await transaction.commit();
+      return newTeam;
+    } catch (err) {
+      await transaction.rollback();
+      throw err;
+    }
   }
 
-  static async getAll() {
+  static async getAll(seasonId) {
     const pool = await poolPromise;
-    const result = await pool.request()
-      .query('SELECT * FROM Teams');
+    const request = pool.request();
+    
+    let query = 'SELECT * FROM Teams';
+    if (seasonId) {
+      request.input('SeasonID', sql.Int, seasonId);
+      query = `
+        SELECT t.* FROM Teams t
+        INNER JOIN TeamSeasons ts ON t.TeamID = ts.TeamID
+        WHERE ts.SeasonID = @SeasonID
+      `;
+    } else {
+      // Por defecto temporada activa si no se provee
+      query = `
+        SELECT t.* FROM Teams t
+        INNER JOIN TeamSeasons ts ON t.TeamID = ts.TeamID
+        INNER JOIN Seasons s ON ts.SeasonID = s.SeasonID
+        WHERE s.IsActive = 1
+      `;
+    }
+
+    const result = await request.query(query);
     return result.recordset;
   }
 
-  static async getById(id) {
+  static async getById(id, seasonId) {
     const pool = await poolPromise;
     
     // 1. Obtener información básica del equipo
@@ -30,24 +74,50 @@ class TeamModel {
     }
     const team = teamResult.recordset[0];
 
+    const request = pool.request().input('TeamID', sql.Int, id);
+
+    let pQuery = 'SELECT * FROM Players WHERE TeamID = @TeamID'; // Legacy fallback
+    let mQuery = 'SELECT * FROM Matches WHERE (LocalTeamID = @TeamID OR VisitorTeamID = @TeamID) ORDER BY MatchDate DESC';
+    
+    if (seasonId) {
+      request.input('SeasonID', sql.Int, seasonId);
+      pQuery = `
+        SELECT p.* FROM Players p
+        INNER JOIN PlayerSeasons ps ON p.PlayerID = ps.PlayerID
+        WHERE ps.TeamID = @TeamID AND ps.SeasonID = @SeasonID
+      `;
+      mQuery = `
+        SELECT * FROM Matches 
+        WHERE (LocalTeamID = @TeamID OR VisitorTeamID = @TeamID) AND SeasonID = @SeasonID
+        ORDER BY MatchDate DESC
+      `;
+    } else {
+      // Default to active season
+      pQuery = `
+        SELECT p.* FROM Players p
+        INNER JOIN PlayerSeasons ps ON p.PlayerID = ps.PlayerID
+        INNER JOIN Seasons s ON ps.SeasonID = s.SeasonID
+        WHERE ps.TeamID = @TeamID AND s.IsActive = 1
+      `;
+      mQuery = `
+        SELECT m.* FROM Matches m
+        INNER JOIN Seasons s ON m.SeasonID = s.SeasonID
+        WHERE (m.LocalTeamID = @TeamID OR m.VisitorTeamID = @TeamID) AND s.IsActive = 1
+        ORDER BY m.MatchDate DESC
+      `;
+    }
+
     // 2. Obtener lista de jugadores del equipo
-    const playersResult = await pool.request()
-      .input('TeamID', sql.Int, id)
-      .query('SELECT * FROM Players WHERE TeamID = @TeamID');
+    const playersResult = await request.query(pQuery);
     team.Players = playersResult.recordset;
 
     // 3. Obtener partidos asociados al equipo
-    const matchesResult = await pool.request()
-      .input('TeamID', sql.Int, id)
-      .query('SELECT * FROM Matches WHERE LocalTeamID = @TeamID OR VisitorTeamID = @TeamID ORDER BY MatchDate DESC');
-    
+    const matchesResult = await request.query(mQuery);
     const allMatches = matchesResult.recordset;
     
     // Clasificar partidos en jugados (tienen resultado) y pendientes (no tienen resultado)
     team.PlayedMatches = allMatches.filter(m => m.LocalPoints !== null && m.VisitorPoints !== null);
     team.PendingMatches = allMatches.filter(m => m.LocalPoints === null || m.VisitorPoints === null);
-    
-    // Resultados obtenidos
     team.Results = team.PlayedMatches;
 
     return team;
@@ -58,7 +128,6 @@ class TeamModel {
     const request = pool.request().input('TeamID', sql.Int, id);
     
     let updates = [];
-    
     if (Name) {
       request.input('Name', sql.NVarChar, Name);
       updates.push('Name = @Name');
@@ -67,19 +136,19 @@ class TeamModel {
       request.input('Coach', sql.NVarChar, Coach);
       updates.push('Coach = @Coach');
     }
+    if (updates.length === 0) return null;
     
     const query = `UPDATE Teams SET ${updates.join(', ')} OUTPUT INSERTED.* WHERE TeamID = @TeamID`;
     const result = await request.query(query);
-
     return result.recordset.length > 0 ? result.recordset[0] : null;
   }
 
   static async delete(id) {
     const pool = await poolPromise;
-    const result = await pool.request()
-      .input('TeamID', sql.Int, id)
-      .query('DELETE FROM Teams WHERE TeamID = @TeamID');
-    
+    const request = pool.request().input('TeamID', sql.Int, id);
+    // Para simplificar, asume que primero se elimina de TeamSeasons si no tiene dependencias fuertes
+    await request.query('DELETE FROM TeamSeasons WHERE TeamID = @TeamID');
+    const result = await request.query('DELETE FROM Teams WHERE TeamID = @TeamID');
     return result.rowsAffected[0] > 0;
   }
 }
