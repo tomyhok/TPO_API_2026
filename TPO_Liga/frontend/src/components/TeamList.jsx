@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { apiRequest, getToken } from '../services/api';
 import { useSeason } from '../contexts/SeasonContext';
+import { useRightPanel } from '../contexts/RightPanelContext';
 import Alert from './ui/Alert';
 import Card from './ui/Card';
 import PageHeader from './ui/PageHeader';
@@ -8,6 +9,7 @@ import Skeleton from './ui/Skeleton';
 import Button from './ui/Button';
 import Input from './ui/Input';
 import Modal from './ui/Modal';
+import TeamDetailsWidget from './widgets/TeamDetailsWidget';
 
 const TeamList = () => {
   const [teams, setTeams] = useState([]);
@@ -15,17 +17,13 @@ const TeamList = () => {
   const [error, setError] = useState('');
   const isAdmin = !!getToken();
   const { selectedSeasonId } = useSeason();
+  const { openPanel } = useRightPanel();
   
   // Modal & Form State
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingTeam, setEditingTeam] = useState(null);
   const [formData, setFormData] = useState({ Name: '', Coach: '' });
   const [saving, setSaving] = useState(false);
-
-  // View Team State
-  const [viewingTeam, setViewingTeam] = useState(null);
-  const [viewingTeamData, setViewingTeamData] = useState(null);
-  const [loadingTeam, setLoadingTeam] = useState(false);
 
   useEffect(() => {
     if (!selectedSeasonId) return;
@@ -46,18 +44,8 @@ const TeamList = () => {
     fetchTeams();
   }, [selectedSeasonId]);
 
-  const handleViewTeam = async (team) => {
-    setViewingTeam(team);
-    setLoadingTeam(true);
-    try {
-      const data = await apiRequest(`/api/teams/${team.TeamID}?seasonId=${selectedSeasonId}`);
-      setViewingTeamData(data);
-    } catch (err) {
-      console.error(err);
-      setError('Error al cargar datos del equipo');
-    } finally {
-      setLoadingTeam(false);
-    }
+  const handleViewTeam = (team) => {
+    openPanel(<TeamDetailsWidget team={team} />);
   };
 
   const openModal = (team = null) => {
@@ -133,7 +121,7 @@ const TeamList = () => {
           <p className="text-lg text-zinc-400">No hay equipos cargados actualmente.</p>
         </Card>
       ) : (
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3">
           {teams.map((team, idx) => {
             const teamName = team.TeamName || team.Equipo || team.Name || 'Equipo Sin Nombre';
             // Generate a deterministic gradient color based on index
@@ -170,7 +158,7 @@ const TeamList = () => {
                     🛡️
                   </div>
                   <div>
-                    <h3 className="font-bold text-lg text-zinc-100 group-hover:text-orange-300 transition-colors line-clamp-1" title={teamName}>
+                    <h3 className="font-bold text-lg text-zinc-100 group-hover:text-orange-300 transition-colors leading-tight" title={teamName}>
                       {teamName}
                     </h3>
                     <p className="text-sm font-medium text-zinc-500 mt-1">
@@ -209,48 +197,6 @@ const TeamList = () => {
             </Button>
           </div>
         </form>
-      </Modal>
-
-      {/* View Team Modal */}
-      <Modal 
-        isOpen={!!viewingTeam} 
-        onClose={() => { setViewingTeam(null); setViewingTeamData(null); }} 
-        title={viewingTeam?.TeamName || viewingTeam?.Name || 'Detalles del Equipo'}
-      >
-        {loadingTeam ? (
-          <div className="flex justify-center p-8">
-            <div className="w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
-          </div>
-        ) : viewingTeamData ? (
-          <div className="space-y-6">
-            <div>
-              <p className="text-zinc-400 mb-4 text-sm">
-                Entrenador: <strong className="text-zinc-200">{viewingTeamData.Coach || 'No asignado'}</strong>
-              </p>
-              <h3 className="text-lg font-semibold text-zinc-300 border-b border-zinc-700 pb-2 mb-4">Plantel</h3>
-              {viewingTeamData.Players && viewingTeamData.Players.length > 0 ? (
-                <ul className="space-y-2 max-h-60 overflow-y-auto pr-2 custom-scrollbar">
-                  {viewingTeamData.Players.map(p => (
-                    <li key={p.PlayerID} className="flex justify-between items-center bg-zinc-800/50 p-2.5 rounded-lg border border-zinc-700/50 hover:border-orange-500/30 transition-colors">
-                      <span className="font-medium text-zinc-200">{p.FirstName} {p.LastName}</span>
-                      <div className="flex gap-2">
-                        {p.Position && <span className="text-xs bg-zinc-700 px-2 py-1 rounded-md text-zinc-300">{p.Position}</span>}
-                        {p.JerseyNumber && <span className="text-xs bg-orange-500/20 text-orange-400 px-2 py-1 rounded-md font-bold">#{p.JerseyNumber}</span>}
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <p className="text-zinc-500 text-sm italic bg-zinc-800/30 p-4 rounded-lg text-center border border-zinc-800">
-                  No hay jugadores registrados en este equipo.
-                </p>
-              )}
-            </div>
-            <div className="flex justify-end pt-4">
-              <Button variant="ghost" onClick={() => { setViewingTeam(null); setViewingTeamData(null); }}>Cerrar</Button>
-            </div>
-          </div>
-        ) : null}
       </Modal>
     </div>
   );

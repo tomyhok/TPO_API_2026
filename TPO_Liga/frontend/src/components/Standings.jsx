@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
 import { apiRequest } from '../services/api';
 import { useSeason } from '../contexts/SeasonContext';
+import { useRightPanel } from '../contexts/RightPanelContext';
 import Alert from './ui/Alert';
 import Card from './ui/Card';
 import PageHeader from './ui/PageHeader';
 import Skeleton from './ui/Skeleton';
+import TeamDetailsWidget from './widgets/TeamDetailsWidget';
 
 const Standings = () => {
   const [standings, setStandings] = useState([]);
@@ -12,6 +14,7 @@ const Standings = () => {
   const [error, setError] = useState('');
 
   const { selectedSeasonId } = useSeason();
+  const { openPanel } = useRightPanel();
 
   useEffect(() => {
     if (!selectedSeasonId) return;
@@ -71,7 +74,8 @@ const Standings = () => {
                   return (
                     <tr 
                       key={team.TeamID || index} 
-                      className={`hover:bg-zinc-800/50 transition-colors group ${isTop3 ? 'bg-orange-500/[0.02]' : ''}`}
+                      onClick={() => openPanel(<TeamDetailsWidget team={{ TeamID: team.TeamID, TeamName: team.Equipo || team.TeamName }} />)}
+                      className={`hover:bg-zinc-800/50 transition-colors group cursor-pointer ${isTop3 ? 'bg-orange-500/[0.02]' : ''}`}
                     >
                       <td className="px-6 py-4">
                         <div className={`w-8 h-8 rounded-full flex items-center justify-center mx-auto font-bold text-sm ${

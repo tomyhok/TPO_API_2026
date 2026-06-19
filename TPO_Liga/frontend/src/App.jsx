@@ -4,12 +4,14 @@ import MatchList from './components/MatchList';
 import PlayerList from './components/PlayerList';
 import SeasonList from './components/SeasonList';
 import Standings from './components/Standings';
+import StandingsWidget from './components/widgets/StandingsWidget';
 import LoginForm from './components/LoginForm';
 import HomePage from './components/HomePage';
 import Button from './components/ui/Button';
 import { clearToken, getToken } from './services/api';
 import { useEffect, useState } from 'react';
 import { useSeason } from './contexts/SeasonContext';
+import { useRightPanel } from './contexts/RightPanelContext';
 
 const navItems = [
   { to: '/', label: 'Inicio' },
@@ -25,6 +27,7 @@ function Layout() {
   const navigate = useNavigate();
   const [token, setToken] = useState(() => getToken());
   const { seasons, selectedSeasonId, setSelectedSeasonId, loading: seasonLoading } = useSeason();
+  const { panelContent, isOpen, closePanel } = useRightPanel();
 
   useEffect(() => {
     const syncAuth = () => setToken(getToken());
@@ -67,8 +70,8 @@ function Layout() {
         )}
       </header>
 
-      {/* Sidebar (Desktop) / Bottom Nav (Mobile - basic fallback) */}
-      <aside className="lg:w-72 lg:h-screen lg:sticky lg:top-0 lg:flex lg:flex-col glass-panel border-r border-zinc-800/50 hidden lg:block">
+      {/* Sidebar (Desktop) */}
+      <aside className="lg:w-64 lg:h-screen lg:sticky lg:top-0 lg:flex lg:flex-col glass-panel border-r border-zinc-800/50 hidden lg:block flex-shrink-0">
         <div className="p-8 pb-4">
           <h1 className="text-2xl font-bold tracking-tight text-gradient leading-tight">
             Youth Basketball<br />League
@@ -128,19 +131,44 @@ function Layout() {
         )}
       </aside>
 
-      {/* Main Content */}
-      <main className="flex-1 px-4 py-8 sm:px-8 lg:px-12 max-w-7xl mx-auto w-full">
-        <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/standings" element={<Standings />} />
-          <Route path="/matches" element={<MatchList />} />
-          <Route path="/teams" element={<TeamList />} />
-          <Route path="/players" element={<PlayerList />} />
-          <Route path="/seasons" element={<SeasonList />} />
-          <Route path="/login" element={<LoginForm onLoginSuccess={() => setToken(getToken())} />} />
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
+      {/* Main Content (Center) */}
+      <main className="flex-1 flex justify-center w-full min-w-0">
+        <div className="w-full max-w-5xl px-4 py-8 sm:px-8 xl:px-12">
+          <Routes>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/standings" element={<Standings />} />
+            <Route path="/matches" element={<MatchList />} />
+            <Route path="/teams" element={<TeamList />} />
+            <Route path="/players" element={<PlayerList />} />
+            <Route path="/seasons" element={<SeasonList />} />
+            <Route path="/login" element={<LoginForm onLoginSuccess={() => setToken(getToken())} />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </div>
       </main>
+
+      {/* Right Panel (Desktop) */}
+      <aside className="hidden xl:flex xl:w-80 2xl:w-96 border-l border-zinc-800/50 bg-zinc-950/50 h-screen sticky top-0 flex-col overflow-y-auto flex-shrink-0">
+        <div className="p-6 h-full">
+          {panelContent ? panelContent : <StandingsWidget />}
+        </div>
+      </aside>
+
+      {/* Right Panel (Mobile Overlay) */}
+      {isOpen && (
+        <div className="fixed inset-0 z-50 flex justify-end xl:hidden">
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={closePanel}></div>
+          <div className="relative w-full max-w-md bg-zinc-950 border-l border-zinc-800 h-full overflow-y-auto animate-slide-in-right shadow-2xl">
+            <div className="sticky top-0 bg-zinc-900/90 backdrop-blur border-b border-zinc-800 p-4 flex justify-between items-center z-10">
+              <h3 className="font-bold text-zinc-100">Detalles</h3>
+              <Button variant="ghost" onClick={closePanel} className="!p-2 text-zinc-400 hover:text-white">✕</Button>
+            </div>
+            <div className="p-4">
+              {panelContent}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Mobile Bottom Nav */}
       <nav className="lg:hidden glass-panel fixed bottom-0 left-0 right-0 z-50 flex justify-around p-3 pb-safe">

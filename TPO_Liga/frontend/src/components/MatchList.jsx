@@ -1,13 +1,13 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { apiRequest, getToken } from '../services/api';
 import { useSeason } from '../contexts/SeasonContext';
+import { useRightPanel } from '../contexts/RightPanelContext';
 import Alert from './ui/Alert';
-import Card from './ui/Card';
-import PageHeader from './ui/PageHeader';
 import Skeleton from './ui/Skeleton';
 import Button from './ui/Button';
 import Input from './ui/Input';
 import Modal from './ui/Modal';
+import MatchDetailsWidget from './widgets/MatchDetailsWidget';
 
 const MatchList = () => {
   const [matches, setMatches] = useState([]);
@@ -16,15 +16,13 @@ const MatchList = () => {
   const [error, setError] = useState('');
   const isAdmin = !!getToken();
   const { selectedSeasonId } = useSeason();
+  const { openPanel } = useRightPanel();
   
   // Modal & Form State
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingMatch, setEditingMatch] = useState(null);
   const [formData, setFormData] = useState({ LocalTeamID: '', VisitorTeamID: '', MatchDate: '', LocalPoints: '', VisitorPoints: '', Status: '' });
   const [saving, setSaving] = useState(false);
-
-  // View Match State
-  const [viewingMatch, setViewingMatch] = useState(null);
 
   const getTeamName = (id) => {
     if (!id) return null;
@@ -55,7 +53,12 @@ const MatchList = () => {
     fetchData();
   }, [selectedSeasonId]);
 
-  const openModal = (match = null) => {
+  const openMatchDetails = (match) => {
+    openPanel(<MatchDetailsWidget match={match} getTeamName={getTeamName} />);
+  };
+
+  const openModal = (match = null, e = null) => {
+    if (e) e.stopPropagation();
     if (match) {
       setEditingMatch(match);
       setFormData({ 
@@ -107,7 +110,8 @@ const MatchList = () => {
     }
   };
 
-  const handleDelete = async (id) => {
+  const handleDelete = async (id, e) => {
+    e.stopPropagation();
     if (!window.confirm('¿Estás seguro de eliminar este partido?')) return;
     try {
       await apiRequest(`/api/matches/${id}`, { method: 'DELETE', auth: true });
@@ -117,116 +121,118 @@ const MatchList = () => {
     }
   };
 
+  // Group matches by date
+  const groupedMatches = useMemo(() => {
+    const groups = {};
+    matches.forEach(match => {
+      const dateKey = match.MatchDate 
+        ? new Date(match.MatchDate).toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) 
+        : 'Sin fecha';
+      
+      if (!groups[dateKey]) groups[dateKey] = [];
+      groups[dateKey].push(match);
+    });
+    
+    // Sort groups (roughly) - assuming keys are parseable or we just return an array of entries
+    return Object.entries(groups).sort((a, b) => {
+        if (a[0] === 'Sin fecha') return 1;
+        if (b[0] === 'Sin fecha') return -1;
+        // Basic string sort is not perfect for dates but we trust the DB order mostly
+        return 0;
+    });
+  }, [matches]);
+
   return (
-    <div className="animate-fade-in">
-      <PageHeader 
-        title="Partidos" 
-        subtitle="Calendario y resultados de encuentros" 
-        action={isAdmin && <Button onClick={() => openModal()}>+ Nuevo Partido</Button>}
-      />
+    <div className="animate-fade-in w-full max-w-full">
+      <div className="flex justify-between items-center mb-6">
+        <div>
+            <h1 className="text-2xl font-bold text-zinc-100 tracking-tight">Calendario de Partidos</h1>
+            <p className="text-sm text-zinc-400">Resultados y próximos encuentros</p>
+        </div>
+        {isAdmin && <Button onClick={() => openModal()}>+ Nuevo Partido</Button>}
+      </div>
+      
       <Alert message={error} />
 
       {loading ? (
         <div className="space-y-4">
-          {[1, 2, 3].map((i) => (
-            <Card key={i} className="h-24">
-               <Skeleton className="h-8 w-full" />
-            </Card>
+          <Skeleton className="h-6 w-48 mb-4" />
+          {[1, 2, 3, 4, 5].map((i) => (
+            <Skeleton key={i} className="h-16 w-full rounded-xl" />
           ))}
         </div>
       ) : matches.length === 0 ? (
-        <Card className="text-center py-12">
+        <div className="text-center py-12 bg-zinc-900/30 rounded-xl border border-zinc-800">
           <div className="text-4xl mb-4 opacity-50">📅</div>
-          <p className="text-lg text-zinc-400">No hay partidos cargados.</p>
-        </Card>
+          <p className="text-lg text-zinc-400">No hay partidos cargados para esta temporada.</p>
+        </div>
       ) : (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3">
-          {matches.map((match) => {
-            const localTeam = match.HomeTeamName || match.Local || getTeamName(match.HomeTeamID) || getTeamName(match.LocalTeamID) || `Equipo ${match.HomeTeamID || match.LocalTeamID || 'Local'}`;
-            const visitorTeam = match.AwayTeamName || match.Visitante || getTeamName(match.AwayTeamID) || getTeamName(match.VisitorTeamID) || `Equipo ${match.AwayTeamID || match.VisitorTeamID || 'Visitante'}`;
-            const localScore = match.HomeScore ?? match.LocalPoints ?? match.HomePoints;
-            const visitorScore = match.AwayScore ?? match.VisitorPoints ?? match.AwayPoints;
-            
-            // Format Date and Time
-            const dateStr = match.MatchDate ? new Date(match.MatchDate).toLocaleDateString('es-ES', { day: '2-digit', month: 'short' }) : '';
-            // Only show time if it's not a 1970 dummy date/time
-            const timeStr = match.MatchTime && !match.MatchTime.startsWith('1970') && !match.MatchTime.startsWith('0001') ? new Date(match.MatchTime).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }) : '';
-            
-            const hasScore = localScore !== null && localScore !== undefined;
-            const localWon = hasScore && localScore > visitorScore;
-            const visitorWon = hasScore && visitorScore > localScore;
+        <div className="space-y-8">
+          {groupedMatches.map(([date, dayMatches]) => (
+            <div key={date} className="space-y-2">
+              <h3 className="text-xs font-bold text-zinc-400 uppercase tracking-wider px-2 flex items-center gap-2">
+                <span className="w-4 h-px bg-zinc-700"></span> {date} <span className="flex-1 h-px bg-zinc-800"></span>
+              </h3>
+              
+              <div className="bg-zinc-900/40 border border-zinc-800/50 rounded-xl overflow-hidden divide-y divide-zinc-800/50">
+                {dayMatches.map((match) => {
+                  const localTeam = match.HomeTeamName || match.Local || getTeamName(match.HomeTeamID) || getTeamName(match.LocalTeamID) || `Equipo Local`;
+                  const visitorTeam = match.AwayTeamName || match.Visitante || getTeamName(match.AwayTeamID) || getTeamName(match.VisitorTeamID) || `Equipo Visitante`;
+                  const localScore = match.HomeScore ?? match.LocalPoints ?? match.HomePoints;
+                  const visitorScore = match.AwayScore ?? match.VisitorPoints ?? match.AwayPoints;
+                  
+                  const timeStr = match.MatchTime && !match.MatchTime.startsWith('1970') && !match.MatchTime.startsWith('0001') ? new Date(match.MatchTime).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }) : '-';
+                  
+                  const hasScore = localScore !== null && localScore !== undefined;
+                  const localWon = hasScore && localScore > visitorScore;
+                  const visitorWon = hasScore && visitorScore > localScore;
 
-            return (
-              <Card 
-                key={match.MatchID} 
-                className="group hover:border-orange-500/40 transition-colors p-0 overflow-hidden relative cursor-pointer"
-                onClick={() => setViewingMatch(match)}
-              >
-                <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-zinc-700 to-transparent group-hover:via-orange-500 transition-colors"></div>
-                
-                {isAdmin && (
-                  <div className="absolute top-3 right-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity z-20">
-                    <button onClick={(e) => { e.stopPropagation(); openModal(match); }} className="p-1 rounded bg-zinc-800/80 text-orange-400 hover:bg-zinc-700 hover:text-orange-300 transition-colors backdrop-blur-sm border border-zinc-700/50 text-xs">
-                      ✏️
-                    </button>
-                    <button onClick={(e) => { e.stopPropagation(); handleDelete(match.MatchID); }} className="p-1 rounded bg-zinc-800/80 text-red-500 hover:bg-zinc-700 hover:text-red-400 transition-colors backdrop-blur-sm border border-zinc-700/50 text-xs">
-                      🗑️
-                    </button>
-                  </div>
-                )}
-                
-                <div className="p-5">
-                  <div className="flex justify-between items-center mb-6">
-                    <span className="text-xs font-semibold px-2 py-1 bg-zinc-800 rounded text-zinc-400">Match #{match.MatchID}</span>
-                    
-                    {(dateStr || timeStr) && (
-                      <span className="text-xs font-medium text-zinc-300 bg-zinc-900 px-2 py-1 rounded shadow-inner">
-                        {dateStr} {timeStr && `• ${timeStr}`}
-                      </span>
-                    )}
-
-                    <span className={`text-xs font-bold px-2 py-1 rounded ${hasScore ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-amber-500/10 text-amber-400 border border-amber-500/20'}`}>
-                      {hasScore ? 'Finalizado' : 'Pendiente'}
-                    </span>
-                  </div>
-
-                  <div className="flex items-center justify-between gap-4">
-                    {/* Local Team */}
-                    <div className="flex-1 text-center">
-                      <p className={`font-bold text-lg leading-tight line-clamp-2 ${localWon ? 'text-zinc-100' : 'text-zinc-300'}`}>
-                        {localTeam}
-                      </p>
-                      {hasScore && (
-                        <p className={`text-3xl font-black mt-2 ${localWon ? 'text-orange-400' : 'text-zinc-500'}`}>
-                          {localScore}
-                        </p>
-                      )}
-                    </div>
-
-                    {/* VS Badge */}
-                    <div className="flex-shrink-0 flex flex-col items-center justify-center w-10">
-                      <div className="w-8 h-8 rounded-full bg-zinc-800 border border-zinc-700 flex items-center justify-center text-xs font-bold text-zinc-500 z-10 shadow-lg">
-                        VS
+                  return (
+                    <div 
+                      key={match.MatchID} 
+                      className="group flex items-center p-3 hover:bg-zinc-800/50 transition-colors cursor-pointer relative"
+                      onClick={() => openMatchDetails(match)}
+                    >
+                      {/* Left: Time / Status */}
+                      <div className="w-16 flex-shrink-0 text-center pr-4 border-r border-zinc-800">
+                        {hasScore ? (
+                          <span className="text-xs font-bold text-zinc-500">FT</span>
+                        ) : (
+                          <span className="text-xs font-medium text-zinc-400">{timeStr}</span>
+                        )}
                       </div>
-                      {hasScore && <div className="h-full w-px bg-zinc-800 absolute top-0 bottom-0 -z-0"></div>}
-                    </div>
 
-                    {/* Visitor Team */}
-                    <div className="flex-1 text-center">
-                      <p className={`font-bold text-lg leading-tight line-clamp-2 ${visitorWon ? 'text-zinc-100' : 'text-zinc-300'}`}>
-                        {visitorTeam}
-                      </p>
-                      {hasScore && (
-                        <p className={`text-3xl font-black mt-2 ${visitorWon ? 'text-orange-400' : 'text-zinc-500'}`}>
-                          {visitorScore}
-                        </p>
+                      {/* Center: Teams */}
+                      <div className="flex-1 flex flex-col justify-center px-4 space-y-2 py-1">
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                                <div className="w-5 h-5 rounded bg-zinc-800 flex items-center justify-center text-[10px] text-zinc-500">🛡️</div>
+                                <span className={`text-sm font-medium ${localWon ? 'text-zinc-100 font-bold' : 'text-zinc-300'}`}>{localTeam}</span>
+                            </div>
+                            {hasScore && <span className={`text-sm font-bold ${localWon ? 'text-orange-400' : 'text-zinc-300'}`}>{localScore}</span>}
+                        </div>
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                                <div className="w-5 h-5 rounded bg-zinc-800 flex items-center justify-center text-[10px] text-zinc-500">🛡️</div>
+                                <span className={`text-sm font-medium ${visitorWon ? 'text-zinc-100 font-bold' : 'text-zinc-300'}`}>{visitorTeam}</span>
+                            </div>
+                            {hasScore && <span className={`text-sm font-bold ${visitorWon ? 'text-orange-400' : 'text-zinc-300'}`}>{visitorScore}</span>}
+                        </div>
+                      </div>
+
+                      {/* Admin Actions */}
+                      {isAdmin && (
+                        <div className="absolute right-4 top-1/2 -translate-y-1/2 flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <button onClick={(e) => openModal(match, e)} className="p-1 rounded bg-zinc-800 text-orange-400 hover:bg-zinc-700 text-xs shadow">✏️</button>
+                          <button onClick={(e) => handleDelete(match.MatchID, e)} className="p-1 rounded bg-zinc-800 text-red-500 hover:bg-zinc-700 text-xs shadow">🗑️</button>
+                        </div>
                       )}
                     </div>
-                  </div>
-                </div>
-              </Card>
-            );
-          })}
+                  );
+                })}
+              </div>
+            </div>
+          ))}
         </div>
       )}
 
@@ -309,66 +315,6 @@ const MatchList = () => {
             </Button>
           </div>
         </form>
-      </Modal>
-
-      {/* View Match Details Modal */}
-      <Modal 
-        isOpen={!!viewingMatch} 
-        onClose={() => setViewingMatch(null)} 
-        title={`Detalles del Partido #${viewingMatch?.MatchID}`}
-      >
-        {viewingMatch && (
-          <div className="space-y-6">
-            <div className="flex justify-between items-center bg-zinc-800/50 p-6 rounded-xl border border-zinc-700/50 shadow-inner">
-               <div className="text-center w-2/5">
-                 <p className="font-bold text-zinc-100 text-lg leading-tight">{getTeamName(viewingMatch.LocalTeamID) || 'Local'}</p>
-                 <p className="text-5xl font-black text-orange-400 mt-3 drop-shadow-md">{viewingMatch.LocalPoints ?? '-'}</p>
-               </div>
-               <div className="text-center w-1/5">
-                 <span className="text-xs font-bold text-zinc-500 bg-zinc-800 px-3 py-1.5 rounded-full border border-zinc-700/50">VS</span>
-               </div>
-               <div className="text-center w-2/5">
-                 <p className="font-bold text-zinc-100 text-lg leading-tight">{getTeamName(viewingMatch.VisitorTeamID) || 'Visitante'}</p>
-                 <p className="text-5xl font-black text-orange-400 mt-3 drop-shadow-md">{viewingMatch.VisitorPoints ?? '-'}</p>
-               </div>
-            </div>
-
-            <div className="bg-zinc-800/30 rounded-xl p-5 border border-zinc-800/80 space-y-4">
-              <div className="flex justify-between items-center border-b border-zinc-800/50 pb-3">
-                <span className="text-zinc-500 text-sm">Fecha</span>
-                <span className="text-zinc-200 font-semibold">
-                  {viewingMatch.MatchDate ? new Date(viewingMatch.MatchDate).toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) : 'No asignada'}
-                </span>
-              </div>
-              <div className="flex justify-between items-center border-b border-zinc-800/50 pb-3">
-                <span className="text-zinc-500 text-sm">Hora</span>
-                <span className="text-zinc-200 font-semibold">
-                  {viewingMatch.MatchTime && !viewingMatch.MatchTime.startsWith('1970') && !viewingMatch.MatchTime.startsWith('0001') ? new Date(viewingMatch.MatchTime).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }) : 'No asignada'}
-                </span>
-              </div>
-              <div className="flex justify-between items-center border-b border-zinc-800/50 pb-3">
-                <span className="text-zinc-500 text-sm">Sede (Ubicación)</span>
-                <span className="text-zinc-200 font-semibold">
-                  {viewingMatch.Location || 'A confirmar'}
-                </span>
-              </div>
-              <div className="flex justify-between items-center pt-1">
-                <span className="text-zinc-500 text-sm">Estado</span>
-                <span className={`text-xs font-bold px-2 py-1 rounded ${
-                  viewingMatch.LocalPoints !== null && viewingMatch.LocalPoints !== undefined 
-                    ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' 
-                    : 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
-                }`}>
-                  {viewingMatch.Status || (viewingMatch.LocalPoints !== null ? 'Finalizado' : 'Pendiente')}
-                </span>
-              </div>
-            </div>
-
-            <div className="flex justify-end pt-2">
-              <Button variant="ghost" onClick={() => setViewingMatch(null)}>Cerrar</Button>
-            </div>
-          </div>
-        )}
       </Modal>
     </div>
   );
