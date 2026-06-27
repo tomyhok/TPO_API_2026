@@ -63,10 +63,10 @@ const LoginForm = ({ onLoginSuccess }) => {
       <div className="w-full max-w-md relative z-10">
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold tracking-tight text-gradient mb-2">Bienvenido</h1>
-          <p className="text-zinc-400">Ingresa tus credenciales para continuar</p>
+          <p className="text-stone-600">Ingresa tus credenciales para continuar</p>
         </div>
 
-        <Card className="!p-8 backdrop-blur-xl bg-zinc-900/60 border-zinc-700/50 shadow-2xl">
+        <Card className="!p-8 backdrop-blur-xl bg-stone-100/60 border-stone-300/50 shadow-2xl">
           <form onSubmit={handleLogin} className="space-y-6">
             <Alert message={error} />
             

@@ -1,11 +1,14 @@
 import { useState, useEffect } from 'react';
 import { apiRequest } from '../../services/api';
 import { useSeason } from '../../contexts/SeasonContext';
+import { useCategories } from '../../contexts/CategoryContext';
 
 const StandingsWidget = () => {
   const [standings, setStandings] = useState([]);
   const [loading, setLoading] = useState(true);
   const { selectedSeasonId } = useSeason();
+  const { categories, categoriesLoading } = useCategories();
+  const [activeCategoryId, setActiveCategoryId] = useState(null);
 
   useEffect(() => {
     if (!selectedSeasonId) return;
@@ -25,15 +28,21 @@ const StandingsWidget = () => {
     fetchStandings();
   }, [selectedSeasonId]);
 
-  if (loading) {
+  useEffect(() => {
+    if (!activeCategoryId && categories && categories.length > 0) {
+      setActiveCategoryId(categories[0].CategoryID);
+    }
+  }, [categories, activeCategoryId]);
+
+  if (loading || categoriesLoading) {
     return (
       <div className="animate-pulse space-y-4">
-        <div className="h-4 bg-zinc-800 rounded w-1/3 mb-6"></div>
+        <div className="h-4 bg-stone-200 rounded w-1/3 mb-6"></div>
         {[1,2,3,4,5,6].map(i => (
           <div key={i} className="flex gap-4">
-            <div className="h-6 w-6 bg-zinc-800 rounded"></div>
-            <div className="h-6 flex-1 bg-zinc-800 rounded"></div>
-            <div className="h-6 w-8 bg-zinc-800 rounded"></div>
+            <div className="h-6 w-6 bg-stone-200 rounded"></div>
+            <div className="h-6 flex-1 bg-stone-200 rounded"></div>
+            <div className="h-6 w-8 bg-stone-200 rounded"></div>
           </div>
         ))}
       </div>
@@ -42,34 +51,55 @@ const StandingsWidget = () => {
 
   if (standings.length === 0) return null;
 
+  const filteredStandings = standings.filter(t => t.CategoryID === activeCategoryId);
+
   return (
     <div className="flex flex-col h-full animate-fade-in">
-      <h3 className="font-bold text-lg text-zinc-100 mb-4 border-b border-zinc-800 pb-2">Clasificación</h3>
+      <div className="flex justify-between items-center mb-4 border-b border-stone-200 pb-2">
+        <h3 className="font-bold text-lg text-stone-900">Clasificación</h3>
+        {categories && categories.length > 0 && (
+          <select 
+            className="bg-stone-100 border border-stone-300 text-stone-700 text-xs rounded-md px-2 py-1 focus:border-orange-500/50 appearance-none max-w-[120px]"
+            value={activeCategoryId || ''}
+            onChange={(e) => setActiveCategoryId(Number(e.target.value))}
+          >
+            {categories.map(c => (
+              <option key={c.CategoryID} value={c.CategoryID}>{c.Name}</option>
+            ))}
+          </select>
+        )}
+      </div>
+      
       <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar">
         <table className="w-full text-sm text-left">
-          <thead className="text-xs text-zinc-500 uppercase border-b border-zinc-800/50">
+          <thead className="text-xs text-stone-500 uppercase border-b border-stone-200/50">
             <tr>
               <th className="py-2 font-medium w-8 text-center">#</th>
               <th className="py-2 font-medium">Equipo</th>
               <th className="py-2 font-medium text-right w-12">PTS</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-zinc-800/30">
-            {standings.map((team, index) => (
-              <tr key={team.TeamID} className="hover:bg-zinc-800/30 transition-colors group">
+          <tbody className="divide-y divide-stone-200/30">
+            {filteredStandings.map((team, index) => (
+              <tr key={team.TeamID} className="hover:bg-stone-200/30 transition-colors group">
                 <td className="py-2.5 text-center">
                   <span className={`text-xs font-bold ${
-                    index < 3 ? 'text-orange-400' : 'text-zinc-500'
+                    index < 3 ? 'text-orange-400' : 'text-stone-500'
                   }`}>{index + 1}</span>
                 </td>
-                <td className="py-2.5 font-semibold text-zinc-300 group-hover:text-zinc-100 truncate max-w-[150px]">
+                <td className="py-2.5 font-semibold text-stone-700 group-hover:text-stone-900 truncate max-w-[150px]" title={team.Equipo || team.TeamName}>
                   {team.Equipo || team.TeamName}
                 </td>
-                <td className="py-2.5 text-right font-bold text-zinc-200">
+                <td className="py-2.5 text-right font-bold text-stone-800">
                   {team.Puntos ?? '-'}
                 </td>
               </tr>
             ))}
+            {filteredStandings.length === 0 && (
+              <tr>
+                <td colSpan="3" className="py-8 text-center text-stone-500 text-sm">No hay equipos en esta categoría</td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>

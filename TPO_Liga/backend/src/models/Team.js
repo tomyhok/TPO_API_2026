@@ -1,15 +1,19 @@
 const { sql, poolPromise } = require('../config/db');
 
 class TeamModel {
-  static async create(Name, Coach, seasonId) {
+  static async create(Name, Coach, LogoURL, seasonId, StadiumName) {
     const pool = await poolPromise;
     const transaction = new sql.Transaction(pool);
     await transaction.begin();
     try {
-      const result = await transaction.request()
+      const request = transaction.request()
         .input('Name', sql.NVarChar, Name)
         .input('Coach', sql.NVarChar, Coach)
-        .query('INSERT INTO Teams (Name, Coach) OUTPUT INSERTED.* VALUES (@Name, @Coach)');
+        .input('LogoURL', sql.NVarChar, LogoURL || null)
+        .input('StadiumName', sql.NVarChar, StadiumName || null);
+        
+      var result = await request.query('INSERT INTO Teams (Name, Coach, LogoURL, StadiumName) OUTPUT INSERTED.* VALUES (@Name, @Coach, @LogoURL, @StadiumName)');
+      
       const newTeam = result.recordset[0];
 
       let targetSeasonId = seasonId;
@@ -82,25 +86,31 @@ class TeamModel {
     if (seasonId) {
       request.input('SeasonID', sql.Int, seasonId);
       pQuery = `
-        SELECT p.* FROM Players p
+        SELECT p.PlayerID, p.FirstName, p.LastName, p.CategoryID, c.Name AS CategoryName, ps.TeamID
+        FROM Players p
+        INNER JOIN Categories c ON p.CategoryID = c.CategoryID
         INNER JOIN PlayerSeasons ps ON p.PlayerID = ps.PlayerID
         WHERE ps.TeamID = @TeamID AND ps.SeasonID = @SeasonID
       `;
       mQuery = `
-        SELECT * FROM Matches 
-        WHERE (LocalTeamID = @TeamID OR VisitorTeamID = @TeamID) AND SeasonID = @SeasonID
-        ORDER BY MatchDate DESC
+        SELECT m.*, c.Name AS CategoryName FROM Matches m
+        INNER JOIN Categories c ON m.CategoryID = c.CategoryID
+        WHERE (m.LocalTeamID = @TeamID OR m.VisitorTeamID = @TeamID) AND m.SeasonID = @SeasonID
+        ORDER BY m.MatchDate DESC
       `;
     } else {
       // Default to active season
       pQuery = `
-        SELECT p.* FROM Players p
+        SELECT p.PlayerID, p.FirstName, p.LastName, p.CategoryID, c.Name AS CategoryName, ps.TeamID
+        FROM Players p
+        INNER JOIN Categories c ON p.CategoryID = c.CategoryID
         INNER JOIN PlayerSeasons ps ON p.PlayerID = ps.PlayerID
         INNER JOIN Seasons s ON ps.SeasonID = s.SeasonID
         WHERE ps.TeamID = @TeamID AND s.IsActive = 1
       `;
       mQuery = `
-        SELECT m.* FROM Matches m
+        SELECT m.*, c.Name AS CategoryName FROM Matches m
+        INNER JOIN Categories c ON m.CategoryID = c.CategoryID
         INNER JOIN Seasons s ON m.SeasonID = s.SeasonID
         WHERE (m.LocalTeamID = @TeamID OR m.VisitorTeamID = @TeamID) AND s.IsActive = 1
         ORDER BY m.MatchDate DESC
@@ -123,18 +133,26 @@ class TeamModel {
     return team;
   }
 
-  static async update(id, Name, Coach) {
+  static async update(id, Name, Coach, LogoURL, StadiumName) {
     const pool = await poolPromise;
     const request = pool.request().input('TeamID', sql.Int, id);
     
     let updates = [];
-    if (Name) {
+    if (Name !== undefined) {
       request.input('Name', sql.NVarChar, Name);
       updates.push('Name = @Name');
     }
-    if (Coach) {
+    if (Coach !== undefined) {
       request.input('Coach', sql.NVarChar, Coach);
       updates.push('Coach = @Coach');
+    }
+    if (LogoURL !== undefined) {
+      request.input('LogoURL', sql.NVarChar, LogoURL);
+      updates.push('LogoURL = @LogoURL');
+    }
+    if (StadiumName !== undefined) {
+      request.input('StadiumName', sql.NVarChar, StadiumName);
+      updates.push('StadiumName = @StadiumName');
     }
     if (updates.length === 0) return null;
     

@@ -2,11 +2,11 @@ const TeamModel = require('../models/Team');
 
 exports.createTeam = async (req, res) => {
   try {
-    const { Name, Coach, seasonId } = req.body;
+    const { Name, Coach, LogoURL, seasonId, StadiumName } = req.body;
     if (!Name || !Coach) {
       return res.status(400).json({ message: 'Name and Coach are required.' });
     }
-    const team = await TeamModel.create(Name, Coach, seasonId);
+    const team = await TeamModel.create(Name, Coach, LogoURL, seasonId, StadiumName);
     res.status(201).json(team);
   } catch (error) {
     console.error('Error creating team:', error);
@@ -43,11 +43,11 @@ exports.getTeamById = async (req, res) => {
 exports.updateTeam = async (req, res) => {
   try {
     const { id } = req.params;
-    const { Name, Coach } = req.body;
-    if (!Name && !Coach) {
-      return res.status(400).json({ message: 'At least Name or Coach must be provided for update.' });
+    const { Name, Coach, LogoURL, StadiumName } = req.body;
+    if (!Name && !Coach && LogoURL === undefined && StadiumName === undefined) {
+      return res.status(400).json({ message: 'At least Name, Coach, LogoURL or StadiumName must be provided for update.' });
     }
-    const updatedTeam = await TeamModel.update(id, Name, Coach);
+    const updatedTeam = await TeamModel.update(id, Name, Coach, LogoURL, StadiumName);
     if (!updatedTeam) {
       return res.status(404).json({ message: 'Team not found.' });
     }

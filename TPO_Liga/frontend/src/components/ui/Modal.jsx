@@ -18,15 +18,15 @@ export default function Modal({ isOpen, onClose, title, children }) {
   return createPortal(
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
       <div 
-        className="absolute inset-0 bg-black/60 backdrop-blur-sm animate-fade-in" 
+        className="absolute inset-0 bg-stone-900/40 backdrop-blur-sm animate-fade-in" 
         onClick={onClose}
       ></div>
-      <div className="relative bg-zinc-900 border border-zinc-700/50 rounded-2xl w-full max-w-md shadow-2xl animate-slide-up overflow-hidden">
-        <div className="flex items-center justify-between p-6 border-b border-zinc-800">
-          <h2 className="text-xl font-bold text-zinc-100">{title}</h2>
+      <div className="relative bg-stone-100 border border-stone-300/50 rounded-2xl w-full max-w-md shadow-2xl animate-slide-up overflow-hidden">
+        <div className="flex items-center justify-between p-6 border-b border-stone-200">
+          <h2 className="text-xl font-bold text-stone-900">{title}</h2>
           <button 
             onClick={onClose}
-            className="text-zinc-500 hover:text-zinc-300 transition-colors"
+            className="text-stone-500 hover:text-stone-700 transition-colors"
           >
             ✕
           </button>

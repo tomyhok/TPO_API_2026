@@ -4,6 +4,7 @@ import { BrowserRouter } from 'react-router-dom';
 import './index.css';
 import App from './App.jsx';
 import { SeasonProvider } from './contexts/SeasonContext';
+import { CategoryProvider } from './contexts/CategoryContext';
 
 import { RightPanelProvider } from './contexts/RightPanelContext';
 
@@ -11,9 +12,11 @@ createRoot(document.getElementById('root')).render(
   <StrictMode>
     <BrowserRouter>
       <SeasonProvider>
-        <RightPanelProvider>
-          <App />
-        </RightPanelProvider>
+        <CategoryProvider>
+          <RightPanelProvider>
+            <App />
+          </RightPanelProvider>
+        </CategoryProvider>
       </SeasonProvider>
     </BrowserRouter>
   </StrictMode>,

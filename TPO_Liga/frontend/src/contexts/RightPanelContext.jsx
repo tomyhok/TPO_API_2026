@@ -13,6 +13,7 @@ export function RightPanelProvider({ children }) {
 
   const closePanel = () => {
     setIsOpen(false);
+    setPanelContent(null);
   };
 
   return (

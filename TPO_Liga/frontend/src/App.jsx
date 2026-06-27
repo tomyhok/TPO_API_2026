@@ -3,6 +3,7 @@ import TeamList from './components/TeamList';
 import MatchList from './components/MatchList';
 import PlayerList from './components/PlayerList';
 import SeasonList from './components/SeasonList';
+import CategoryList from './components/CategoryList';
 import Standings from './components/Standings';
 import StandingsWidget from './components/widgets/StandingsWidget';
 import LoginForm from './components/LoginForm';
@@ -16,10 +17,10 @@ import { useRightPanel } from './contexts/RightPanelContext';
 const navItems = [
   { to: '/', label: 'Inicio' },
   { to: '/standings', label: 'Posiciones' },
-  { to: '/matches', label: 'Partidos' },
   { to: '/teams', label: 'Equipos' },
   { to: '/players', label: 'Jugadores' },
   { to: '/seasons', label: 'Temporadas', adminOnly: true },
+  { to: '/categories', label: 'Categorías', adminOnly: true },
   { to: '/login', label: 'Login', guestOnly: true },
 ];
 
@@ -42,12 +43,12 @@ function Layout() {
   };
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col lg:flex-row font-sans selection:bg-orange-500/30">
+    <div className="min-h-screen bg-stone-50 text-stone-900 flex flex-col lg:flex-row font-sans selection:bg-orange-500/30">
       
       {/* Mobile Header */}
       <header className="lg:hidden glass-panel sticky top-0 z-50 flex flex-col gap-2 px-6 py-4">
         <div className="flex items-center justify-between">
-          <h1 className="text-xl font-bold tracking-tight text-gradient">{token ? 'YBL Admin' : 'YBL'}</h1>
+          <h1 className="text-xl font-bold tracking-tight text-gradient">{token ? 'LNB Admin' : 'LNB'}</h1>
           {token && (
             <Button variant="ghost" onClick={onLogout} className="!px-3 !py-1 text-xs">
               Salir
@@ -57,7 +58,7 @@ function Layout() {
         {/* Mobile Season Selector */}
         {!seasonLoading && seasons.length > 0 && (
           <select 
-            className="w-full bg-zinc-900/50 border border-zinc-700/50 text-zinc-300 text-xs rounded-lg px-2 py-1.5 focus:border-orange-500/50 appearance-none text-center"
+            className="w-full bg-stone-100/50 border border-stone-300/50 text-stone-700 text-xs rounded-lg px-2 py-1.5 focus:border-orange-500/50 appearance-none text-center"
             value={selectedSeasonId || ''}
             onChange={(e) => setSelectedSeasonId(Number(e.target.value))}
           >
@@ -71,21 +72,21 @@ function Layout() {
       </header>
 
       {/* Sidebar (Desktop) */}
-      <aside className="lg:w-64 lg:h-screen lg:sticky lg:top-0 lg:flex lg:flex-col glass-panel border-r border-zinc-800/50 hidden lg:block flex-shrink-0">
+      <aside className="lg:w-64 lg:h-screen lg:sticky lg:top-0 lg:flex lg:flex-col glass-panel border-r border-stone-200/50 hidden lg:block flex-shrink-0">
         <div className="p-8 pb-4">
           <h1 className="text-2xl font-bold tracking-tight text-gradient leading-tight">
-            Youth Basketball<br />League
+            Liga<br />Juvenil
           </h1>
         </div>
         
         {/* Desktop Season Selector */}
         <div className="px-6 mb-6">
           {seasonLoading ? (
-            <div className="h-10 bg-zinc-800/50 animate-pulse rounded-xl"></div>
+            <div className="h-10 bg-stone-200/50 animate-pulse rounded-xl"></div>
           ) : seasons.length > 0 ? (
             <div className="relative">
               <select 
-                className="w-full bg-zinc-900/80 border border-zinc-700/50 text-zinc-300 text-sm font-semibold rounded-xl pl-4 pr-10 py-2.5 focus:border-orange-500/50 focus:ring-1 focus:ring-orange-500/50 transition-colors cursor-pointer appearance-none shadow-inner"
+                className="w-full bg-stone-100/80 border border-stone-300/50 text-stone-700 text-sm font-semibold rounded-xl pl-4 pr-10 py-2.5 focus:border-orange-500/50 focus:ring-1 focus:ring-orange-500/50 transition-colors cursor-pointer appearance-none shadow-inner"
                 value={selectedSeasonId || ''}
                 onChange={(e) => setSelectedSeasonId(Number(e.target.value))}
               >
@@ -112,7 +113,7 @@ function Layout() {
                   `flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all duration-300 ${
                     isActive
                       ? 'bg-gradient-to-r from-orange-500/20 to-amber-500/10 text-orange-300 border border-orange-500/20 shadow-lg shadow-orange-500/5'
-                      : 'text-zinc-400 hover:bg-zinc-800/50 hover:text-zinc-200'
+                      : 'text-stone-600 hover:bg-stone-200/50 hover:text-stone-800'
                   }`
                 }
               >
@@ -137,10 +138,10 @@ function Layout() {
           <Routes>
             <Route path="/" element={<HomePage />} />
             <Route path="/standings" element={<Standings />} />
-            <Route path="/matches" element={<MatchList />} />
             <Route path="/teams" element={<TeamList />} />
             <Route path="/players" element={<PlayerList />} />
             <Route path="/seasons" element={<SeasonList />} />
+            <Route path="/categories" element={<CategoryList />} />
             <Route path="/login" element={<LoginForm onLoginSuccess={() => setToken(getToken())} />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
@@ -148,20 +149,32 @@ function Layout() {
       </main>
 
       {/* Right Panel (Desktop) */}
-      <aside className="hidden xl:flex xl:w-80 2xl:w-96 border-l border-zinc-800/50 bg-zinc-950/50 h-screen sticky top-0 flex-col overflow-y-auto flex-shrink-0">
-        <div className="p-6 h-full">
-          {panelContent ? panelContent : <StandingsWidget />}
+      <aside className="hidden xl:flex xl:w-80 2xl:w-96 border-l border-stone-200/50 bg-stone-50/50 h-screen sticky top-0 flex-col overflow-y-auto flex-shrink-0">
+        <div className="p-6 h-full flex flex-col">
+          {panelContent ? (
+            <>
+              <div className="flex justify-between items-center mb-6 pb-2 border-b border-stone-200/50">
+                <h3 className="font-bold text-stone-900 text-lg">Detalles</h3>
+                <Button variant="ghost" onClick={closePanel} className="!p-2 text-stone-600 hover:text-stone-900 bg-stone-100/50 hover:bg-stone-200 rounded-lg transition-colors">✕</Button>
+              </div>
+              <div className="flex-1">
+                {panelContent}
+              </div>
+            </>
+          ) : (
+            <StandingsWidget />
+          )}
         </div>
       </aside>
 
       {/* Right Panel (Mobile Overlay) */}
       {isOpen && (
         <div className="fixed inset-0 z-50 flex justify-end xl:hidden">
-          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={closePanel}></div>
-          <div className="relative w-full max-w-md bg-zinc-950 border-l border-zinc-800 h-full overflow-y-auto animate-slide-in-right shadow-2xl">
-            <div className="sticky top-0 bg-zinc-900/90 backdrop-blur border-b border-zinc-800 p-4 flex justify-between items-center z-10">
-              <h3 className="font-bold text-zinc-100">Detalles</h3>
-              <Button variant="ghost" onClick={closePanel} className="!p-2 text-zinc-400 hover:text-white">✕</Button>
+          <div className="absolute inset-0 bg-stone-900/40 backdrop-blur-sm" onClick={closePanel}></div>
+          <div className="relative w-full max-w-md bg-stone-50 border-l border-stone-200 h-full overflow-y-auto animate-slide-in-right shadow-2xl">
+            <div className="sticky top-0 bg-stone-100/90 backdrop-blur border-b border-stone-200 p-4 flex justify-between items-center z-10">
+              <h3 className="font-bold text-stone-900">Detalles</h3>
+              <Button variant="ghost" onClick={closePanel} className="!p-2 text-stone-600 hover:text-stone-900">✕</Button>
             </div>
             <div className="p-4">
               {panelContent}
@@ -181,7 +194,7 @@ function Layout() {
               to={item.to}
               className={({ isActive }) =>
                 `flex flex-col items-center gap-1 p-2 rounded-lg transition-colors ${
-                  isActive ? 'text-orange-400' : 'text-zinc-500 hover:text-zinc-300'
+                  isActive ? 'text-orange-400' : 'text-stone-500 hover:text-stone-700'
                 }`
               }
             >

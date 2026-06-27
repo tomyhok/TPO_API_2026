@@ -16,17 +16,20 @@ const TeamList = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const isAdmin = !!getToken();
-  const { selectedSeasonId } = useSeason();
+  const { selectedSeasonId, loading: seasonLoading } = useSeason();
   const { openPanel } = useRightPanel();
   
   // Modal & Form State
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingTeam, setEditingTeam] = useState(null);
-  const [formData, setFormData] = useState({ Name: '', Coach: '' });
+  const [formData, setFormData] = useState({ Name: '', Coach: '', LogoURL: '', StadiumName: '' });
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    if (!selectedSeasonId) return;
+    if (!selectedSeasonId) {
+      if (!seasonLoading) setLoading(false);
+      return;
+    }
 
     const fetchTeams = async () => {
       setLoading(true);
@@ -42,7 +45,7 @@ const TeamList = () => {
     };
 
     fetchTeams();
-  }, [selectedSeasonId]);
+  }, [selectedSeasonId, seasonLoading]);
 
   const handleViewTeam = (team) => {
     openPanel(<TeamDetailsWidget team={team} />);
@@ -51,10 +54,10 @@ const TeamList = () => {
   const openModal = (team = null) => {
     if (team) {
       setEditingTeam(team);
-      setFormData({ Name: team.TeamName || team.Name || '', Coach: team.Coach || '' });
+      setFormData({ Name: team.TeamName || team.Name || '', Coach: team.Coach || '', LogoURL: team.LogoURL || '', StadiumName: team.StadiumName || '' });
     } else {
       setEditingTeam(null);
-      setFormData({ Name: '', Coach: '' });
+      setFormData({ Name: '', Coach: '', LogoURL: '', StadiumName: '' });
     }
     setIsModalOpen(true);
   };
@@ -118,7 +121,7 @@ const TeamList = () => {
       ) : teams.length === 0 ? (
         <Card className="text-center py-12">
           <div className="text-4xl mb-4 opacity-50">🛡️</div>
-          <p className="text-lg text-zinc-400">No hay equipos cargados actualmente.</p>
+          <p className="text-lg text-stone-600">No hay equipos cargados actualmente.</p>
         </Card>
       ) : (
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3">
@@ -144,26 +147,32 @@ const TeamList = () => {
                 
                 {isAdmin && (
                   <div className="absolute top-3 right-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity z-20">
-                    <button onClick={(e) => { e.stopPropagation(); openModal(team); }} className="p-1.5 rounded-lg bg-zinc-800/80 text-orange-400 hover:bg-zinc-700 hover:text-orange-300 transition-colors backdrop-blur-sm border border-zinc-700/50">
+                    <button onClick={(e) => { e.stopPropagation(); openModal(team); }} className="p-1.5 rounded-lg bg-stone-200/80 text-orange-400 hover:bg-stone-300 hover:text-orange-300 transition-colors backdrop-blur-sm border border-stone-300/50">
                       ✏️
                     </button>
-                    <button onClick={(e) => { e.stopPropagation(); handleDelete(team.TeamID); }} className="p-1.5 rounded-lg bg-zinc-800/80 text-red-500 hover:bg-zinc-700 hover:text-red-400 transition-colors backdrop-blur-sm border border-zinc-700/50">
+                    <button onClick={(e) => { e.stopPropagation(); handleDelete(team.TeamID); }} className="p-1.5 rounded-lg bg-stone-200/80 text-red-500 hover:bg-stone-300 hover:text-red-400 transition-colors backdrop-blur-sm border border-stone-300/50">
                       🗑️
                     </button>
                   </div>
                 )}
                 
                 <div className="relative z-10 flex items-start gap-4">
-                  <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-zinc-800/80 border border-zinc-700 flex items-center justify-center text-xl shadow-lg group-hover:scale-110 transition-transform">
-                    🛡️
-                  </div>
+                  {team.LogoURL ? (
+                    <img src={team.LogoURL} alt={teamName} className="flex-shrink-0 w-12 h-12 rounded-xl object-contain bg-stone-200/80 border border-stone-300 shadow-lg group-hover:scale-110 transition-transform" />
+                  ) : (
+                    <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-stone-200/80 border border-stone-300 flex items-center justify-center text-xl shadow-lg group-hover:scale-110 transition-transform">
+                      🛡️
+                    </div>
+                  )}
                   <div>
-                    <h3 className="font-bold text-lg text-zinc-100 group-hover:text-orange-300 transition-colors leading-tight" title={teamName}>
+                    <h3 className="font-bold text-lg text-stone-900 group-hover:text-orange-300 transition-colors leading-tight" title={teamName}>
                       {teamName}
                     </h3>
-                    <p className="text-sm font-medium text-zinc-500 mt-1">
-                      ID: <span className="text-orange-400/80">{team.TeamID}</span>
-                    </p>
+                    {team.Coach && (
+                      <p className="text-sm font-medium text-stone-500 mt-1 flex items-center gap-1">
+                        <span className="opacity-70">DT:</span> {team.Coach}
+                      </p>
+                    )}
                   </div>
                 </div>
               </Card>
@@ -189,6 +198,18 @@ const TeamList = () => {
             value={formData.Coach} 
             onChange={e => setFormData({...formData, Coach: e.target.value})} 
             required 
+          />
+          <Input 
+            label="URL del Escudo (Opcional)" 
+            type="url"
+            placeholder="https://ejemplo.com/logo.png"
+            value={formData.LogoURL} 
+            onChange={e => setFormData({...formData, LogoURL: e.target.value})} 
+          />
+          <Input 
+            label="Estadio Sede (Opcional)" 
+            value={formData.StadiumName} 
+            onChange={e => setFormData({...formData, StadiumName: e.target.value})} 
           />
           <div className="flex justify-end gap-3 mt-6">
             <Button variant="ghost" type="button" onClick={() => setIsModalOpen(false)}>Cancelar</Button>

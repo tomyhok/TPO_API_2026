@@ -1,7 +1,7 @@
 const { sql, poolPromise } = require('../config/db');
 
 class PlayerModel {
-  static async create(TeamID, FirstName, LastName, Category, seasonId) {
+  static async create(TeamID, FirstName, LastName, CategoryID, seasonId) {
     const pool = await poolPromise;
     const transaction = new sql.Transaction(pool);
     await transaction.begin();
@@ -12,8 +12,8 @@ class PlayerModel {
         .input('TeamID', sql.Int, TeamID) // keep legacy for now
         .input('FirstName', sql.NVarChar, FirstName)
         .input('LastName', sql.NVarChar, LastName)
-        .input('Category', sql.NVarChar, Category || '')
-        .query('INSERT INTO Players (TeamID, FirstName, LastName, Category) OUTPUT INSERTED.* VALUES (@TeamID, @FirstName, @LastName, @Category)');
+        .input('CategoryID', sql.Int, CategoryID)
+        .query('INSERT INTO Players (TeamID, FirstName, LastName, CategoryID) OUTPUT INSERTED.* VALUES (@TeamID, @FirstName, @LastName, @CategoryID)');
       const newPlayer = result.recordset[0];
 
       // 2. Resolve season
@@ -48,15 +48,17 @@ class PlayerModel {
     if (seasonId) {
        request.input('SeasonID', sql.Int, seasonId);
        query = `
-         SELECT p.PlayerID, p.FirstName, p.LastName, p.Category, ps.TeamID
+         SELECT p.PlayerID, p.FirstName, p.LastName, p.CategoryID, c.Name AS CategoryName, ps.TeamID
          FROM Players p
+         INNER JOIN Categories c ON p.CategoryID = c.CategoryID
          INNER JOIN PlayerSeasons ps ON p.PlayerID = ps.PlayerID
          WHERE ps.SeasonID = @SeasonID
        `;
     } else {
        query = `
-         SELECT p.PlayerID, p.FirstName, p.LastName, p.Category, ps.TeamID
+         SELECT p.PlayerID, p.FirstName, p.LastName, p.CategoryID, c.Name AS CategoryName, ps.TeamID
          FROM Players p
+         INNER JOIN Categories c ON p.CategoryID = c.CategoryID
          INNER JOIN PlayerSeasons ps ON p.PlayerID = ps.PlayerID
          INNER JOIN Seasons s ON ps.SeasonID = s.SeasonID
          WHERE s.IsActive = 1
@@ -73,15 +75,17 @@ class PlayerModel {
     if (seasonId) {
        request.input('SeasonID', sql.Int, seasonId);
        query = `
-         SELECT p.PlayerID, p.FirstName, p.LastName, p.Category, ps.TeamID
+         SELECT p.PlayerID, p.FirstName, p.LastName, p.CategoryID, c.Name AS CategoryName, ps.TeamID
          FROM Players p
+         INNER JOIN Categories c ON p.CategoryID = c.CategoryID
          LEFT JOIN PlayerSeasons ps ON p.PlayerID = ps.PlayerID AND ps.SeasonID = @SeasonID
          WHERE p.PlayerID = @PlayerID
        `;
     } else {
        query = `
-         SELECT p.PlayerID, p.FirstName, p.LastName, p.Category, ps.TeamID
+         SELECT p.PlayerID, p.FirstName, p.LastName, p.CategoryID, c.Name AS CategoryName, ps.TeamID
          FROM Players p
+         INNER JOIN Categories c ON p.CategoryID = c.CategoryID
          LEFT JOIN PlayerSeasons ps ON p.PlayerID = ps.PlayerID
          LEFT JOIN Seasons s ON ps.SeasonID = s.SeasonID
          WHERE p.PlayerID = @PlayerID AND (s.IsActive = 1 OR s.IsActive IS NULL)
@@ -98,15 +102,17 @@ class PlayerModel {
     if (seasonId) {
        request.input('SeasonID', sql.Int, seasonId);
        query = `
-         SELECT p.PlayerID, p.FirstName, p.LastName, p.Category, ps.TeamID
+         SELECT p.PlayerID, p.FirstName, p.LastName, p.CategoryID, c.Name AS CategoryName, ps.TeamID
          FROM Players p
+         INNER JOIN Categories c ON p.CategoryID = c.CategoryID
          INNER JOIN PlayerSeasons ps ON p.PlayerID = ps.PlayerID
          WHERE ps.TeamID = @TeamID AND ps.SeasonID = @SeasonID
        `;
     } else {
        query = `
-         SELECT p.PlayerID, p.FirstName, p.LastName, p.Category, ps.TeamID
+         SELECT p.PlayerID, p.FirstName, p.LastName, p.CategoryID, c.Name AS CategoryName, ps.TeamID
          FROM Players p
+         INNER JOIN Categories c ON p.CategoryID = c.CategoryID
          INNER JOIN PlayerSeasons ps ON p.PlayerID = ps.PlayerID
          INNER JOIN Seasons s ON ps.SeasonID = s.SeasonID
          WHERE ps.TeamID = @TeamID AND s.IsActive = 1
@@ -116,7 +122,7 @@ class PlayerModel {
     return result.recordset;
   }
 
-  static async update(id, TeamID, FirstName, LastName, Category, seasonId) {
+  static async update(id, TeamID, FirstName, LastName, CategoryID, seasonId) {
     const pool = await poolPromise;
     const transaction = new sql.Transaction(pool);
     await transaction.begin();
@@ -134,9 +140,9 @@ class PlayerModel {
         request.input('LastName', sql.NVarChar, LastName);
         updates.push('LastName = @LastName');
       }
-      if (Category !== undefined) {
-        request.input('Category', sql.NVarChar, Category || '');
-        updates.push('Category = @Category');
+      if (CategoryID !== undefined) {
+        request.input('CategoryID', sql.Int, CategoryID);
+        updates.push('CategoryID = @CategoryID');
       }
       
       if (updates.length > 0) {
@@ -171,11 +177,11 @@ class PlayerModel {
       const resRequest = pool.request().input('PlayerID', sql.Int, id);
       if (targetSeasonId) resRequest.input('SeasonID', sql.Int, targetSeasonId);
       
-      const updatedQuery = targetSeasonId 
-        ? 'SELECT p.PlayerID, p.FirstName, p.LastName, p.Category, ps.TeamID FROM Players p LEFT JOIN PlayerSeasons ps ON p.PlayerID = ps.PlayerID AND ps.SeasonID = @SeasonID WHERE p.PlayerID = @PlayerID'
-        : 'SELECT p.PlayerID, p.FirstName, p.LastName, p.Category, p.TeamID FROM Players p WHERE p.PlayerID = @PlayerID';
-        
-      const resResult = await resRequest.query(updatedQuery);
+      const resResult = await resRequest.query(
+        targetSeasonId 
+          ? 'SELECT p.PlayerID, p.FirstName, p.LastName, p.CategoryID, c.Name AS CategoryName, ps.TeamID FROM Players p INNER JOIN Categories c ON p.CategoryID = c.CategoryID LEFT JOIN PlayerSeasons ps ON p.PlayerID = ps.PlayerID AND ps.SeasonID = @SeasonID WHERE p.PlayerID = @PlayerID'
+          : 'SELECT p.PlayerID, p.FirstName, p.LastName, p.CategoryID, c.Name AS CategoryName, p.TeamID FROM Players p INNER JOIN Categories c ON p.CategoryID = c.CategoryID WHERE p.PlayerID = @PlayerID'
+      );
       return resResult.recordset.length > 0 ? resResult.recordset[0] : null;
 
     } catch (err) {

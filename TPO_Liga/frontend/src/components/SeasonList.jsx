@@ -20,7 +20,7 @@ const SeasonList = () => {
   // Modal & Form State
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingSeason, setEditingSeason] = useState(null);
-  const [formData, setFormData] = useState({ Name: '', StartDate: '', EndDate: '', IsActive: false });
+  const [formData, setFormData] = useState({ Name: '', StartDate: '', EndDate: '', IsActive: false, CopyTeams: true, CopyPlayers: true });
   const [saving, setSaving] = useState(false);
 
   const fetchSeasonsData = async () => {
@@ -47,19 +47,29 @@ const SeasonList = () => {
         Name: season.Name || '', 
         StartDate: season.StartDate ? season.StartDate.substring(0, 10) : '', 
         EndDate: season.EndDate ? season.EndDate.substring(0, 10) : '', 
-        IsActive: !!season.IsActive 
+        IsActive: !!season.IsActive,
+        CopyTeams: true,
+        CopyPlayers: true
       });
     } else {
       setEditingSeason(null);
-      setFormData({ Name: '', StartDate: '', EndDate: '', IsActive: false });
+      setFormData({ Name: '', StartDate: '', EndDate: '', IsActive: false, CopyTeams: true, CopyPlayers: true });
     }
     setIsModalOpen(true);
   };
 
   const handleSave = async (e) => {
     e.preventDefault();
-    setSaving(true);
     setError('');
+    
+    if (formData.StartDate && formData.EndDate) {
+      if (new Date(formData.EndDate) < new Date(formData.StartDate)) {
+        setError('La fecha de fin no puede ser anterior a la fecha de inicio.');
+        return;
+      }
+    }
+    
+    setSaving(true);
     
     const payload = { ...formData };
     if (!payload.StartDate) payload.StartDate = null;
@@ -90,6 +100,23 @@ const SeasonList = () => {
     }
   };
 
+  const handleDelete = async (season) => {
+    if (season.IsActive) {
+      alert("No se puede eliminar la temporada activa. Cambia de temporada antes de intentar eliminarla.");
+      return;
+    }
+    
+    if (window.confirm(`¿Estás seguro que deseas eliminar la temporada "${season.Name}"?\n\n¡CUIDADO! Esta acción eliminará permanentemente todos los partidos y planteles asociados a esta temporada.`)) {
+      try {
+        await apiRequest(`/api/seasons/${season.SeasonID}`, { method: 'DELETE', auth: true });
+        await fetchSeasonsData();
+        await fetchSeasons(); // Sync global context
+      } catch (err) {
+        setError(err.message || 'Error al eliminar la temporada.');
+      }
+    }
+  };
+
   return (
     <div className="animate-fade-in">
       <PageHeader 
@@ -111,7 +138,7 @@ const SeasonList = () => {
       ) : seasonsData.length === 0 ? (
         <Card className="text-center py-12">
           <div className="text-4xl mb-4 opacity-50">📅</div>
-          <p className="text-lg text-zinc-400">No hay temporadas cargadas actualmente.</p>
+          <p className="text-lg text-stone-600">No hay temporadas cargadas actualmente.</p>
         </Card>
       ) : (
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
@@ -126,15 +153,20 @@ const SeasonList = () => {
               
               {isAdmin && (
                 <div className="absolute top-3 right-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity z-20">
-                  <button onClick={(e) => { e.stopPropagation(); openModal(season); }} className="p-1.5 rounded-lg bg-zinc-800/80 text-orange-400 hover:bg-zinc-700 hover:text-orange-300 transition-colors backdrop-blur-sm border border-zinc-700/50">
+                  <button onClick={(e) => { e.stopPropagation(); openModal(season); }} className="p-1.5 rounded-lg bg-stone-200/80 text-orange-400 hover:bg-stone-300 hover:text-orange-300 transition-colors backdrop-blur-sm border border-stone-300/50">
                     ✏️
                   </button>
+                  {!season.IsActive && (
+                    <button onClick={(e) => { e.stopPropagation(); handleDelete(season); }} className="p-1.5 rounded-lg bg-stone-200/80 text-red-500 hover:bg-stone-300 hover:text-red-400 transition-colors backdrop-blur-sm border border-stone-300/50">
+                      🗑️
+                    </button>
+                  )}
                 </div>
               )}
               
               <div className="relative z-10 flex flex-col items-start gap-4 h-full">
                 <div className="flex items-center justify-between w-full">
-                   <div className={`flex-shrink-0 w-12 h-12 rounded-xl flex items-center justify-center text-xl shadow-lg transition-transform ${season.IsActive ? 'bg-orange-500/20 text-orange-400 border border-orange-500/30' : 'bg-zinc-800/80 border border-zinc-700'}`}>
+                   <div className={`flex-shrink-0 w-12 h-12 rounded-xl flex items-center justify-center text-xl shadow-lg transition-transform ${season.IsActive ? 'bg-orange-500/20 text-orange-400 border border-orange-500/30' : 'bg-stone-200/80 border border-stone-300'}`}>
                     {season.IsActive ? '⭐' : '🗓️'}
                    </div>
                    {season.IsActive && (
@@ -143,13 +175,13 @@ const SeasonList = () => {
                 </div>
                 
                 <div>
-                  <h3 className="font-bold text-lg text-zinc-100 group-hover:text-orange-300 transition-colors line-clamp-1">
+                  <h3 className="font-bold text-lg text-stone-900 group-hover:text-orange-300 transition-colors line-clamp-1">
                     {season.Name}
                   </h3>
-                  <p className="text-sm font-medium text-zinc-500 mt-1">
+                  <p className="text-sm font-medium text-stone-500 mt-1">
                     ID: <span className="text-orange-400/80">{season.SeasonID}</span>
                   </p>
-                  <p className="text-xs text-zinc-400 mt-2">
+                  <p className="text-xs text-stone-600 mt-2">
                     Inicio: {season.StartDate ? new Date(season.StartDate).toLocaleDateString('es-ES') : 'N/A'} <br />
                     Fin: {season.EndDate ? new Date(season.EndDate).toLocaleDateString('es-ES') : 'N/A'}
                   </p>
@@ -183,19 +215,20 @@ const SeasonList = () => {
              <Input 
                label="Fecha de Fin" 
                type="date"
+               min={formData.StartDate || undefined}
                value={formData.EndDate} 
                onChange={e => setFormData({...formData, EndDate: e.target.value})} 
              />
           </div>
-          <div className="flex items-center gap-3 mt-4 bg-zinc-900/50 p-4 rounded-xl border border-zinc-700/50">
+          <div className="flex items-center gap-3 mt-4 bg-stone-100/50 p-4 rounded-xl border border-stone-300/50">
             <input 
               type="checkbox" 
               id="isActive"
-              className="w-5 h-5 rounded border-zinc-700 text-orange-500 focus:ring-orange-500/20 bg-zinc-800"
+              className="w-5 h-5 rounded border-stone-300 text-orange-500 focus:ring-orange-500/20 bg-stone-200"
               checked={formData.IsActive}
               onChange={e => setFormData({...formData, IsActive: e.target.checked})}
             />
-            <label htmlFor="isActive" className="text-sm font-semibold text-zinc-300 cursor-pointer select-none">
+            <label htmlFor="isActive" className="text-sm font-semibold text-stone-700 cursor-pointer select-none">
               Marcar como Temporada Activa
             </label>
           </div>
@@ -203,6 +236,43 @@ const SeasonList = () => {
             <p className="text-xs text-amber-500/80 italic pl-1">
               Nota: Solo puede haber una temporada activa. Las demás se desactivarán.
             </p>
+          )}
+
+          {!editingSeason && (
+            <div className="space-y-3 mt-4 bg-stone-100/50 p-4 rounded-xl border border-stone-300/50">
+              <p className="text-sm font-semibold text-stone-700 mb-2">Opciones de Migración</p>
+              
+              <div className="flex items-center gap-3">
+                <input 
+                  type="checkbox" 
+                  id="copyTeams"
+                  className="w-5 h-5 rounded border-stone-300 text-orange-500 focus:ring-orange-500/20 bg-stone-200"
+                  checked={formData.CopyTeams}
+                  onChange={e => {
+                    const checked = e.target.checked;
+                    // Si desmarcamos equipos, obligatoriamente desmarcamos jugadores
+                    setFormData({...formData, CopyTeams: checked, CopyPlayers: checked ? formData.CopyPlayers : false});
+                  }}
+                />
+                <label htmlFor="copyTeams" className="text-sm text-stone-600 cursor-pointer select-none">
+                  Importar Equipos de la temporada anterior
+                </label>
+              </div>
+
+              <div className="flex items-center gap-3">
+                <input 
+                  type="checkbox" 
+                  id="copyPlayers"
+                  className="w-5 h-5 rounded border-stone-300 text-orange-500 focus:ring-orange-500/20 bg-stone-200 disabled:opacity-50"
+                  checked={formData.CopyPlayers}
+                  disabled={!formData.CopyTeams}
+                  onChange={e => setFormData({...formData, CopyPlayers: e.target.checked})}
+                />
+                <label htmlFor="copyPlayers" className={`text-sm cursor-pointer select-none ${formData.CopyTeams ? 'text-stone-600' : 'text-stone-400'}`}>
+                  Importar Jugadores de la temporada anterior
+                </label>
+              </div>
+            </div>
           )}
 
           <div className="flex justify-end gap-3 mt-6">
