@@ -5,6 +5,7 @@ import { useCategories } from '../../contexts/CategoryContext';
 
 const TeamDetailsWidget = ({ team }) => {
   const [teamData, setTeamData] = useState(null);
+  const [standingsData, setStandingsData] = useState([]);
   const [loading, setLoading] = useState(true);
   const { selectedSeasonId } = useSeason();
   const { categories } = useCategories();
@@ -22,8 +23,12 @@ const TeamDetailsWidget = ({ team }) => {
     const fetchTeam = async () => {
       setLoading(true);
       try {
-        const data = await apiRequest(`/api/teams/${team.TeamID}?seasonId=${selectedSeasonId}`);
-        setTeamData(data);
+        const [tData, sData] = await Promise.all([
+          apiRequest(`/api/teams/${team.TeamID}?seasonId=${selectedSeasonId}`),
+          apiRequest(`/api/standings?seasonId=${selectedSeasonId}`)
+        ]);
+        setTeamData(tData);
+        setStandingsData(Array.isArray(sData) ? sData : []);
       } catch (err) {
         console.error(err);
       } finally {
@@ -35,6 +40,12 @@ const TeamDetailsWidget = ({ team }) => {
   }, [team, selectedSeasonId]);
 
   if (!team) return null;
+
+  const catStandings = standingsData.filter(s => String(s.CategoryID) === String(activeCategoryId));
+  const teamStandingIndex = catStandings.findIndex(s => String(s.TeamID) === String(team.TeamID));
+  const teamStats = teamStandingIndex >= 0 ? catStandings[teamStandingIndex] : null;
+  const rank = teamStandingIndex >= 0 ? teamStandingIndex + 1 : '-';
+  const pendingMatchesCount = teamData?.PendingMatches?.filter(m => String(m.CategoryID) === String(activeCategoryId)).length || 0;
 
   return (
     <div className="space-y-6 animate-fade-in h-full flex flex-col">
@@ -55,17 +66,36 @@ const TeamDetailsWidget = ({ team }) => {
         </div>
       ) : teamData ? (
         <div className="flex-1 flex flex-col min-h-0">
-          <div className="grid grid-cols-2 gap-4 mb-6">
-            <div className="bg-stone-100/30 rounded-xl p-4 border border-stone-200/50">
-              <h4 className="text-xs font-bold text-stone-500 uppercase tracking-wider mb-1">Entrenador</h4>
-              <p className="font-semibold text-stone-800">{teamData.Coach || team.Coach || 'No asignado'}</p>
+          <div className="grid grid-cols-2 gap-3 mb-4">
+            <div className="bg-stone-100/30 rounded-xl p-3 border border-stone-200/50">
+              <h4 className="text-[10px] font-bold text-stone-500 uppercase tracking-wider mb-1">Entrenador</h4>
+              <p className="font-semibold text-stone-800 text-sm">{teamData.Coach || team.Coach || 'No asignado'}</p>
             </div>
-            <div className="bg-stone-100/30 rounded-xl p-4 border border-stone-200/50">
-              <h4 className="text-xs font-bold text-stone-500 uppercase tracking-wider mb-1">Estadio</h4>
-              <p className="font-semibold text-stone-800 text-sm leading-tight" title={teamData.StadiumName || team.StadiumName || 'No asignado'}>
+            <div className="bg-stone-100/30 rounded-xl p-3 border border-stone-200/50">
+              <h4 className="text-[10px] font-bold text-stone-500 uppercase tracking-wider mb-1">Estadio</h4>
+              <p className="font-semibold text-stone-800 text-sm truncate" title={teamData.StadiumName || team.StadiumName || 'No asignado'}>
                 {teamData.StadiumName || team.StadiumName || 'No asignado'}
               </p>
             </div>
+          </div>
+          
+          <div className="grid grid-cols-4 gap-2 mb-6">
+             <div className="bg-orange-500/5 rounded-xl p-2 border border-orange-500/20 text-center">
+               <h4 className="text-[9px] font-bold text-orange-600/80 uppercase tracking-wider mb-1">Pos</h4>
+               <p className="font-black text-orange-500 text-base">{rank}</p>
+             </div>
+             <div className="bg-stone-100/30 rounded-xl p-2 border border-stone-200/50 text-center">
+               <h4 className="text-[9px] font-bold text-stone-500 uppercase tracking-wider mb-1">Pts</h4>
+               <p className="font-black text-stone-800 text-base">{teamStats?.Puntos ?? '-'}</p>
+             </div>
+             <div className="bg-emerald-500/5 rounded-xl p-2 border border-emerald-500/20 text-center">
+               <h4 className="text-[9px] font-bold text-emerald-600/80 uppercase tracking-wider mb-1">PG</h4>
+               <p className="font-black text-emerald-500 text-base">{teamStats?.PartidosGanados ?? '-'}</p>
+             </div>
+             <div className="bg-stone-100/30 rounded-xl p-2 border border-stone-200/50 text-center">
+               <h4 className="text-[9px] font-bold text-stone-500 uppercase tracking-wider mb-1">Pend</h4>
+               <p className="font-black text-stone-800 text-base">{pendingMatchesCount}</p>
+             </div>
           </div>
 
           <h4 className="text-sm font-bold text-stone-600 uppercase tracking-wider mb-3">Plantel ({teamData.Players?.length || 0})</h4>

@@ -241,6 +241,11 @@ const PlayerList = () => {
                             #{player.JerseyNumber}
                           </span>
                         )}
+                        {player.Position && (
+                          <span className="inline-flex items-center rounded-md bg-stone-200/80 px-2 py-0.5 text-xs font-medium text-stone-600 border border-stone-300 uppercase">
+                            {player.Position}
+                          </span>
+                        )}
                         {teamName && (
                           <span className="inline-flex items-center rounded-md bg-orange-500/10 px-2 py-0.5 text-xs font-medium text-orange-500 border border-orange-500/20 truncate max-w-[120px]" title={teamName}>
                             {teamName}
@@ -301,17 +306,34 @@ const PlayerList = () => {
             required 
           />
           <div className="grid grid-cols-2 gap-4">
-            <Input 
-              label="Dorsal" 
-              type="number"
-              value={formData.JerseyNumber} 
-              onChange={e => setFormData({...formData, JerseyNumber: e.target.value})} 
-            />
-            <Input 
-              label="Posición" 
-              value={formData.Position} 
-              onChange={e => setFormData({...formData, Position: e.target.value})} 
-            />
+            <div className="space-y-1">
+              <label className="text-sm font-semibold text-stone-700">Dorsal</label>
+              <select 
+                className="w-full rounded-xl border border-stone-300 bg-stone-100/50 px-4 py-3 text-stone-900 placeholder:text-stone-500 focus:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500/20 transition-all"
+                value={formData.JerseyNumber}
+                onChange={e => setFormData({...formData, JerseyNumber: e.target.value})}
+              >
+                <option value="">N/A</option>
+                {Array.from({length: 100}, (_, i) => (
+                  <option key={i} value={i}>{i}</option>
+                ))}
+              </select>
+            </div>
+            <div className="space-y-1">
+              <label className="text-sm font-semibold text-stone-700">Posición</label>
+              <select 
+                className="w-full rounded-xl border border-stone-300 bg-stone-100/50 px-4 py-3 text-stone-900 placeholder:text-stone-500 focus:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500/20 transition-all"
+                value={formData.Position}
+                onChange={e => setFormData({...formData, Position: e.target.value})}
+              >
+                <option value="">N/A</option>
+                <option value="Base">Base</option>
+                <option value="Escolta">Escolta</option>
+                <option value="Alero">Alero</option>
+                <option value="Ala-Pívot">Ala-Pívot</option>
+                <option value="Pívot">Pívot</option>
+              </select>
+            </div>
           </div>
           <div className="space-y-1">
             <label className="text-sm font-semibold text-stone-700">Equipo</label>

@@ -86,7 +86,7 @@ class TeamModel {
     if (seasonId) {
       request.input('SeasonID', sql.Int, seasonId);
       pQuery = `
-        SELECT p.PlayerID, p.FirstName, p.LastName, p.CategoryID, c.Name AS CategoryName, ps.TeamID
+        SELECT p.PlayerID, p.FirstName, p.LastName, p.CategoryID, p.JerseyNumber, p.Position, c.Name AS CategoryName, ps.TeamID
         FROM Players p
         INNER JOIN Categories c ON p.CategoryID = c.CategoryID
         INNER JOIN PlayerSeasons ps ON p.PlayerID = ps.PlayerID
@@ -101,7 +101,7 @@ class TeamModel {
     } else {
       // Default to active season
       pQuery = `
-        SELECT p.PlayerID, p.FirstName, p.LastName, p.CategoryID, c.Name AS CategoryName, ps.TeamID
+        SELECT p.PlayerID, p.FirstName, p.LastName, p.CategoryID, p.JerseyNumber, p.Position, c.Name AS CategoryName, ps.TeamID
         FROM Players p
         INNER JOIN Categories c ON p.CategoryID = c.CategoryID
         INNER JOIN PlayerSeasons ps ON p.PlayerID = ps.PlayerID

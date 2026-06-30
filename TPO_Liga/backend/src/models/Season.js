@@ -63,6 +63,68 @@ class SeasonModel {
               SELECT PlayerID, @NewSeasonID2, TeamID FROM PlayerSeasons WHERE SeasonID = @OldSeasonID2
             `);
         }
+        
+        // Generar fixture (ida y vuelta) automáticamente para la nueva temporada
+        const teamsRes = await transaction.request()
+          .input('SeasonForMatches', sql.Int, newSeason.SeasonID)
+          .query('SELECT TeamID FROM TeamSeasons WHERE SeasonID = @SeasonForMatches');
+        
+        const teams = teamsRes.recordset.map(t => t.TeamID);
+        
+        if (teams.length >= 2) {
+          const catRes = await transaction.request().query('SELECT CategoryID FROM Categories');
+          const categories = catRes.recordset.map(c => c.CategoryID);
+          
+          let roundRobinTeams = [...teams];
+          if (roundRobinTeams.length % 2 !== 0) roundRobinTeams.push(null);
+          
+          const numTeams = roundRobinTeams.length;
+          const rounds = numTeams - 1;
+          const half = numTeams / 2;
+          
+          let matches = [];
+          for (let round = 1; round <= rounds; round++) {
+            for (let i = 0; i < half; i++) {
+              const home = roundRobinTeams[i];
+              const away = roundRobinTeams[numTeams - 1 - i];
+              if (home !== null && away !== null) {
+                matches.push({ round, home, away });
+              }
+            }
+            roundRobinTeams.splice(1, 0, roundRobinTeams.pop());
+          }
+          
+          const matchesVuelta = matches.map(m => ({
+            round: m.round + rounds,
+            home: m.away,
+            away: m.home
+          }));
+          
+          const allMatches = [...matches, ...matchesVuelta];
+          
+          let baseDate = StartDate ? new Date(StartDate) : new Date();
+          
+          for (const match of allMatches) {
+            let matchDate = new Date(baseDate);
+            matchDate.setDate(matchDate.getDate() + (match.round - 1) * 7); // 1 week per round
+            const dateString = matchDate.toISOString().split('T')[0];
+            
+            for (const cat of categories) {
+              const req = transaction.request();
+              await req
+                .input('LocTeamID', sql.Int, match.home)
+                .input('VisTeamID', sql.Int, match.away)
+                .input('SeaID', sql.Int, newSeason.SeasonID)
+                .input('CatID', sql.Int, cat)
+                .input('RndNumber', sql.Int, match.round)
+                .input('MDate', sql.Date, dateString)
+                .query(`
+                  INSERT INTO Matches (LocalTeamID, VisitorTeamID, SeasonID, CategoryID, RoundNumber, MatchDate) 
+                  VALUES (@LocTeamID, @VisTeamID, @SeaID, @CatID, @RndNumber, @MDate)
+                `);
+            }
+          }
+        }
       }
 
       await transaction.commit();

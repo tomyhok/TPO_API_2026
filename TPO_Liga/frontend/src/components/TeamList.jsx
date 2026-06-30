@@ -127,15 +127,7 @@ const TeamList = () => {
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3">
           {teams.map((team, idx) => {
             const teamName = team.TeamName || team.Equipo || team.Name || 'Equipo Sin Nombre';
-            // Generate a deterministic gradient color based on index
-            const colors = [
-              'from-red-500/20 to-yellow-500/5',
-              'from-amber-500/20 to-pink-500/5',
-              'from-emerald-500/20 to-teal-500/5',
-              'from-orange-500/20 to-amber-500/5',
-              'from-rose-500/20 to-red-500/5',
-            ];
-            const bgClass = colors[idx % colors.length];
+            const bgClass = 'from-white to-orange-500/10';
 
             return (
               <Card 

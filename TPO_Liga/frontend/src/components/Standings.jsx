@@ -92,7 +92,7 @@ const Standings = () => {
               </div>
             ) : (
               <div className="overflow-x-auto">
-                <table className="w-full min-w-[860px] text-left text-sm text-stone-700">
+                <table className="w-full text-left text-sm text-stone-700">
                   <thead className="bg-stone-200/80 text-xs uppercase text-stone-600 font-bold border-b border-stone-300/50 shadow-sm">
                     <tr>
                       <th className="px-6 py-4 w-16 text-center">Pos</th>
