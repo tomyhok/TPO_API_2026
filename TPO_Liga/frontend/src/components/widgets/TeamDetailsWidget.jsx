@@ -90,9 +90,9 @@ const TeamDetailsWidget = ({ team }) => {
           )}
 
           <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar">
-            {teamData.Players && teamData.Players.filter(p => p.CategoryID === activeCategoryId).length > 0 ? (
+            {teamData.Players && teamData.Players.filter(p => String(p.CategoryID) === String(activeCategoryId)).length > 0 ? (
               <ul className="space-y-2">
-                {teamData.Players.filter(p => p.CategoryID === activeCategoryId).map(p => (
+                {teamData.Players.filter(p => String(p.CategoryID) === String(activeCategoryId)).map(p => (
                   <li key={p.PlayerID} className="flex justify-between items-center bg-stone-100/40 p-3 rounded-lg border border-stone-200/50 hover:bg-stone-200/50 transition-colors">
                     <div className="flex items-center gap-3">
                       <div className="w-8 h-8 rounded-full bg-stone-200 flex items-center justify-center text-xs">🧑‍🚀</div>

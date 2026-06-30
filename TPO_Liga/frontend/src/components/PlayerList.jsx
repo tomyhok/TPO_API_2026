@@ -178,7 +178,7 @@ const PlayerList = () => {
         </div>
       ) : (() => {
         const filteredPlayers = players.filter(p => 
-          p.CategoryID === activeCategoryId && 
+          String(p.CategoryID) === String(activeCategoryId) && 
           (filterTeamId === '' || String(p.TeamID) === String(filterTeamId))
         );
 

@@ -47,7 +47,7 @@ const Standings = () => {
     }
   }, [categories, activeCategoryId]);
 
-  const filteredStandings = standings.filter(s => s.CategoryID === activeCategoryId);
+  const filteredStandings = standings.filter(s => String(s.CategoryID) === String(activeCategoryId));
 
   return (
     <div className="animate-fade-in">

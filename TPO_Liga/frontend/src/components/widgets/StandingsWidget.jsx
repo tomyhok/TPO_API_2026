@@ -51,7 +51,7 @@ const StandingsWidget = () => {
 
   if (standings.length === 0) return null;
 
-  const filteredStandings = standings.filter(t => t.CategoryID === activeCategoryId);
+  const filteredStandings = standings.filter(t => String(t.CategoryID) === String(activeCategoryId));
 
   return (
     <div className="flex flex-col h-full animate-fade-in">

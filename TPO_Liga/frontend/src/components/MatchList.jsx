@@ -153,7 +153,7 @@ const MatchList = () => {
   // Group matches by date and active round
   const groupedMatches = useMemo(() => {
     const groups = {};
-    const filteredMatches = matches.filter(m => m.CategoryID === activeCategoryId && (m.RoundNumber === activeRound || (!m.RoundNumber && activeRound === 1)));
+    const filteredMatches = matches.filter(m => String(m.CategoryID) === String(activeCategoryId) && (m.RoundNumber === activeRound || (!m.RoundNumber && activeRound === 1)));
     filteredMatches.forEach(match => {
       const dateKey = match.MatchDate 
         ? new Date(match.MatchDate).toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) 

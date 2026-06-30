@@ -1,16 +1,11 @@
-const sql = require('mssql');
+const sql = require('mssql/msnodesqlv8');
 require('dotenv').config();
 
+// Creamos la cadena de conexión para Windows Authentication con ODBC Driver 17
+const connectionString = `Driver={ODBC Driver 17 for SQL Server};Server=${process.env.DB_SERVER || 'localhost'};Database=${process.env.DB_NAME || 'YouthBasketballLeague'};Trusted_Connection=yes;Encrypt=yes;TrustServerCertificate=yes;`;
+
 const config = {
-  server: process.env.DB_SERVER || 'localhost',
-  port: parseInt(process.env.DB_PORT) || 1433,
-  database: process.env.DB_NAME || 'YouthBasketballLeague',
-  user: process.env.DB_USER || 'sa',
-  password: process.env.DB_PASSWORD || 'YourStrong@Passw0rd', // Cambiar en el .env
-  options: {
-    encrypt: true,
-    trustServerCertificate: true
-  }
+  connectionString: connectionString
 };
 
 // Crea una nueva instancia de ConnectionPool con la configuración e intenta conectarse inmediatamente

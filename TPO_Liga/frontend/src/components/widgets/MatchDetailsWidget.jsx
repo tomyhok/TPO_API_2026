@@ -41,10 +41,10 @@ const MatchDetailsWidget = ({ match, getTeamName, getTeamLogo }) => {
       }
     };
 
-    if (activeTab === 'alineaciones' && !localTeamData && !visitorTeamData) {
+    if (activeTab === 'alineaciones') {
       fetchTeamsData();
     }
-  }, [match, selectedSeasonId, activeTab, localTeamId, visitorTeamId, localTeamData, visitorTeamData]);
+  }, [match?.MatchID, selectedSeasonId, activeTab, localTeamId, visitorTeamId]);
 
   if (!match) return null;
 
@@ -143,9 +143,9 @@ const MatchDetailsWidget = ({ match, getTeamName, getTeamLogo }) => {
                   <h4 className="text-sm font-bold text-stone-700 border-b border-stone-200 pb-2 mb-3 flex items-center gap-2">
                     <span className="w-2 h-2 rounded-full bg-orange-500"></span> {localTeamName}
                   </h4>
-                  {localTeamData?.Players && localTeamData.Players.filter(p => p.CategoryID === match.CategoryID).length > 0 ? (
+                  {localTeamData?.Players && localTeamData.Players.filter(p => String(p.CategoryID) === String(match.CategoryID)).length > 0 ? (
                     <ul className="space-y-1.5">
-                      {localTeamData.Players.filter(p => p.CategoryID === match.CategoryID).map(p => (
+                      {localTeamData.Players.filter(p => String(p.CategoryID) === String(match.CategoryID)).map(p => (
                         <li key={p.PlayerID} className="flex justify-between items-center bg-stone-100/40 px-3 py-2 rounded-lg border border-stone-200/50">
                           <span className="font-medium text-stone-700 text-sm">{p.FirstName} {p.LastName}</span>
                           <div className="flex items-center gap-2">
@@ -165,9 +165,9 @@ const MatchDetailsWidget = ({ match, getTeamName, getTeamLogo }) => {
                   <h4 className="text-sm font-bold text-stone-700 border-b border-stone-200 pb-2 mb-3 flex items-center gap-2">
                     <span className="w-2 h-2 rounded-full bg-amber-500"></span> {visitorTeamName}
                   </h4>
-                  {visitorTeamData?.Players && visitorTeamData.Players.filter(p => p.CategoryID === match.CategoryID).length > 0 ? (
+                  {visitorTeamData?.Players && visitorTeamData.Players.filter(p => String(p.CategoryID) === String(match.CategoryID)).length > 0 ? (
                     <ul className="space-y-1.5">
-                      {visitorTeamData.Players.filter(p => p.CategoryID === match.CategoryID).map(p => (
+                      {visitorTeamData.Players.filter(p => String(p.CategoryID) === String(match.CategoryID)).map(p => (
                         <li key={p.PlayerID} className="flex justify-between items-center bg-stone-100/40 px-3 py-2 rounded-lg border border-stone-200/50">
                           <span className="font-medium text-stone-700 text-sm">{p.FirstName} {p.LastName}</span>
                           <div className="flex items-center gap-2">
