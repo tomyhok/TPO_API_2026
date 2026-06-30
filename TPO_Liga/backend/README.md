@@ -21,26 +21,32 @@ src/
 │   └── db.js               # Configuración de conexión a la base de datos SQL Server usando mssql
 ├── controllers/            # Controladores HTTP (Manejan req, res y llaman a Models)
 │   ├── authController.js
+│   ├── categoryController.js
 │   ├── matchController.js
 │   ├── playerController.js
+│   ├── seasonController.js
 │   ├── standingsController.js
 │   └── teamController.js
 ├── middlewares/            # Middlewares personalizados de Express
 │   └── authMiddleware.js   # Middleware de verificación JWT
 ├── models/                 # Modelos de bases de datos (Contienen todas las consultas SQL)
+│   ├── Category.js
 │   ├── Match.js
 │   ├── Player.js
+│   ├── Season.js
 │   ├── Standing.js
 │   ├── Team.js
 │   └── User.js
 ├── routes/                 # Rutas de la API (Redirigen las peticiones a los Controllers)
 │   ├── authRoutes.js
+│   ├── categoryRoutes.js
 │   ├── matchRoutes.js
 │   ├── playerRoutes.js
+│   ├── seasonRoutes.js
 │   ├── standingsRoutes.js
 │   └── teamRoutes.js
 ├── scripts/
-│   └── seedAdmin.js        # Script para crear el usuario administrador inicial
+│   ├── seedAdmin.js        # Script para crear el usuario administrador inicial
 ├── app.js                  # Configuración de la aplicación Express, aplicando middlewares y rutas
 └── server.js               # Punto de entrada de la aplicación, inicia el servidor HTTP
 ```
@@ -90,16 +96,16 @@ Debería ver una salida indicando que el servidor se está ejecutando en el puer
 La API proporciona endpoints bajo el prefijo `/api/teams` para gestionar equipos de básquet.
 
 ### 1. Obtener Todos los Equipos
-- **URL**: `/api/teams`
+- **URL**: `/api/teams?seasonId={id}`
 - **Method**: `GET`
-- **Descripción**: Recupera una lista de todos los equipos en la liga.
+- **Descripción**: Recupera una lista de todos los equipos en la liga. El `seasonId` es opcional (usa la activa por defecto).
 - **Respuesta Exitosa**: `200 OK` (Devuelve un array de objetos de equipo)
 
 ### 2. Obtener Equipo por ID
-- **URL**: `/api/teams/:id`
+- **URL**: `/api/teams/:id?seasonId={id}`
 - **Method**: `GET`
-- **Descripción**: Recupera un equipo específico por su ID entero.
-- **Respuesta Exitosa**: `200 OK` (Devuelve un único objeto de equipo)
+- **Descripción**: Recupera un equipo específico por su ID entero, incluyendo su plantel y partidos en la temporada.
+- **Respuesta Exitosa**: `200 OK` (Devuelve un único objeto de equipo con `.Players`, `.PlayedMatches` y `.PendingMatches`)
 - **Respuesta de Error**: `404 Not Found` (Si el ID del equipo no existe)
 
 ### 3. Crear un Equipo
@@ -110,7 +116,10 @@ La API proporciona endpoints bajo el prefijo `/api/teams` para gestionar equipos
   ```json
   {
     "Name": "Golden Eagles",
-    "Coach": "John Doe"
+    "Coach": "John Doe",
+    "LogoURL": "https://ejemplo.com/logo.png",
+    "StadiumName": "Eagle Arena",
+    "seasonId": 1
   }
   ```
 - **Respuesta Exitosa**: `201 Created` (Devuelve el objeto de equipo recién creado)
@@ -142,22 +151,22 @@ La API proporciona endpoints bajo el prefijo `/api/teams` para gestionar equipos
 La API proporciona endpoints bajo el prefijo `/api/players` para gestionar jugadores dentro de la liga.
 
 ### 1. Obtener Todos los Jugadores
-- **URL**: `/api/players`
+- **URL**: `/api/players?seasonId={id}`
 - **Method**: `GET`
-- **Descripción**: Recupera una lista de todos los jugadores.
+- **Descripción**: Recupera una lista de todos los jugadores. `seasonId` opcional.
 - **Respuesta Exitosa**: `200 OK` (Devuelve un array de objetos de jugador)
 
 ### 2. Obtener Jugador por ID
-- **URL**: `/api/players/:id`
+- **URL**: `/api/players/:id?seasonId={id}`
 - **Method**: `GET`
 - **Descripción**: Recupera un jugador específico por su ID entero.
 - **Respuesta Exitosa**: `200 OK` (Devuelve un único objeto de jugador)
 - **Respuesta de Error**: `404 Not Found` (Si el ID del jugador no existe)
 
 ### 3. Obtener Jugadores por ID de Equipo
-- **URL**: `/api/players/team/:teamId`
+- **URL**: `/api/players/team/:teamId?seasonId={id}`
 - **Method**: `GET`
-- **Descripción**: Recupera todos los jugadores que pertenecen a un equipo específico.
+- **Descripción**: Recupera todos los jugadores que pertenecen a un equipo específico en una temporada.
 - **Respuesta Exitosa**: `200 OK` (Devuelve un array de objetos de jugador)
 
 ### 4. Crear un Jugador
@@ -170,11 +179,14 @@ La API proporciona endpoints bajo el prefijo `/api/players` para gestionar jugad
     "TeamID": 1,
     "FirstName": "Michael",
     "LastName": "Jordan",
-    "Category": "Senior"
+    "CategoryID": 2,
+    "JerseyNumber": 23,
+    "Position": "Escolta",
+    "seasonId": 1
   }
   ```
 - **Respuesta Exitosa**: `201 Created` (Devuelve el objeto de jugador recién creado)
-- **Respuesta de Error**: `400 Bad Request` (Si faltan `TeamID`, `FirstName`, `LastName` o `Category`), `401 Unauthorized` (Si el token falta o es inválido)
+- **Respuesta de Error**: `400 Bad Request` (Si faltan `TeamID`, `FirstName`, `LastName` o `CategoryID`), `401 Unauthorized`
 
 ### 5. Actualizar un Jugador
 - **URL**: `/api/players/:id`
@@ -202,17 +214,17 @@ La API proporciona endpoints bajo el prefijo `/api/players` para gestionar jugad
 La API proporciona endpoints bajo el prefijo `/api/matches` para gestionar la programación y los resultados de los partidos.
 
 ### 1. Obtener Todos los Partidos
-- **URL**: `/api/matches`
+- **URL**: `/api/matches?seasonId={id}`
 - **Method**: `GET`
 - **Descripción**: Recupera una lista de todos los partidos.
 - **Respuesta Exitosa**: `200 OK` (Devuelve un array de objetos de partido)
 
 ### 2. Obtener Partido por ID
-- **URL**: `/api/matches/:id`
+- **URL**: `/api/matches/:id?seasonId={id}`
 - **Method**: `GET`
 - **Descripción**: Recupera un partido específico por su ID entero.
 - **Respuesta Exitosa**: `200 OK` (Devuelve un único objeto de partido)
-- **Respuesta de Error**: `404 Not Found` (Si el ID del partido no existe)
+- **Respuesta de Error**: `404 Not Found`
 
 ### 3. Programar un Partido
 - **URL**: `/api/matches`
@@ -225,11 +237,14 @@ La API proporciona endpoints bajo el prefijo `/api/matches` para gestionar la pr
     "VisitorTeamID": 2,
     "MatchDate": "2026-05-10",
     "MatchTime": "15:30:00",
-    "Location": "Downtown Arena"
+    "Location": "Downtown Arena",
+    "CategoryID": 3,
+    "RoundNumber": 1,
+    "seasonId": 1
   }
   ```
 - **Respuesta Exitosa**: `201 Created` (Devuelve el objeto de partido recién creado)
-- **Respuesta de Error**: `400 Bad Request` (Si faltan campos, o si `LocalTeamID` y `VisitorTeamID` son el mismo), `401 Unauthorized` (Si el token falta o es inválido)
+- **Respuesta de Error**: `400 Bad Request` (Si faltan campos, o si hay conflicto de programación), `401 Unauthorized` (Si el token falta o es inválido)
 
 ### 4. Actualizar Detalles del Partido
 - **URL**: `/api/matches/:id`
@@ -272,9 +287,9 @@ La API proporciona endpoints bajo el prefijo `/api/matches` para gestionar la pr
 La API proporciona endpoints bajo el prefijo `/api/standings` para obtener la tabla de posiciones automatizada de la liga.
 
 ### 1. Obtener Tabla de Posiciones de la Liga
-- **URL**: `/api/standings`
+- **URL**: `/api/standings?seasonId={id}`
 - **Method**: `GET`
-- **Descripción**: Recupera la tabla de posiciones actual de la liga, ordenada por puntos totales en orden descendente.
+- **Descripción**: Recupera la tabla de posiciones actual de la liga (se debe filtrar por `CategoryID` en el frontend).
 - **Respuesta Exitosa**: `200 OK` (Devuelve un array de objetos de posiciones)
 - **Respuesta de Error**: `500 Internal Server Error` (Si hay un problema con la base de datos)
 

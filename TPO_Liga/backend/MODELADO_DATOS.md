@@ -1,19 +1,26 @@
 # Modelado de Datos
 
-El modelo de datos de la plataforma está diseñado bajo un esquema relacional tradicional (SQL), optimizado para mantener la integridad referencial y facilitar consultas eficientes sobre las estadísticas de la liga.
+El modelo de datos de la plataforma está diseñado bajo un esquema relacional tradicional (SQL), optimizado para mantener la integridad referencial y facilitar consultas eficientes sobre las estadísticas de la liga. El sistema soporta múltiples temporadas y categorías simultáneamente.
 
-> **Nota de Arquitectura**: En el backend de Node.js, cada una de estas entidades principales (y la vista de posiciones) cuenta con una representación en la capa de datos dentro del directorio `src/models/` (ej. `Team.js`, `Player.js`), garantizando el patrón MVC.
+> **Nota de Arquitectura**: En el backend de Node.js, cada una de estas entidades principales cuenta con una representación en la capa de datos dentro del directorio `src/models/` (ej. `Team.js`, `Player.js`, `Season.js`), garantizando el patrón MVC.
 
 ## 1. Diagrama de Entidad-Relación (DER)
 
-El siguiente diagrama ilustra las relaciones entre las entidades principales del sistema. 
-*(Nota: GitHub renderizará este bloque de código como un diagrama visual automáticamente).*
+El siguiente diagrama ilustra las relaciones entre las entidades principales del sistema, soportando el manejo multitemporada y multicategoría.
 
 ```mermaid
 erDiagram
-    TEAMS ||--o{ PLAYERS : "tiene (1:N)"
-    TEAMS ||--o{ MATCHES : "juega como Local (1:N)"
-    TEAMS ||--o{ MATCHES : "juega como Visitante (1:N)"
+    SEASONS ||--o{ TEAM_SEASONS : "tiene (1:N)"
+    SEASONS ||--o{ PLAYER_SEASONS : "tiene (1:N)"
+    SEASONS ||--o{ MATCHES : "tiene (1:N)"
+    
+    CATEGORIES ||--o{ MATCHES : "se juega en (1:N)"
+    CATEGORIES ||--o{ PLAYERS : "pertenece a (1:N)"
+
+    TEAMS ||--o{ TEAM_SEASONS : "participa (1:N)"
+    TEAMS ||--o{ MATCHES : "juega (Local/Visitante)"
+    
+    PLAYERS ||--o{ PLAYER_SEASONS : "inscripto (1:N)"
 
     ADMINISTRATORS {
         int AdminID PK
@@ -22,73 +29,68 @@ erDiagram
         datetime CreatedAt
     }
 
+    SEASONS {
+        int SeasonID PK
+        nvarchar Name
+        date StartDate
+        date EndDate
+        bit IsActive
+    }
+
+    CATEGORIES {
+        int CategoryID PK
+        nvarchar Name UK
+    }
+
     TEAMS {
         int TeamID PK
         nvarchar Name UK
         nvarchar Coach
-        datetime CreatedAt
+        nvarchar LogoURL
+        nvarchar StadiumName
     }
 
     PLAYERS {
         int PlayerID PK
-        int TeamID FK
+        int CategoryID FK
         nvarchar FirstName
         nvarchar LastName
         int JerseyNumber
         nvarchar Position
     }
 
+    TEAM_SEASONS {
+        int TeamID FK
+        int SeasonID FK
+    }
+
+    PLAYER_SEASONS {
+        int PlayerID FK
+        int SeasonID FK
+        int TeamID FK
+    }
+
     MATCHES {
         int MatchID PK
         int LocalTeamID FK
         int VisitorTeamID FK
+        int SeasonID FK
+        int CategoryID FK
+        int RoundNumber
         datetime MatchDate
+        time MatchTime
+        nvarchar Location
         int LocalPoints
         int VisitorPoints
         nvarchar Status
     }
 ```
 
-## 2. Diagrama Lógico de la Base de Datos
+## 2. Vista de Tabla de Posiciones (`v_Standings`)
 
-El siguiente diagrama utiliza la notación de Mermaid para representar la trazabilidad de las llaves entre tablas. Las líneas indican la relación desde la **Primary Key (PK)** hacia donde se aloja como **Foreign Key (FK)**.
+Para calcular la tabla de posiciones dinámicamente y con máxima eficiencia (sin requerir código complejo en el backend), se utiliza una View en la base de datos:
 
-```mermaid
-erDiagram
-    ADMINISTRATORS {
-        int AdminID PK "Identificador único"
-        nvarchar Username "Nombre de usuario (Unique)"
-        nvarchar PasswordHash "Hash de seguridad"
-        datetime CreatedAt "Fecha de creación"
-    }
-
-    TEAMS {
-        int TeamID PK "Identificador único"
-        nvarchar Name "Nombre del equipo (Unique)"
-        nvarchar Coach "Entrenador"
-        datetime CreatedAt "Fecha de registro"
-    }
-
-    PLAYERS {
-        int PlayerID PK "Identificador único"
-        int TeamID FK "Referencia a TEAMS.TeamID"
-        nvarchar FirstName "Nombre"
-        nvarchar LastName "Apellido"
-        int JerseyNumber "Nro de camiseta"
-        nvarchar Position "Posición en campo"
-    }
-
-    MATCHES {
-        int MatchID PK "Identificador único"
-        int LocalTeamID FK "Referencia a TEAMS.TeamID (Local)"
-        int VisitorTeamID FK "Referencia a TEAMS.TeamID (Visitante)"
-        datetime MatchDate "Fecha y hora"
-        int LocalPoints "Puntos local"
-        int VisitorPoints "Puntos visitante"
-        nvarchar Status "Estado del partido"
-    }
-
-    %% Definición de relaciones con trazabilidad de PK a FK
-    TEAMS ||--o{ PLAYERS : "TeamID (PK) -> TeamID (FK)"
-    TEAMS ||--o{ MATCHES : "TeamID (PK) -> LocalTeamID (FK)"
-    TEAMS ||--o{ MATCHES : "TeamID (PK) -> VisitorTeamID (FK)"
+- La vista cruza los equipos activos en una temporada, con todas las categorías de la temporada.
+- Acumula (SUM) `LocalPoints` y `VisitorPoints` basándose en el resultado de los partidos finalizados de `MATCHES`.
+- Calcula: **Partidos Jugados (PJ)**, **Partidos Ganados (PG)**, **Partidos Perdidos (PP)**, **Puntos (Pts)** y **Diferencia de Tantos**.
+- Se filtran según `SeasonID` y `CategoryID` dinámicamente desde el backend.

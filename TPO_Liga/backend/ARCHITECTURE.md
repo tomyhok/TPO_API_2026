@@ -19,10 +19,10 @@ El ciclo de vida de una solicitud HTTP entrante sigue un flujo de datos estricto
 3.  **Router (`src/routes/`)**: La aplicación Express reenvía la solicitud al router de la ruta apropiada (ej., `playerRoutes.js`) basándose en el prefijo de la URL.
 4.  **Middleware de Ruta**: Si la ruta está protegida (como un `POST` o `DELETE`), la solicitud debe pasar primero por `authMiddleware`. Si la autenticación falla, el flujo se detiene aquí y devuelve un `401 Unauthorized`.
 5.  **Controller (`src/controllers/`)**: La solicitud se entrega a la función específica del controlador (ej., `getPlayersByTeamId`). El controlador desestructura los parámetros (`req.params`) y las cargas útiles del cuerpo (`req.body`).
-6.  **Conexión a Base de Datos (`src/config/db.js`)**: El controlador espera la `poolPromise` para asegurar una conexión activa a la base de datos SQL Server.
-7.  **Ejecución de Consulta**: El controlador ejecuta una consulta SQL parametrizada (ej., `.input('TeamID', sql.Int, teamId)`) utilizando el paquete `mssql`. La vinculación de parámetros se utiliza para prevenir ataques de Inyección SQL.
-8.  **Respuesta de Base de Datos**: SQL Server ejecuta la consulta y devuelve un `recordset` (un array de filas).
-9.  **Respuesta HTTP**: El controlador toma el `recordset` de la base de datos, lo serializa en una cadena JSON a través de `res.json()` y envía un código de estado HTTP 200/201 de vuelta al cliente.
+6.  **Capa de Modelo (`src/models/`)**: El controlador delega la operación a un modelo (ej., `PlayerModel.getByTeamId(teamId)`).
+7.  **Conexión a Base de Datos**: El Modelo utiliza la `poolPromise` (`src/config/db.js`) para asegurar una conexión activa y ejecuta una consulta SQL parametrizada utilizando `mssql` (ej., `.input('TeamID', sql.Int, teamId)`), previniendo ataques de inyección SQL.
+8.  **Respuesta de Base de Datos**: SQL Server ejecuta la consulta y devuelve un `recordset`.
+9.  **Respuesta HTTP**: El modelo devuelve los datos al controlador, quien los formatea como JSON a través de `res.json()` y envía un código de estado HTTP 200/201 de vuelta al cliente.
 
 ## 3. Sistema de Autenticación con JSON Web Token (JWT)
 
@@ -38,7 +38,7 @@ La aplicación asegura los endpoints administrativos (crear, actualizar y elimin
 
 En lugar de calcular la tabla de posiciones de los equipos dinámicamente dentro de la capa de la aplicación Node.js, la lógica de negocio se descarga directamente al motor de la base de datos utilizando una Vista SQL (`v_Standings`).
 
-*   **Agregación a Nivel de Base de Datos**: La vista SQL es responsable de agregar los datos de los partidos. Calcula el total de partidos jugados, victorias, derrotas y empates para cada equipo basándose en los `LocalPoints` y `VisitorPoints` almacenados en la tabla `Matches`.
-*   **Optimización del Rendimiento**: Al mantener esta lógica en la base de datos, el motor relacional puede optimizar el plan de ejecución. Evita que el servidor Node.js tenga que obtener cientos de partidos en memoria y recorrerlos para calcular los puntos.
-*   **Controlador Simplificado**: Debido a que la lógica se abstrae en la Vista, el `standingsController` es increíblemente ligero. Simplemente ejecuta `SELECT * FROM [v_Standings] ORDER BY [Puntos] DESC`.
+*   **Agregación a Nivel de Base de Datos**: La vista SQL cruza dinámicamente las categorías y los equipos de una temporada. Calcula los partidos jugados, victorias, derrotas y puntos utilizando sumatorias condicionales sobre la tabla `Matches`.
+*   **Optimización del Rendimiento**: Al mantener esta lógica en la base de datos, el motor relacional optimiza el plan de ejecución. Evita que el servidor Node.js obtenga los partidos en memoria y los procese manualmente.
+*   **Controlador Simplificado**: La lógica se abstrae completamente. El `StandingsModel` simplemente inyecta dinámicamente el filtro de temporada/categoría y realiza un `SELECT * FROM [v_Standings] WHERE SeasonID = @SeasonId ORDER BY Puntos DESC`.
 *   **Única Fuente de Verdad**: Cualquier herramienta de informes, aplicación frontend o servicio secundario que consulte la vista `v_Standings` obtendrá cálculos idénticos sin duplicar el código de la lógica de negocio.
