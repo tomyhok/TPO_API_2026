@@ -52,7 +52,7 @@ export async function apiRequest(path, { method = 'GET', body, auth = false } = 
 
   if (!response.ok) {
     const message =
-      data?.message ||
+      data?.message || data?.error ||
       (typeof data === 'string' && data) ||
       `Request failed with status ${response.status}`;
     throw new ApiError(message, response.status, data);

@@ -18,7 +18,8 @@ export default function CategoryList() {
     try {
       await apiRequest('/api/categories', {
         method: 'POST',
-        body: { Name: newCategoryName }
+        body: { Name: newCategoryName },
+        auth: true
       });
       setNewCategoryName('');
       await refreshCategories();
@@ -34,7 +35,7 @@ export default function CategoryList() {
     setLoading(true);
     setErrorMsg('');
     try {
-      await apiRequest(`/api/categories/${id}`, { method: 'DELETE' });
+      await apiRequest(`/api/categories/${id}`, { method: 'DELETE', auth: true });
       await refreshCategories();
     } catch (err) {
       setErrorMsg(err.message);
