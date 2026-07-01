@@ -23,6 +23,7 @@ Esta es la aplicación cliente (frontend) para la plataforma de gestión de la *
 3. **Dashboard e Informes**:
    - Vistas generales de la tabla de posiciones generadas dinámicamente.
    - Detalles interactivos de los equipos, mostrando su rendimiento, plantel actual, estadio y DT.
+   - Componentes inteligentes de UI como `TeamLogo`, que detecta si una imagen web no carga (Error 404) y automáticamente presenta un ícono de escudo por defecto, manteniendo la estética de la app.
    - Lista detallada de partidos, permitiendo la visualización rápida de resultados y alineaciones.
 
 ## Estructura del Proyecto
@@ -31,7 +32,7 @@ Esta es la aplicación cliente (frontend) para la plataforma de gestión de la *
 src/
 ├── assets/          # Imágenes y recursos estáticos
 ├── components/      # Componentes principales (Vistas y Widgets)
-│   ├── ui/          # Componentes reutilizables (Botones, Inputs, Modales, Cards)
+│   ├── ui/          # Componentes reutilizables (Botones, Inputs, Modales, Cards, TeamLogo)
 │   ├── widgets/     # Componentes de visualización detallada (TeamDetails, MatchDetails)
 │   ├── Login.jsx
 │   ├── MatchList.jsx

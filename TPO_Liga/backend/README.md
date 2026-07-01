@@ -132,10 +132,11 @@ La API proporciona endpoints bajo el prefijo `/api/teams` para gestionar equipos
 - **Cuerpo de la Solicitud** (JSON):
   ```json
   {
-    "Name": "Silver Hawks" 
+    "Name": "Silver Hawks",
+    "LogoURL": "https://ejemplo.com/new_logo.png"
   }
   ```
-  *(Puede proporcionar `Name`, `Coach` o ambos).*
+  *(Puede proporcionar `Name`, `Coach`, `LogoURL` o `StadiumName`).*
 - **Respuesta Exitosa**: `200 OK` (Devuelve el objeto de equipo actualizado)
 - **Respuesta de Error**: `400 Bad Request` (Si no se proporcionan campos para actualizar), `404 Not Found` (Si el ID del equipo no existe), `401 Unauthorized` (Si el token falta o es inválido)
 
