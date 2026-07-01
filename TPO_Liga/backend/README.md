@@ -61,13 +61,14 @@ Cree un archivo llamado `.env` en la raíz del directorio `backend` (si aún no 
 
 ```env
 PORT=3000
-DB_SERVER=localhost
+DB_SERVER=apiuade.database.windows.net
 DB_PORT=1433
-DB_NAME=YouthBasketballLeague
-
+DB_NAME=LigaJuvenilApis
+DB_USER=sqladmin
+DB_PASSWORD=TpoApis2026!
 JWT_SECRET=supersecret_youth_league_key
 ```
-> **Nota**: Ajuste los valores de `DB_SERVER`, `DB_PORT` y `DB_NAME` para que coincidan con su instancia local de SQL Server.
+> **Nota**: Ajuste los valores si utiliza otra instancia de SQL Server.
 
 ### 2. Instalar Dependencias
 
