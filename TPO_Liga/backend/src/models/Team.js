@@ -163,11 +163,18 @@ class TeamModel {
 
   static async delete(id) {
     const pool = await poolPromise;
-    const request = pool.request().input('TeamID', sql.Int, id);
-    // Para simplificar, asume que primero se elimina de TeamSeasons si no tiene dependencias fuertes
-    await request.query('DELETE FROM TeamSeasons WHERE TeamID = @TeamID');
-    const result = await request.query('DELETE FROM Teams WHERE TeamID = @TeamID');
-    return result.rowsAffected[0] > 0;
+    const transaction = new sql.Transaction(pool);
+    await transaction.begin();
+    try {
+      const request = transaction.request().input('TeamID', sql.Int, id);
+      await request.query('DELETE FROM TeamSeasons WHERE TeamID = @TeamID');
+      const result = await request.query('DELETE FROM Teams WHERE TeamID = @TeamID');
+      await transaction.commit();
+      return result.rowsAffected[0] > 0;
+    } catch (err) {
+      await transaction.rollback();
+      throw err;
+    }
   }
 }
 

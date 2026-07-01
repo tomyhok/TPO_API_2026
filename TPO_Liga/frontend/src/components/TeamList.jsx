@@ -9,6 +9,7 @@ import Skeleton from './ui/Skeleton';
 import Button from './ui/Button';
 import Input from './ui/Input';
 import Modal from './ui/Modal';
+import TeamLogo from './ui/TeamLogo';
 import TeamDetailsWidget from './widgets/TeamDetailsWidget';
 
 const TeamList = () => {
@@ -149,13 +150,12 @@ const TeamList = () => {
                 )}
                 
                 <div className="relative z-10 flex items-start gap-4">
-                  {team.LogoURL ? (
-                    <img src={team.LogoURL} alt={teamName} className="flex-shrink-0 w-12 h-12 rounded-xl object-contain bg-stone-200/80 border border-stone-300 shadow-lg group-hover:scale-110 transition-transform" />
-                  ) : (
-                    <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-stone-200/80 border border-stone-300 flex items-center justify-center text-xl shadow-lg group-hover:scale-110 transition-transform">
-                      🛡️
-                    </div>
-                  )}
+                  <TeamLogo 
+                    src={team.LogoURL} 
+                    alt={teamName}
+                    className="flex-shrink-0 w-12 h-12 rounded-xl shadow-lg group-hover:scale-110 transition-transform"
+                    fallbackClassName="flex-shrink-0 w-12 h-12 rounded-xl shadow-lg group-hover:scale-110 transition-transform text-xl"
+                  />
                   <div>
                     <h3 className="font-bold text-lg text-stone-900 group-hover:text-orange-300 transition-colors leading-tight" title={teamName}>
                       {teamName}

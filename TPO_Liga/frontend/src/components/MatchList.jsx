@@ -8,6 +8,7 @@ import Skeleton from './ui/Skeleton';
 import Button from './ui/Button';
 import Input from './ui/Input';
 import Modal from './ui/Modal';
+import TeamLogo from './ui/TeamLogo';
 import MatchDetailsWidget from './widgets/MatchDetailsWidget';
 
 const MatchList = () => {
@@ -303,22 +304,24 @@ const MatchList = () => {
                       <div className="flex-1 flex flex-col justify-center px-4 space-y-2 py-1">
                         <div className="flex items-center justify-between">
                             <div className="flex items-center gap-3">
-                                {getTeamLogo(match.HomeTeamID || match.LocalTeamID) ? (
-                                  <img src={getTeamLogo(match.HomeTeamID || match.LocalTeamID)} alt={localTeam} className="w-5 h-5 rounded object-contain bg-stone-200" />
-                                ) : (
-                                  <div className="w-5 h-5 rounded bg-stone-200 flex items-center justify-center text-[10px] text-stone-500">🛡️</div>
-                                )}
+                                <TeamLogo 
+                                  src={getTeamLogo(match.HomeTeamID || match.LocalTeamID)} 
+                                  alt={localTeam}
+                                  className="w-5 h-5 rounded"
+                                  fallbackClassName="w-5 h-5 rounded text-[10px]"
+                                />
                                 <span className={`text-sm font-medium ${localWon ? 'text-stone-900 font-bold' : 'text-stone-700'}`}>{localTeam}</span>
                             </div>
                             {hasScore && <span className={`text-sm font-bold ${localWon ? 'text-orange-400' : 'text-stone-700'}`}>{localScore}</span>}
                         </div>
                         <div className="flex items-center justify-between">
                             <div className="flex items-center gap-3">
-                                {getTeamLogo(match.AwayTeamID || match.VisitorTeamID) ? (
-                                  <img src={getTeamLogo(match.AwayTeamID || match.VisitorTeamID)} alt={visitorTeam} className="w-5 h-5 rounded object-contain bg-stone-200" />
-                                ) : (
-                                  <div className="w-5 h-5 rounded bg-stone-200 flex items-center justify-center text-[10px] text-stone-500">🛡️</div>
-                                )}
+                                <TeamLogo 
+                                  src={getTeamLogo(match.AwayTeamID || match.VisitorTeamID)} 
+                                  alt={visitorTeam}
+                                  className="w-5 h-5 rounded"
+                                  fallbackClassName="w-5 h-5 rounded text-[10px]"
+                                />
                                 <span className={`text-sm font-medium ${visitorWon ? 'text-stone-900 font-bold' : 'text-stone-700'}`}>{visitorTeam}</span>
                             </div>
                             {hasScore && <span className={`text-sm font-bold ${visitorWon ? 'text-orange-400' : 'text-stone-700'}`}>{visitorScore}</span>}

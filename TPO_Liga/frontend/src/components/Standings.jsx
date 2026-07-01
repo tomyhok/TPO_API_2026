@@ -7,6 +7,7 @@ import Alert from './ui/Alert';
 import Card from './ui/Card';
 import PageHeader from './ui/PageHeader';
 import Skeleton from './ui/Skeleton';
+import TeamLogo from './ui/TeamLogo';
 import TeamDetailsWidget from './widgets/TeamDetailsWidget';
 
 const Standings = () => {
@@ -126,11 +127,12 @@ const Standings = () => {
                         </div>
                       </td>
                       <td className="px-6 py-4 font-bold text-base text-stone-900 group-hover:text-orange-300 transition-colors flex items-center gap-3">
-                        {team.LogoURL ? (
-                          <img src={team.LogoURL} alt={team.Equipo || team.TeamName} className="w-8 h-8 rounded-full object-contain bg-stone-200 border border-stone-300" />
-                        ) : (
-                          <div className="w-8 h-8 rounded-full bg-stone-200 flex items-center justify-center text-xs shadow-inner border border-stone-300">🛡️</div>
-                        )}
+                        <TeamLogo 
+                          src={team.LogoURL} 
+                          alt={team.Equipo || team.TeamName}
+                          className="w-8 h-8 rounded-full"
+                          fallbackClassName="w-8 h-8 rounded-full shadow-inner text-xs"
+                        />
                         <span>{team.Equipo || team.TeamName || '-'}</span>
                       </td>
                       <td className="px-4 py-4 text-center font-black text-lg text-orange-400">

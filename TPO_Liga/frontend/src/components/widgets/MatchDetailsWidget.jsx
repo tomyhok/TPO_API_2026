@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { apiRequest } from '../../services/api';
 import { useSeason } from '../../contexts/SeasonContext';
+import TeamLogo from '../ui/TeamLogo';
 
 const MatchDetailsWidget = ({ match, getTeamName, getTeamLogo }) => {
   const [localTeamData, setLocalTeamData] = useState(null);
@@ -56,11 +57,12 @@ const MatchDetailsWidget = ({ match, getTeamName, getTeamLogo }) => {
       <div className="flex flex-col items-center justify-center p-4 bg-stone-100/50 rounded-xl border border-stone-200 shadow-inner flex-shrink-0">
         <div className="flex w-full items-center justify-between gap-2">
           <div className="flex-1 text-center flex flex-col items-center min-w-0">
-            {localLogo ? (
-              <img src={localLogo} alt={localTeamName} className="w-12 h-12 md:w-16 md:h-16 rounded-2xl object-contain bg-stone-200 border border-stone-300 shadow-lg mb-2" />
-            ) : (
-              <div className="w-12 h-12 md:w-16 md:h-16 rounded-2xl bg-stone-200 flex items-center justify-center text-2xl shadow-lg border border-stone-300 mb-2">🛡️</div>
-            )}
+            <TeamLogo 
+              src={localLogo} 
+              alt={localTeamName}
+              className="w-12 h-12 md:w-16 md:h-16 rounded-2xl shadow-lg mb-2"
+              fallbackClassName="w-12 h-12 md:w-16 md:h-16 rounded-2xl shadow-lg text-2xl mb-2"
+            />
             <h4 className="font-bold text-stone-900 text-sm md:text-base leading-tight truncate w-full px-1" title={localTeamName}>{localTeamName}</h4>
             <span className="text-[10px] md:text-xs font-semibold text-stone-500 uppercase tracking-widest mt-1">Local</span>
           </div>
@@ -79,11 +81,12 @@ const MatchDetailsWidget = ({ match, getTeamName, getTeamLogo }) => {
           </div>
 
           <div className="flex-1 text-center flex flex-col items-center min-w-0">
-            {visitorLogo ? (
-              <img src={visitorLogo} alt={visitorTeamName} className="w-12 h-12 md:w-16 md:h-16 rounded-2xl object-contain bg-stone-200 border border-stone-300 shadow-lg mb-2" />
-            ) : (
-              <div className="w-12 h-12 md:w-16 md:h-16 rounded-2xl bg-stone-200 flex items-center justify-center text-2xl shadow-lg border border-stone-300 mb-2">🛡️</div>
-            )}
+            <TeamLogo 
+              src={visitorLogo} 
+              alt={visitorTeamName}
+              className="w-12 h-12 md:w-16 md:h-16 rounded-2xl shadow-lg mb-2"
+              fallbackClassName="w-12 h-12 md:w-16 md:h-16 rounded-2xl shadow-lg text-2xl mb-2"
+            />
             <h4 className="font-bold text-stone-900 text-sm md:text-base leading-tight truncate w-full px-1" title={visitorTeamName}>{visitorTeamName}</h4>
             <span className="text-[10px] md:text-xs font-semibold text-stone-500 uppercase tracking-widest mt-1">Visitante</span>
           </div>

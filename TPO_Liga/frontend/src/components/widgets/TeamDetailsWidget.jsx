@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { apiRequest } from '../../services/api';
 import { useSeason } from '../../contexts/SeasonContext';
 import { useCategories } from '../../contexts/CategoryContext';
+import TeamLogo from '../ui/TeamLogo';
 
 const TeamDetailsWidget = ({ team }) => {
   const [teamData, setTeamData] = useState(null);
@@ -50,11 +51,12 @@ const TeamDetailsWidget = ({ team }) => {
   return (
     <div className="space-y-6 animate-fade-in h-full flex flex-col">
       <div className="flex items-center gap-4 border-b border-stone-200 pb-4">
-        {(teamData?.LogoURL || team.LogoURL) ? (
-          <img src={teamData?.LogoURL || team.LogoURL} alt={teamData?.TeamName || team.TeamName || team.Name || team.Equipo} className="w-14 h-14 rounded-xl object-contain bg-stone-200 border border-stone-300 shadow-lg" />
-        ) : (
-          <div className="w-14 h-14 rounded-xl bg-stone-200 flex items-center justify-center text-2xl shadow-lg border border-stone-300">🛡️</div>
-        )}
+        <TeamLogo 
+          src={teamData?.LogoURL || team.LogoURL} 
+          alt={teamData?.TeamName || team.TeamName || team.Name || team.Equipo}
+          className="w-14 h-14 rounded-xl shadow-lg"
+          fallbackClassName="text-2xl"
+        />
         <div>
           <h3 className="font-bold text-xl text-stone-900 leading-tight">{teamData?.TeamName || team.TeamName || team.Name || team.Equipo}</h3>
         </div>
