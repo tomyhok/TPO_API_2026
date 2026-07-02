@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { apiRequest, getToken } from '../services/api';
 import { useSeason } from '../contexts/SeasonContext';
 import { useCategories } from '../contexts/CategoryContext';
+import { useRightPanel } from '../contexts/RightPanelContext';
 import Alert from './ui/Alert';
 import Card from './ui/Card';
 import PageHeader from './ui/PageHeader';
@@ -9,6 +10,7 @@ import Skeleton from './ui/Skeleton';
 import Button from './ui/Button';
 import Input from './ui/Input';
 import Modal from './ui/Modal';
+import PlayerDetailsWidget from './widgets/PlayerDetailsWidget';
 
 const PlayerList = () => {
   const [players, setPlayers] = useState([]);
@@ -22,11 +24,12 @@ const PlayerList = () => {
   const isAdmin = !!getToken();
   const { selectedSeasonId, loading: seasonLoading } = useSeason();
   const { categories, categoriesLoading } = useCategories();
+  const { openPanel } = useRightPanel();
   
   // Modal & Form State
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingPlayer, setEditingPlayer] = useState(null);
-  const [formData, setFormData] = useState({ FirstName: '', LastName: '', JerseyNumber: '', Position: '', TeamID: '', CategoryID: '' });
+  const [formData, setFormData] = useState({ FirstName: '', LastName: '', JerseyNumber: '', Position: '', TeamID: '', CategoryID: '', PhotoURL: '' });
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -70,11 +73,12 @@ const PlayerList = () => {
         JerseyNumber: player.JerseyNumber || '', 
         Position: player.Position || '', 
         TeamID: player.TeamID || '',
-        CategoryID: player.CategoryID || activeCategoryId || ''
+        CategoryID: player.CategoryID || activeCategoryId || '',
+        PhotoURL: player.PhotoURL || ''
       });
     } else {
       setEditingPlayer(null);
-      setFormData({ FirstName: '', LastName: '', JerseyNumber: '', Position: '', TeamID: '', CategoryID: activeCategoryId || '' });
+      setFormData({ FirstName: '', LastName: '', JerseyNumber: '', Position: '', TeamID: '', CategoryID: activeCategoryId || '', PhotoURL: '' });
     }
     setIsModalOpen(true);
   };
@@ -207,10 +211,16 @@ const PlayerList = () => {
                   ? nameParts.join(' ')
                   : player.PlayerName || player.Nombre || player.Name || 'Jugador';
   
-              const teamName = player.TeamID ? (teams.find(t => String(t.TeamID) === String(player.TeamID))?.TeamName || teams.find(t => String(t.TeamID) === String(player.TeamID))?.Name || teams.find(t => String(t.TeamID) === String(player.TeamID))?.Equipo || `Equipo ${player.TeamID}`) : null;
+              const teamObj = teams.find(t => String(t.TeamID) === String(player.TeamID));
+              const teamName = teamObj ? (teamObj.TeamName || teamObj.Name || teamObj.Equipo) : null;
+              const teamLogoURL = teamObj ? teamObj.LogoURL : null;
 
               return (
-                <Card key={player.PlayerID} className="group hover:-translate-y-1 transition-transform duration-300 relative overflow-hidden">
+                <Card 
+                  key={player.PlayerID} 
+                  onClick={() => openPanel(<PlayerDetailsWidget player={{ ...player, TeamName: teamName, TeamLogoURL: teamLogoURL }} />)}
+                  className="group hover:-translate-y-1 transition-transform duration-300 relative overflow-hidden cursor-pointer"
+                >
                   {/* Subtle background glow based on category if available */}
                   {player.CategoryName && (
                     <div className="absolute -top-10 -right-10 w-32 h-32 bg-orange-500/10 rounded-full blur-2xl group-hover:bg-orange-500/20 transition-colors"></div>
@@ -218,18 +228,23 @@ const PlayerList = () => {
                   
                   {isAdmin && (
                     <div className="absolute top-2 right-2 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity z-20">
-                      <button onClick={() => openModal(player)} className="p-1 rounded bg-stone-200/80 text-orange-400 hover:bg-stone-300 hover:text-orange-300 transition-colors backdrop-blur-sm border border-stone-300/50 text-sm">
+                      <button onClick={(e) => { e.stopPropagation(); openModal(player); }} className="p-1 rounded bg-stone-200/80 text-orange-400 hover:bg-stone-300 hover:text-orange-300 transition-colors backdrop-blur-sm border border-stone-300/50 text-sm">
                         ✏️
                       </button>
-                      <button onClick={() => handleDelete(player.PlayerID)} className="p-1 rounded bg-stone-200/80 text-red-500 hover:bg-stone-300 hover:text-red-400 transition-colors backdrop-blur-sm border border-stone-300/50 text-sm">
+                      <button onClick={(e) => { e.stopPropagation(); handleDelete(player.PlayerID); }} className="p-1 rounded bg-stone-200/80 text-red-500 hover:bg-stone-300 hover:text-red-400 transition-colors backdrop-blur-sm border border-stone-300/50 text-sm">
                         🗑️
                       </button>
                     </div>
                   )}
                   
                   <div className="flex items-center gap-4 w-full relative z-10">
-                    <div className="flex-shrink-0 w-14 h-14 rounded-full bg-gradient-to-tr from-stone-300 to-stone-400 border border-stone-400 flex items-center justify-center text-2xl shadow-inner overflow-hidden">
-                      🧑‍🚀
+                    <div className="flex-shrink-0 w-14 h-14 rounded-full border border-stone-300 shadow-inner overflow-hidden bg-stone-100 flex items-center justify-center">
+                      <img 
+                        src={player.PhotoURL || 'https://images.fifaindex.com/fifa22/players/205340.png'} 
+                        alt={displayName} 
+                        className="w-full h-full object-cover" 
+                        onError={(e) => { e.target.src = 'https://images.fifaindex.com/fifa22/players/205340.png'; }}
+                      />
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-lg font-bold text-stone-900 truncate group-hover:text-orange-300 transition-colors">
@@ -241,13 +256,11 @@ const PlayerList = () => {
                             #{player.JerseyNumber}
                           </span>
                         )}
-                        {player.Position && (
-                          <span className="inline-flex items-center rounded-md bg-stone-200/80 px-2 py-0.5 text-xs font-medium text-stone-600 border border-stone-300 uppercase">
-                            {player.Position}
-                          </span>
-                        )}
+                        <span className="inline-flex items-center rounded-md bg-stone-200/80 px-2 py-0.5 text-xs font-medium text-stone-600 border border-stone-300 uppercase">
+                          {player.Position || 'N/A'}
+                        </span>
                         {teamName && (
-                          <span className="inline-flex items-center rounded-md bg-orange-500/10 px-2 py-0.5 text-xs font-medium text-orange-500 border border-orange-500/20 truncate max-w-[120px]" title={teamName}>
+                          <span className="inline-flex items-center rounded-md bg-orange-500/10 px-2 py-0.5 text-xs font-medium text-orange-500 border border-orange-500/20" title={teamName}>
                             {teamName}
                           </span>
                         )}
@@ -363,6 +376,13 @@ const PlayerList = () => {
               ))}
             </select>
           </div>
+          <Input 
+            label="URL de Foto (Opcional)" 
+            type="url"
+            placeholder="https://images.fifaindex.com/fifa22/players/205340.png"
+            value={formData.PhotoURL} 
+            onChange={e => setFormData({...formData, PhotoURL: e.target.value})} 
+          />
           <div className="flex justify-end gap-3 mt-6">
             <Button variant="ghost" type="button" onClick={() => setIsModalOpen(false)}>Cancelar</Button>
             <Button type="submit" disabled={saving}>

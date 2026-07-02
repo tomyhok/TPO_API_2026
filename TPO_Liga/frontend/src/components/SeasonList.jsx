@@ -8,6 +8,8 @@ import Button from './ui/Button';
 import Input from './ui/Input';
 import Modal from './ui/Modal';
 import { useSeason } from '../contexts/SeasonContext';
+import { useRightPanel } from '../contexts/RightPanelContext';
+import StandingsWidget from './widgets/StandingsWidget';
 
 const SeasonList = () => {
   const [seasonsData, setSeasonsData] = useState([]);
@@ -16,6 +18,7 @@ const SeasonList = () => {
   const isAdmin = !!getToken();
   
   const { fetchSeasons } = useSeason(); // to reload context after edit
+  const { openPanel } = useRightPanel();
   
   // Modal & Form State
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -141,18 +144,28 @@ const SeasonList = () => {
           <p className="text-lg text-stone-600">No hay temporadas cargadas actualmente.</p>
         </Card>
       ) : (
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        <div className="flex flex-col gap-4">
           {seasonsData.map((season) => (
             <Card 
               key={season.SeasonID} 
-              className={`relative overflow-hidden group hover:-translate-y-1 transition-transform duration-300 ${season.IsActive ? 'border-orange-500/50 shadow-lg shadow-orange-500/5' : ''}`}
+              onClick={() => openPanel(
+                <div className="h-full bg-white flex flex-col p-8">
+                  <h2 className="text-2xl font-black text-stone-900 mb-6 border-b border-stone-200 pb-4 pr-12">
+                    Posiciones: {season.Name}
+                  </h2>
+                  <div className="flex-1 overflow-hidden">
+                    <StandingsWidget seasonId={season.SeasonID} hideTitle={true} />
+                  </div>
+                </div>
+              )}
+              className={`relative overflow-hidden group hover:-translate-y-1 transition-transform duration-300 cursor-pointer ${season.IsActive ? 'border-orange-500/50 shadow-lg shadow-orange-500/5' : ''}`}
             >
               {season.IsActive && (
                 <div className={`absolute inset-0 bg-gradient-to-br from-orange-500/10 to-amber-500/5 opacity-50`}></div>
               )}
               
               {isAdmin && (
-                <div className="absolute top-3 right-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity z-20">
+                <div className="absolute top-1/2 -translate-y-1/2 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity z-20">
                   <button onClick={(e) => { e.stopPropagation(); openModal(season); }} className="p-1.5 rounded-lg bg-stone-200/80 text-orange-400 hover:bg-stone-300 hover:text-orange-300 transition-colors backdrop-blur-sm border border-stone-300/50">
                     ✏️
                   </button>
@@ -164,27 +177,32 @@ const SeasonList = () => {
                 </div>
               )}
               
-              <div className="relative z-10 flex flex-col items-start gap-4 h-full">
-                <div className="flex items-center justify-between w-full">
+              <div className="relative z-10 flex flex-row items-center gap-6 h-full w-full">
+                <div className="flex items-center gap-4">
                    <div className={`flex-shrink-0 w-12 h-12 rounded-xl flex items-center justify-center text-xl shadow-lg transition-transform ${season.IsActive ? 'bg-orange-500/20 text-orange-400 border border-orange-500/30' : 'bg-stone-200/80 border border-stone-300'}`}>
                     {season.IsActive ? '⭐' : '🗓️'}
                    </div>
                    {season.IsActive && (
-                     <span className="text-xs font-bold text-orange-400 bg-orange-500/10 px-2 py-1 rounded">Activa</span>
+                     <span className="text-xs font-bold text-orange-400 bg-orange-500/10 px-2 py-1 rounded whitespace-nowrap hidden sm:inline-block">Activa</span>
                    )}
                 </div>
                 
-                <div>
-                  <h3 className="font-bold text-lg text-stone-900 group-hover:text-orange-300 transition-colors line-clamp-1">
-                    {season.Name}
-                  </h3>
-                  <p className="text-sm font-medium text-stone-500 mt-1">
-                    ID: <span className="text-orange-400/80">{season.SeasonID}</span>
-                  </p>
-                  <p className="text-xs text-stone-600 mt-2">
-                    Inicio: {season.StartDate ? new Date(season.StartDate).toLocaleDateString('es-ES') : 'N/A'} <br />
-                    Fin: {season.EndDate ? new Date(season.EndDate).toLocaleDateString('es-ES') : 'N/A'}
-                  </p>
+                <div className="flex-1 min-w-0 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pr-16">
+                  <div>
+                    <h3 className="font-bold text-lg text-stone-900 group-hover:text-orange-300 transition-colors line-clamp-1 flex items-center gap-2">
+                      {season.Name}
+                      {season.IsActive && (
+                         <span className="text-[10px] font-bold text-orange-400 bg-orange-500/10 px-1.5 py-0.5 rounded sm:hidden">Activa</span>
+                      )}
+                    </h3>
+                    <p className="text-sm font-medium text-stone-500 mt-1">
+                      ID: <span className="text-orange-400/80">{season.SeasonID}</span>
+                    </p>
+                  </div>
+                  <div className="text-xs text-stone-600 flex flex-col sm:text-right gap-1">
+                    <span><span className="font-semibold text-stone-400 uppercase tracking-wider text-[10px]">Inicio:</span> {season.StartDate ? new Date(season.StartDate).toLocaleDateString('es-ES') : 'N/A'}</span>
+                    <span><span className="font-semibold text-stone-400 uppercase tracking-wider text-[10px]">Fin:</span> {season.EndDate ? new Date(season.EndDate).toLocaleDateString('es-ES') : 'N/A'}</span>
+                  </div>
                 </div>
               </div>
             </Card>

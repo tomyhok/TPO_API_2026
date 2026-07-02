@@ -184,11 +184,13 @@ La API proporciona endpoints bajo el prefijo `/api/players` para gestionar jugad
     "CategoryID": 2,
     "JerseyNumber": 23,
     "Position": "Escolta",
+    "PhotoURL": "https://images.fifaindex.com/fifa22/players/205340.png",
     "seasonId": 1
   }
   ```
 - **Respuesta Exitosa**: `201 Created` (Devuelve el objeto de jugador recién creado)
 - **Respuesta de Error**: `400 Bad Request` (Si faltan `TeamID`, `FirstName`, `LastName` o `CategoryID`), `401 Unauthorized`
+- **Nota**: Si `Position` se omite, se le asigna por defecto el valor `"N/A"`.
 
 ### 5. Actualizar un Jugador
 - **URL**: `/api/players/:id`
@@ -197,10 +199,11 @@ La API proporciona endpoints bajo el prefijo `/api/players` para gestionar jugad
 - **Cuerpo de la Solicitud** (JSON):
   ```json
   {
-    "Category": "Pro" 
+    "Category": "Pro",
+    "PhotoURL": "https://images.fifaindex.com/fifa22/players/205340.png"
   }
   ```
-  *(Puede proporcionar cualquier combinación de `TeamID`, `FirstName`, `LastName` o `Category`).*
+  *(Puede proporcionar cualquier combinación de `TeamID`, `FirstName`, `LastName`, `CategoryID`, `JerseyNumber`, `Position` o `PhotoURL`).*
 - **Respuesta Exitosa**: `200 OK` (Devuelve el objeto de jugador actualizado)
 - **Respuesta de Error**: `400 Bad Request` (Si no se proporcionan campos para actualizar), `404 Not Found` (Si el ID del jugador no existe), `401 Unauthorized` (Si el token falta o es inválido)
 

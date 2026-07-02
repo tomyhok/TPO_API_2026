@@ -2,11 +2,11 @@ const PlayerModel = require('../models/Player');
 
 exports.createPlayer = async (req, res) => {
   try {
-    const { TeamID, FirstName, LastName, CategoryID, seasonId, JerseyNumber, Position } = req.body;
+    const { TeamID, FirstName, LastName, CategoryID, seasonId, JerseyNumber, Position, PhotoURL } = req.body;
     if (!FirstName || !LastName) {
       return res.status(400).json({ message: 'FirstName and LastName are required.' });
     }
-    const player = await PlayerModel.create(TeamID, FirstName, LastName, CategoryID, seasonId, JerseyNumber, Position);
+    const player = await PlayerModel.create(TeamID, FirstName, LastName, CategoryID, seasonId, JerseyNumber, Position, PhotoURL);
     res.status(201).json(player);
   } catch (error) {
     console.error('Error creating player:', error);
@@ -55,13 +55,13 @@ exports.getPlayersByTeamId = async (req, res) => {
 exports.updatePlayer = async (req, res) => {
   try {
     const { id } = req.params;
-    const { TeamID, FirstName, LastName, CategoryID, seasonId, JerseyNumber, Position } = req.body;
+    const { TeamID, FirstName, LastName, CategoryID, seasonId, JerseyNumber, Position, PhotoURL } = req.body;
     
-    if (!TeamID && !FirstName && !LastName && !CategoryID && JerseyNumber === undefined && Position === undefined) {
+    if (!TeamID && !FirstName && !LastName && !CategoryID && JerseyNumber === undefined && Position === undefined && PhotoURL === undefined) {
       return res.status(400).json({ message: 'At least one field is required for update.' });
     }
     
-    const updatedPlayer = await PlayerModel.update(id, TeamID, FirstName, LastName, CategoryID, seasonId, JerseyNumber, Position);
+    const updatedPlayer = await PlayerModel.update(id, TeamID, FirstName, LastName, CategoryID, seasonId, JerseyNumber, Position, PhotoURL);
     if (!updatedPlayer) {
       return res.status(404).json({ message: 'Player not found.' });
     }

@@ -3,20 +3,21 @@ import { apiRequest } from '../../services/api';
 import { useSeason } from '../../contexts/SeasonContext';
 import { useCategories } from '../../contexts/CategoryContext';
 
-const StandingsWidget = () => {
+const StandingsWidget = ({ seasonId: propSeasonId, hideTitle = false }) => {
   const [standings, setStandings] = useState([]);
   const [loading, setLoading] = useState(true);
   const { selectedSeasonId } = useSeason();
+  const effectiveSeasonId = propSeasonId || selectedSeasonId;
   const { categories, categoriesLoading } = useCategories();
   const [activeCategoryId, setActiveCategoryId] = useState(null);
 
   useEffect(() => {
-    if (!selectedSeasonId) return;
+    if (!effectiveSeasonId) return;
 
     const fetchStandings = async () => {
       setLoading(true);
       try {
-        const data = await apiRequest(`/api/standings?seasonId=${selectedSeasonId}`);
+        const data = await apiRequest(`/api/standings?seasonId=${effectiveSeasonId}`);
         setStandings(Array.isArray(data) ? data : []);
       } catch (err) {
         console.error(err);
@@ -26,7 +27,7 @@ const StandingsWidget = () => {
     };
 
     fetchStandings();
-  }, [selectedSeasonId]);
+  }, [effectiveSeasonId]);
 
   useEffect(() => {
     if (!activeCategoryId && categories && categories.length > 0) {
@@ -55,8 +56,8 @@ const StandingsWidget = () => {
 
   return (
     <div className="flex flex-col h-full animate-fade-in">
-      <div className="flex justify-between items-center mb-4 border-b border-stone-200 pb-2">
-        <h3 className="font-bold text-lg text-stone-900">Clasificación</h3>
+      <div className="flex justify-between items-center mb-4 border-b border-stone-200 pb-2 gap-4">
+        {!hideTitle && <h3 className="font-bold text-lg text-stone-900">Clasificación</h3>}
         {categories && categories.length > 0 && (
           <select 
             className="bg-stone-100 border border-stone-300 text-stone-700 text-xs rounded-md px-2 py-1 focus:border-orange-500/50 appearance-none max-w-[120px]"

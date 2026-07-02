@@ -14,6 +14,7 @@ Esta es la aplicación cliente (frontend) para la plataforma de gestión de la *
 1. **Gestión Multitemporada y Categorías**:
    - Selector global de temporadas en la barra superior que actualiza instantáneamente los datos en toda la aplicación.
    - Pestañas de categorías integradas en todas las vistas (Partidos, Posiciones, Planteles) para segmentar la información por edad/división.
+   - Listado de Temporadas en formato de lista panorámica, con información clave (Inicio, Fin, Estado). Al interactuar con una temporada, se despliega la tabla de posiciones específica de esa temporada en el panel lateral.
    - Gestor de temporadas exclusivo para administradores, que permite crear nuevas temporadas (copiando equipos y jugadores) y generar automáticamente el fixture (ida y vuelta) usando un algoritmo de Round Robin.
 
 2. **Panel de Administración Seguro**:
@@ -23,7 +24,9 @@ Esta es la aplicación cliente (frontend) para la plataforma de gestión de la *
 3. **Dashboard e Informes**:
    - Vistas generales de la tabla de posiciones generadas dinámicamente.
    - Detalles interactivos de los equipos, mostrando su rendimiento, plantel actual, estadio y DT.
+   - Panel lateral (`RightPanel`) interactivo que muestra vistas detalladas contextuales, como el `PlayerDetailsWidget` (con foto del jugador, logo del equipo y dorsal) o el `StandingsWidget`.
    - Componentes inteligentes de UI como `TeamLogo`, que detecta si una imagen web no carga (Error 404) y automáticamente presenta un ícono de escudo por defecto, manteniendo la estética de la app.
+   - Vistas atractivas de los jugadores con soporte para carga de URLs de foto o placeholders por defecto.
    - Lista detallada de partidos, permitiendo la visualización rápida de resultados y alineaciones.
 
 ## Estructura del Proyecto
@@ -33,7 +36,7 @@ src/
 ├── assets/          # Imágenes y recursos estáticos
 ├── components/      # Componentes principales (Vistas y Widgets)
 │   ├── ui/          # Componentes reutilizables (Botones, Inputs, Modales, Cards, TeamLogo)
-│   ├── widgets/     # Componentes de visualización detallada (TeamDetails, MatchDetails)
+│   ├── widgets/     # Componentes de visualización detallada (TeamDetails, MatchDetails, PlayerDetailsWidget, StandingsWidget)
 │   ├── Login.jsx
 │   ├── MatchList.jsx
 │   ├── PlayerList.jsx
