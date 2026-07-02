@@ -107,6 +107,7 @@ async function runMigration() {
           ts.SeasonID,
           t.TeamID,
           t.Name AS Equipo,
+          t.LogoURL,
           ISNULL(SUM(m.Points), 0) AS Puntos,
           ISNULL(SUM(m.Played), 0) AS PartidosJugados,
           ISNULL(SUM(m.Won), 0) AS PartidosGanados,

@@ -69,6 +69,7 @@ WITH MatchStats AS (
 SELECT 
     t.TeamID,
     t.Name AS Equipo,
+    t.LogoURL,
     c.CategoryID,
     c.Name AS CategoryName,
     ISNULL(SUM(m.Points), 0) AS Puntos,
