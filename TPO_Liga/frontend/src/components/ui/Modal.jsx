@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { createPortal } from 'react-dom';
+import styles from '../../styles/ui/Modal.module.css';
 
 export default function Modal({ isOpen, onClose, title, children }) {
   useEffect(() => {
@@ -16,22 +17,22 @@ export default function Modal({ isOpen, onClose, title, children }) {
   if (!isOpen) return null;
 
   return createPortal(
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+    <div className={styles.overlay}>
       <div 
-        className="absolute inset-0 bg-stone-900/40 backdrop-blur-sm animate-fade-in" 
+        className={styles.backdrop} 
         onClick={onClose}
       ></div>
-      <div className="relative bg-stone-100 border border-stone-300/50 rounded-2xl w-full max-w-md shadow-2xl animate-slide-up overflow-hidden">
-        <div className="flex items-center justify-between p-6 border-b border-stone-200">
-          <h2 className="text-xl font-bold text-stone-900">{title}</h2>
+      <div className={styles.modal}>
+        <div className={styles.header}>
+          <h2 className={styles.title}>{title}</h2>
           <button 
             onClick={onClose}
-            className="text-stone-500 hover:text-stone-700 transition-colors"
+            className={styles.closeBtn}
           >
             ✕
           </button>
         </div>
-        <div className="p-6">
+        <div className={styles.content}>
           {children}
         </div>
       </div>

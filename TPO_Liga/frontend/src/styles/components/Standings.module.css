@@ -1,0 +1,172 @@
+.container {
+  @apply animate-fade-in;
+}
+
+.card {
+  @apply p-0 overflow-hidden border-0 bg-stone-100/40 backdrop-blur-md;
+}
+
+.loadingContainer {
+  @apply p-6 space-y-4;
+}
+
+.emptyContainer {
+  @apply p-12 text-center;
+}
+
+.emptyIcon {
+  @apply text-4xl mb-4 opacity-50;
+}
+
+.emptyText {
+  @apply text-lg text-stone-600;
+}
+
+.tabsContainer {
+  @apply flex border-b border-stone-200/80 overflow-x-auto;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.tabsContainer::-webkit-scrollbar {
+  display: none;
+}
+
+.tabBtn {
+  @apply px-6 py-4 font-semibold text-sm whitespace-nowrap transition-all border-b-2 border-transparent text-stone-600 hover:text-stone-800 hover:bg-stone-200/30 cursor-pointer;
+}
+
+.tabBtnActive {
+  @apply border-orange-500 text-orange-400 bg-orange-500/5;
+}
+
+.tableContainer {
+  @apply overflow-x-auto;
+}
+
+.table {
+  @apply w-full text-left text-sm text-stone-700;
+}
+
+.thead {
+  @apply bg-stone-200/80 text-xs uppercase text-stone-600 font-bold border-b border-stone-300/50 shadow-sm;
+}
+
+.thPos {
+  @apply w-16 px-4 py-4 text-center;
+}
+
+.thLeft {
+  @apply text-left px-6 py-4;
+}
+
+.thDefault {
+  @apply px-4 py-4 text-center;
+}
+
+.thWins {
+  @apply px-4 py-4 text-center text-emerald-400/80;
+}
+
+.thLosses {
+  @apply px-4 py-4 text-center text-rose-400/80;
+}
+
+.tbody {
+  @apply divide-y divide-stone-200/50;
+}
+
+.tr {
+  @apply hover:bg-stone-200/50 transition-colors cursor-pointer;
+}
+/* No @apply group allowed, so we write standard CSS for hover effects */
+
+.trTop3 {
+  @apply bg-orange-500/[0.02];
+}
+
+.tdDefault {
+  @apply px-4 py-4 text-center;
+}
+
+.posBadgeBase {
+  @apply w-8 h-8 rounded-full flex items-center justify-center mx-auto font-bold text-sm;
+}
+
+.posBadgeGold {
+  @apply bg-amber-500/20 text-amber-500 border border-amber-500/30;
+}
+
+.posBadgeSilver {
+  @apply bg-stone-300/60 text-stone-700 border border-stone-300;
+}
+
+.posBadgeBronze {
+  @apply bg-orange-700/20 text-orange-500 border border-orange-700/30;
+}
+
+.posBadgeDefault {
+  @apply bg-stone-200 text-stone-500;
+}
+
+.medalText {
+  @apply text-lg;
+}
+
+.teamCell {
+  @apply text-left px-6 py-4 font-bold text-base text-stone-900 transition-colors flex items-center gap-3;
+}
+.tr:hover .teamCell {
+  @apply text-orange-400;
+}
+
+.teamLogo {
+  @apply w-8 h-8 rounded-full;
+}
+
+.teamLogoFallback {
+  @apply w-8 h-8 rounded-full shadow-inner text-xs;
+}
+
+.pts {
+  @apply font-black text-lg text-orange-400;
+}
+
+.pj {
+  @apply font-medium;
+}
+
+.pg {
+  @apply font-medium text-emerald-400;
+}
+
+.pp {
+  @apply font-medium text-rose-400;
+}
+
+.pf {
+  @apply font-medium text-stone-600;
+}
+
+.pc {
+  @apply font-medium text-stone-600;
+}
+
+.difCell {
+  @apply font-medium;
+}
+
+.difBadgeBase {
+  @apply px-2 py-1 rounded;
+}
+
+.difBadgePositive {
+  @apply bg-emerald-500/10 text-emerald-400;
+}
+
+.difBadgeNegative {
+  @apply bg-rose-500/10 text-rose-400;
+}
+
+.difBadgeNeutral {
+  @apply bg-stone-200 text-stone-600;
+}

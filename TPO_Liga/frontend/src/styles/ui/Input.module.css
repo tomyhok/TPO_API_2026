@@ -1,0 +1,5 @@
+.container { @apply flex flex-col gap-1.5; }
+.label { @apply text-sm font-medium text-stone-700 ml-1; }
+.input { @apply w-full rounded-xl border border-stone-300/50 bg-stone-100/50 px-4 py-2.5 text-stone-900 outline-none transition-all duration-300 placeholder:text-stone-500 focus:border-orange-500/50 focus:bg-stone-100 focus:ring-2 focus:ring-orange-500/20; }
+.inputError { @apply border-rose-500/50 focus:border-rose-500/50 focus:ring-rose-500/20; }
+.errorText { @apply text-sm text-rose-400 ml-1 animate-fade-in; }

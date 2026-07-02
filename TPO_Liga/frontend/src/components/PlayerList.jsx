@@ -11,6 +11,7 @@ import Button from './ui/Button';
 import Input from './ui/Input';
 import Modal from './ui/Modal';
 import PlayerDetailsWidget from './widgets/PlayerDetailsWidget';
+import styles from '../styles/components/PlayerList.module.css';
 
 const PlayerList = () => {
   const [players, setPlayers] = useState([]);
@@ -122,7 +123,7 @@ const PlayerList = () => {
   };
 
   return (
-    <div className="animate-fade-in">
+    <div className={styles.container}>
       <PageHeader 
         title="Jugadores" 
         subtitle="Listado general de jugadores registrados" 
@@ -132,8 +133,8 @@ const PlayerList = () => {
 
       {/* Category Tabs & Filters */}
       {!categoriesLoading && categories.length > 0 && (
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 mb-6">
-          <div className="flex border-b border-stone-200/80 overflow-x-auto no-scrollbar w-full sm:w-auto">
+        <div className={styles.filtersContainer}>
+          <div className={styles.tabsWrapper}>
             {categories.map(cat => (
               <button
                 key={cat.CategoryID}
@@ -142,20 +143,16 @@ const PlayerList = () => {
                   setFilterTeamId('');
                   setCurrentPage(1);
                 }}
-                className={`px-6 py-4 font-semibold text-sm whitespace-nowrap transition-all border-b-2 ${
-                  activeCategoryId === cat.CategoryID 
-                    ? 'border-orange-500 text-orange-400 bg-orange-500/5' 
-                    : 'border-transparent text-stone-600 hover:text-stone-800 hover:bg-stone-200/30'
-                }`}
+                className={`${styles.tab} ${activeCategoryId === cat.CategoryID ? styles.tabActive : styles.tabInactive}`}
               >
                 {cat.Name}
               </button>
             ))}
           </div>
 
-          <div className="w-full sm:w-auto">
+          <div className={styles.selectWrapper}>
             <select 
-              className="w-full sm:w-64 rounded-xl border border-stone-300 bg-stone-100/50 px-4 py-2.5 text-sm text-stone-900 focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 shadow-sm"
+              className={styles.select}
               value={filterTeamId}
               onChange={(e) => { setFilterTeamId(e.target.value); setCurrentPage(1); }}
             >
@@ -169,13 +166,13 @@ const PlayerList = () => {
       )}
 
       {loading || categoriesLoading ? (
-        <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+        <div className={styles.playerGrid}>
           {Array.from({ length: 6 }).map((_, index) => (
-            <Card key={index} className="h-32 flex items-center gap-4">
-              <Skeleton className="h-16 w-16 rounded-full" />
-              <div className="flex-1 space-y-2">
-                <Skeleton className="h-5 w-3/4" />
-                <Skeleton className="h-4 w-1/2" />
+            <Card key={index} className={styles.skeletonCard}>
+              <Skeleton className={styles.skeletonAvatar} />
+              <div className={styles.skeletonInfo}>
+                <Skeleton className={styles.skeletonText1} />
+                <Skeleton className={styles.skeletonText2} />
               </div>
             </Card>
           ))}
@@ -188,9 +185,9 @@ const PlayerList = () => {
 
         if (filteredPlayers.length === 0) {
           return (
-            <Card className="mt-4 text-center py-12">
-               <div className="text-4xl mb-4 opacity-50">⛹️‍♂️</div>
-              <p className="text-lg text-stone-600">
+            <Card className={styles.emptyCard}>
+               <div className={styles.emptyIcon}>⛹️‍♂️</div>
+              <p className={styles.emptyText}>
                 {filterTeamId ? 'No hay jugadores en este equipo para la categoría seleccionada.' : 'No hay jugadores cargados en esta categoría.'}
               </p>
             </Card>
@@ -202,8 +199,8 @@ const PlayerList = () => {
         const paginatedPlayers = filteredPlayers.slice(startIndex, startIndex + itemsPerPage);
 
         return (
-          <div className="space-y-8">
-            <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+          <div className={styles.listContainer}>
+            <div className={styles.playerGrid}>
               {paginatedPlayers.map((player) => {
               const nameParts = [player.FirstName, player.LastName].filter(Boolean);
               const displayName =
@@ -219,48 +216,47 @@ const PlayerList = () => {
                 <Card 
                   key={player.PlayerID} 
                   onClick={() => openPanel(<PlayerDetailsWidget player={{ ...player, TeamName: teamName, TeamLogoURL: teamLogoURL }} />)}
-                  className="group hover:-translate-y-1 transition-transform duration-300 relative overflow-hidden cursor-pointer"
+                  className={`${styles.playerCard} group`}
                 >
-                  {/* Subtle background glow based on category if available */}
                   {player.CategoryName && (
-                    <div className="absolute -top-10 -right-10 w-32 h-32 bg-orange-500/10 rounded-full blur-2xl group-hover:bg-orange-500/20 transition-colors"></div>
+                    <div className={styles.playerGlow}></div>
                   )}
                   
                   {isAdmin && (
-                    <div className="absolute top-2 right-2 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity z-20">
-                      <button onClick={(e) => { e.stopPropagation(); openModal(player); }} className="p-1 rounded bg-stone-200/80 text-orange-400 hover:bg-stone-300 hover:text-orange-300 transition-colors backdrop-blur-sm border border-stone-300/50 text-sm">
+                    <div className={styles.playerActions}>
+                      <button onClick={(e) => { e.stopPropagation(); openModal(player); }} className={`${styles.actionBtn} ${styles.actionBtnEdit}`}>
                         ✏️
                       </button>
-                      <button onClick={(e) => { e.stopPropagation(); handleDelete(player.PlayerID); }} className="p-1 rounded bg-stone-200/80 text-red-500 hover:bg-stone-300 hover:text-red-400 transition-colors backdrop-blur-sm border border-stone-300/50 text-sm">
+                      <button onClick={(e) => { e.stopPropagation(); handleDelete(player.PlayerID); }} className={`${styles.actionBtn} ${styles.actionBtnDelete}`}>
                         🗑️
                       </button>
                     </div>
                   )}
                   
-                  <div className="flex items-center gap-4 w-full relative z-10">
-                    <div className="flex-shrink-0 w-14 h-14 rounded-full border border-stone-300 shadow-inner overflow-hidden bg-stone-100 flex items-center justify-center">
+                  <div className={styles.playerContent}>
+                    <div className={styles.avatarContainer}>
                       <img 
                         src={player.PhotoURL || 'https://images.fifaindex.com/fifa22/players/205340.png'} 
                         alt={displayName} 
-                        className="w-full h-full object-cover" 
+                        className={styles.avatarImg} 
                         onError={(e) => { e.target.src = 'https://images.fifaindex.com/fifa22/players/205340.png'; }}
                       />
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-lg font-bold text-stone-900 truncate group-hover:text-orange-300 transition-colors">
+                    <div className={styles.playerInfo}>
+                      <p className={styles.playerName}>
                         {displayName}
                       </p>
-                      <div className="flex items-center gap-2 mt-1 flex-wrap">
+                      <div className={styles.badgesContainer}>
                         {player.JerseyNumber && (
-                          <span className="inline-flex items-center rounded-md bg-stone-200/80 px-2 py-0.5 text-xs font-medium text-stone-600 border border-stone-300">
+                          <span className={`${styles.badge} ${styles.badgeDefault}`}>
                             #{player.JerseyNumber}
                           </span>
                         )}
-                        <span className="inline-flex items-center rounded-md bg-stone-200/80 px-2 py-0.5 text-xs font-medium text-stone-600 border border-stone-300 uppercase">
+                        <span className={`${styles.badge} ${styles.badgeDefault} uppercase`}>
                           {player.Position || 'N/A'}
                         </span>
                         {teamName && (
-                          <span className="inline-flex items-center rounded-md bg-orange-500/10 px-2 py-0.5 text-xs font-medium text-orange-500 border border-orange-500/20" title={teamName}>
+                          <span className={`${styles.badge} ${styles.badgeTeam}`} title={teamName}>
                             {teamName}
                           </span>
                         )}
@@ -273,24 +269,24 @@ const PlayerList = () => {
             </div>
             
             {totalPages > 1 && (
-              <div className="flex justify-center items-center gap-4 mt-8 bg-stone-100/50 py-3 px-6 rounded-2xl w-fit mx-auto border border-stone-200 shadow-sm">
+              <div className={styles.pagination}>
                 <Button 
                   variant="ghost" 
                   onClick={() => setCurrentPage(p => Math.max(1, p - 1))} 
                   disabled={currentPage === 1}
-                  className="bg-white hover:bg-stone-50 border border-stone-200 shadow-sm"
+                  className={styles.pageBtn}
                 >
                   ← Anterior
                 </Button>
-                <div className="flex flex-col items-center px-4">
-                  <span className="text-xs font-bold text-orange-500 uppercase tracking-widest">Página</span>
-                  <span className="font-black text-stone-800 text-lg leading-tight">{currentPage} de {totalPages}</span>
+                <div className={styles.pageInfo}>
+                  <span className={styles.pageLabel}>Página</span>
+                  <span className={styles.pageNumbers}>{currentPage} de {totalPages}</span>
                 </div>
                 <Button 
                   variant="ghost" 
                   onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} 
                   disabled={currentPage === totalPages}
-                  className="bg-white hover:bg-stone-50 border border-stone-200 shadow-sm"
+                  className={styles.pageBtn}
                 >
                   Siguiente →
                 </Button>
@@ -305,7 +301,7 @@ const PlayerList = () => {
         onClose={() => setIsModalOpen(false)} 
         title={editingPlayer ? 'Editar Jugador' : 'Nuevo Jugador'}
       >
-        <form onSubmit={handleSave} className="space-y-4">
+        <form onSubmit={handleSave} className={styles.form}>
           <Input 
             label="Nombre" 
             value={formData.FirstName} 
@@ -318,11 +314,11 @@ const PlayerList = () => {
             onChange={e => setFormData({...formData, LastName: e.target.value})} 
             required 
           />
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-1">
-              <label className="text-sm font-semibold text-stone-700">Dorsal</label>
+          <div className={styles.formRow}>
+            <div className={styles.formGroup}>
+              <label className={styles.formLabel}>Dorsal</label>
               <select 
-                className="w-full rounded-xl border border-stone-300 bg-stone-100/50 px-4 py-3 text-stone-900 placeholder:text-stone-500 focus:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500/20 transition-all"
+                className={styles.formSelect}
                 value={formData.JerseyNumber}
                 onChange={e => setFormData({...formData, JerseyNumber: e.target.value})}
               >
@@ -332,10 +328,10 @@ const PlayerList = () => {
                 ))}
               </select>
             </div>
-            <div className="space-y-1">
-              <label className="text-sm font-semibold text-stone-700">Posición</label>
+            <div className={styles.formGroup}>
+              <label className={styles.formLabel}>Posición</label>
               <select 
-                className="w-full rounded-xl border border-stone-300 bg-stone-100/50 px-4 py-3 text-stone-900 placeholder:text-stone-500 focus:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500/20 transition-all"
+                className={styles.formSelect}
                 value={formData.Position}
                 onChange={e => setFormData({...formData, Position: e.target.value})}
               >
@@ -348,10 +344,10 @@ const PlayerList = () => {
               </select>
             </div>
           </div>
-          <div className="space-y-1">
-            <label className="text-sm font-semibold text-stone-700">Equipo</label>
+          <div className={styles.formGroup}>
+            <label className={styles.formLabel}>Equipo</label>
             <select 
-              className="w-full rounded-xl border border-stone-300 bg-stone-100/50 px-4 py-3 text-stone-900 placeholder:text-stone-500 focus:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500/20 transition-all"
+              className={styles.formSelect}
               value={formData.TeamID}
               onChange={e => setFormData({...formData, TeamID: e.target.value})}
               required
@@ -362,10 +358,10 @@ const PlayerList = () => {
               ))}
             </select>
           </div>
-          <div className="space-y-1">
-            <label className="text-sm font-semibold text-stone-700">Categoría</label>
+          <div className={styles.formGroup}>
+            <label className={styles.formLabel}>Categoría</label>
             <select 
-              className="w-full rounded-xl border border-stone-300 bg-stone-100/50 px-4 py-3 text-stone-900 placeholder:text-stone-500 focus:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500/20 transition-all"
+              className={styles.formSelect}
               value={formData.CategoryID}
               onChange={e => setFormData({...formData, CategoryID: e.target.value})}
               required
@@ -383,7 +379,7 @@ const PlayerList = () => {
             value={formData.PhotoURL} 
             onChange={e => setFormData({...formData, PhotoURL: e.target.value})} 
           />
-          <div className="flex justify-end gap-3 mt-6">
+          <div className={styles.formActions}>
             <Button variant="ghost" type="button" onClick={() => setIsModalOpen(false)}>Cancelar</Button>
             <Button type="submit" disabled={saving}>
               {saving ? 'Guardando...' : 'Guardar'}

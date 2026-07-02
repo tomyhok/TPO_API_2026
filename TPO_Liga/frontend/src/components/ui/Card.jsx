@@ -1,6 +1,8 @@
+import styles from '../../styles/ui/Card.module.css';
+
 export default function Card({ children, className = '', ...props }) {
   return (
-    <div className={`glass-card rounded-2xl p-6 ${className}`} {...props}>
+    <div className={`${styles.card} ${className}`} {...props}>
       {children}
     </div>
   );

@@ -3,6 +3,7 @@ import { apiRequest } from '../../services/api';
 import { useSeason } from '../../contexts/SeasonContext';
 import { useCategories } from '../../contexts/CategoryContext';
 import TeamLogo from '../ui/TeamLogo';
+import styles from '../../styles/widgets/TeamDetailsWidget.module.css';
 
 const TeamDetailsWidget = ({ team }) => {
   const [teamData, setTeamData] = useState(null);
@@ -11,6 +12,7 @@ const TeamDetailsWidget = ({ team }) => {
   const { selectedSeasonId } = useSeason();
   const { categories } = useCategories();
   const [activeCategoryId, setActiveCategoryId] = useState(null);
+  const [activeSection, setActiveSection] = useState('plantel'); // 'plantel' | 'partidos'
 
   useEffect(() => {
     if (!activeCategoryId && categories.length > 0) {
@@ -48,72 +50,158 @@ const TeamDetailsWidget = ({ team }) => {
   const rank = teamStandingIndex >= 0 ? teamStandingIndex + 1 : '-';
   const pendingMatchesCount = teamData?.PendingMatches?.filter(m => String(m.CategoryID) === String(activeCategoryId)).length || 0;
 
+  const renderPartidos = () => {
+    if (!teamData) return null;
+    
+    // Sort played matches descending (latest first)
+    const playedMatches = (teamData.PlayedMatches || [])
+      .filter(m => String(m.CategoryID) === String(activeCategoryId))
+      .sort((a, b) => new Date(b.MatchDate) - new Date(a.MatchDate))
+      .slice(0, 5);
+
+    // Sort pending matches ascending (next first)
+    const pendingMatches = (teamData.PendingMatches || [])
+      .filter(m => String(m.CategoryID) === String(activeCategoryId))
+      .sort((a, b) => new Date(a.MatchDate) - new Date(b.MatchDate))
+      .slice(0, 5);
+
+    return (
+      <div className={styles.matchesContainer}>
+        <div>
+          <h5 className={styles.sectionTitle}>Últimos Resultados</h5>
+          {playedMatches.length > 0 ? (
+            <ul className={styles.matchList}>
+              {playedMatches.map(m => {
+                const isLocal = m.LocalTeamID === team.TeamID;
+                const opponentName = isLocal ? m.VisitorTeamName : m.LocalTeamName;
+                const pointsF = isLocal ? m.LocalPoints : m.VisitorPoints;
+                const pointsC = isLocal ? m.VisitorPoints : m.LocalPoints;
+                const won = pointsF > pointsC;
+                const tied = pointsF === pointsC;
+                
+                return (
+                  <li key={m.MatchID} className={styles.listItem}>
+                    <div className={styles.matchInfo}>
+                      <span className={styles.matchDate}>
+                        {new Date(m.MatchDate).toLocaleDateString()} • {isLocal ? '🏠 Local' : '✈️ Visitante'}
+                      </span>
+                      <span className={styles.matchOpponent}>
+                        vs {opponentName}
+                      </span>
+                    </div>
+                    <div className={styles.matchScoreContainer}>
+                      <div className={styles.matchScore}>
+                        {pointsF} - {pointsC}
+                      </div>
+                      <span className={`${styles.matchBadgeBase} ${
+                        won ? styles.matchBadgeSuccess : 
+                        tied ? styles.matchBadgeNeutral : styles.matchBadgeDanger
+                      }`}>
+                        {won ? 'G' : tied ? 'E' : 'P'}
+                      </span>
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
+          ) : (
+            <p className={styles.emptyMatchState}>No hay partidos jugados recientemente.</p>
+          )}
+        </div>
+
+        <div>
+          <h5 className={styles.sectionTitle}>Próximos Partidos</h5>
+          {pendingMatches.length > 0 ? (
+            <ul className={styles.matchList}>
+              {pendingMatches.map(m => {
+                const isLocal = m.LocalTeamID === team.TeamID;
+                const opponentName = isLocal ? m.VisitorTeamName : m.LocalTeamName;
+
+                return (
+                  <li key={m.MatchID} className={styles.matchItemPending}>
+                    <div className={styles.matchInfo}>
+                      <span className={styles.matchDate}>
+                        {new Date(m.MatchDate).toLocaleDateString()} • {isLocal ? 'Local' : 'Visitante'}
+                      </span>
+                      <span className={styles.matchOpponent}>
+                        vs {opponentName}
+                      </span>
+                    </div>
+                    <div className={styles.matchRoundBadge}>
+                      FECHA {m.RoundNumber || '-'}
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
+          ) : (
+            <p className={styles.emptyMatchState}>No hay partidos pendientes.</p>
+          )}
+        </div>
+      </div>
+    );
+  };
+
   return (
-    <div className="space-y-6 animate-fade-in h-full flex flex-col">
-      <div className="flex items-center gap-4 border-b border-stone-200 pb-4">
+    <div className={styles.container}>
+      <div className={styles.headerContainer}>
         <TeamLogo 
           src={teamData?.LogoURL || team.LogoURL} 
           alt={teamData?.TeamName || team.TeamName || team.Name || team.Equipo}
-          className="w-14 h-14 rounded-xl shadow-lg"
-          fallbackClassName="text-2xl"
+          className={styles.teamLogo}
+          fallbackClassName={styles.teamLogoFallback}
         />
         <div>
-          <h3 className="font-bold text-xl text-stone-900 leading-tight">{teamData?.TeamName || team.TeamName || team.Name || team.Equipo}</h3>
+          <h3 className={styles.teamName}>{teamData?.TeamName || team.TeamName || team.Name || team.Equipo}</h3>
         </div>
       </div>
 
       {loading ? (
-        <div className="flex justify-center p-8">
-          <div className="w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
+        <div className={styles.loadingContainer}>
+          <div className={styles.spinner}></div>
         </div>
       ) : teamData ? (
-        <div className="flex-1 flex flex-col min-h-0">
-          <div className="grid grid-cols-2 gap-3 mb-4">
-            <div className="bg-stone-100/30 rounded-xl p-3 border border-stone-200/50">
-              <h4 className="text-[10px] font-bold text-stone-500 uppercase tracking-wider mb-1">Entrenador</h4>
-              <p className="font-semibold text-stone-800 text-sm">{teamData.Coach || team.Coach || 'No asignado'}</p>
+        <div className={styles.contentContainer}>
+          <div className={styles.infoGrid}>
+            <div className={styles.infoBox}>
+              <h4 className={styles.infoTitle}>Entrenador</h4>
+              <p className={styles.infoValue}>{teamData.Coach || team.Coach || 'No asignado'}</p>
             </div>
-            <div className="bg-stone-100/30 rounded-xl p-3 border border-stone-200/50">
-              <h4 className="text-[10px] font-bold text-stone-500 uppercase tracking-wider mb-1">Estadio</h4>
-              <p className="font-semibold text-stone-800 text-sm truncate" title={teamData.StadiumName || team.StadiumName || 'No asignado'}>
+            <div className={styles.infoBox}>
+              <h4 className={styles.infoTitle}>Estadio</h4>
+              <p className={styles.infoValue} title={teamData.StadiumName || team.StadiumName || 'No asignado'}>
                 {teamData.StadiumName || team.StadiumName || 'No asignado'}
               </p>
             </div>
           </div>
           
-          <div className="grid grid-cols-4 gap-2 mb-6">
-             <div className="bg-orange-500/5 rounded-xl p-2 border border-orange-500/20 text-center">
-               <h4 className="text-[9px] font-bold text-orange-600/80 uppercase tracking-wider mb-1">Pos</h4>
-               <p className="font-black text-orange-500 text-base">{rank}</p>
+          <div className={styles.statGrid}>
+             <div className={styles.statBoxPrimary}>
+               <h4 className={`${styles.statTitleBase} ${styles.statTitle}`}>Pos</h4>
+               <p className={`${styles.statValueBase} ${styles.statValue}`}>{rank}</p>
              </div>
-             <div className="bg-stone-100/30 rounded-xl p-2 border border-stone-200/50 text-center">
-               <h4 className="text-[9px] font-bold text-stone-500 uppercase tracking-wider mb-1">Pts</h4>
-               <p className="font-black text-stone-800 text-base">{teamStats?.Puntos ?? '-'}</p>
+             <div className={styles.statBoxSecondary}>
+               <h4 className={`${styles.statTitleBase} ${styles.statTitle}`}>Pts</h4>
+               <p className={`${styles.statValueBase} ${styles.statValue}`}>{teamStats?.Puntos ?? '-'}</p>
              </div>
-             <div className="bg-emerald-500/5 rounded-xl p-2 border border-emerald-500/20 text-center">
-               <h4 className="text-[9px] font-bold text-emerald-600/80 uppercase tracking-wider mb-1">PG</h4>
-               <p className="font-black text-emerald-500 text-base">{teamStats?.PartidosGanados ?? '-'}</p>
+             <div className={styles.statBoxSuccess}>
+               <h4 className={`${styles.statTitleBase} ${styles.statTitle}`}>PG</h4>
+               <p className={`${styles.statValueBase} ${styles.statValue}`}>{teamStats?.PartidosGanados ?? '-'}</p>
              </div>
-             <div className="bg-stone-100/30 rounded-xl p-2 border border-stone-200/50 text-center">
-               <h4 className="text-[9px] font-bold text-stone-500 uppercase tracking-wider mb-1">Pend</h4>
-               <p className="font-black text-stone-800 text-base">{pendingMatchesCount}</p>
+             <div className={styles.statBoxSecondary}>
+               <h4 className={`${styles.statTitleBase} ${styles.statTitle}`}>Pend</h4>
+               <p className={`${styles.statValueBase} ${styles.statValue}`}>{pendingMatchesCount}</p>
              </div>
           </div>
 
-          <h4 className="text-sm font-bold text-stone-600 uppercase tracking-wider mb-3">Plantel ({teamData.Players?.length || 0})</h4>
-          
           {/* Category Tabs */}
           {categories.length > 0 && (
-            <div className="flex border-b border-stone-200/80 overflow-x-auto no-scrollbar mb-4">
+            <div className={styles.tabsContainer}>
               {categories.map(cat => (
                 <button
                   key={cat.CategoryID}
                   onClick={() => setActiveCategoryId(cat.CategoryID)}
-                  className={`px-4 py-2 font-semibold text-xs whitespace-nowrap transition-all border-b-2 ${
-                    activeCategoryId === cat.CategoryID 
-                      ? 'border-orange-500 text-orange-400 bg-orange-500/5' 
-                      : 'border-transparent text-stone-600 hover:text-stone-800 hover:bg-stone-200/30'
-                  }`}
+                  className={`${styles.tabBtnSmall} ${activeCategoryId === cat.CategoryID ? styles.tabBtnSmallActive : ''}`}
                 >
                   {cat.Name}
                 </button>
@@ -121,26 +209,46 @@ const TeamDetailsWidget = ({ team }) => {
             </div>
           )}
 
-          <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar">
-            {teamData.Players && teamData.Players.filter(p => String(p.CategoryID) === String(activeCategoryId)).length > 0 ? (
-              <ul className="space-y-2">
-                {teamData.Players.filter(p => String(p.CategoryID) === String(activeCategoryId)).map(p => (
-                  <li key={p.PlayerID} className="flex justify-between items-center bg-stone-100/40 p-3 rounded-lg border border-stone-200/50 hover:bg-stone-200/50 transition-colors">
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-stone-200 flex items-center justify-center text-xs">🧑‍🚀</div>
-                      <span className="font-medium text-stone-800 text-sm">{p.FirstName} {p.LastName}</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      {p.Position && <span className="text-[10px] bg-stone-200 px-1.5 py-0.5 rounded text-stone-600 font-bold uppercase">{p.Position}</span>}
-                      {p.JerseyNumber && <span className="text-xs font-black text-orange-400 w-6 text-right">#{p.JerseyNumber}</span>}
-                    </div>
-                  </li>
-                ))}
-              </ul>
+          {/* Section Tabs: Plantel vs Partidos */}
+          <div className={styles.sectionTabsContainer}>
+            <button
+              onClick={() => setActiveSection('plantel')}
+              className={`${styles.sectionTabBtn} ${activeSection === 'plantel' ? styles.sectionTabBtnActive : ''}`}
+            >
+              Plantel
+            </button>
+            <button
+              onClick={() => setActiveSection('partidos')}
+              className={`${styles.sectionTabBtn} ${activeSection === 'partidos' ? styles.sectionTabBtnActive : ''}`}
+            >
+              Partidos
+            </button>
+          </div>
+
+          <div className={styles.listContainer}>
+            {activeSection === 'plantel' ? (
+              teamData.Players && teamData.Players.filter(p => String(p.CategoryID) === String(activeCategoryId)).length > 0 ? (
+                <ul className={styles.playerList}>
+                  {teamData.Players.filter(p => String(p.CategoryID) === String(activeCategoryId)).map(p => (
+                    <li key={p.PlayerID} className={styles.listItem}>
+                      <div className={styles.playerInfo}>
+                        <div className={styles.playerAvatar}>🧑‍🚀</div>
+                        <span className={styles.playerName}>{p.FirstName} {p.LastName}</span>
+                      </div>
+                      <div className={styles.playerMeta}>
+                        {p.Position && <span className={styles.playerPosition}>{p.Position}</span>}
+                        {p.JerseyNumber && <span className={styles.playerJersey}>#{p.JerseyNumber}</span>}
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className={styles.emptyState}>
+                  No hay jugadores registrados en esta categoría.
+                </p>
+              )
             ) : (
-              <p className="text-stone-500 text-sm italic bg-stone-100/30 p-4 rounded-lg text-center border border-stone-200/50">
-                No hay jugadores registrados en esta categoría.
-              </p>
+              renderPartidos()
             )}
           </div>
         </div>

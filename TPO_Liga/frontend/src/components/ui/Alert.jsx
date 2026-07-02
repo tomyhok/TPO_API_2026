@@ -1,11 +1,13 @@
+import styles from '../../styles/ui/Alert.module.css';
+
 export default function Alert({ message, tone = 'error' }) {
   const tones = {
-    error: 'border-red-500/30 bg-red-500/10 text-red-200',
-    info: 'border-red-500/30 bg-red-500/10 text-blue-200',
-    success: 'border-emerald-500/30 bg-emerald-500/10 text-emerald-200',
+    error: styles.error,
+    info: styles.info,
+    success: styles.success,
   };
 
   if (!message) return null;
 
-  return <div className={`rounded-lg border p-3 text-sm ${tones[tone]}`}>{message}</div>;
+  return <div className={`${styles.container} ${tones[tone]}`}>{message}</div>;
 }

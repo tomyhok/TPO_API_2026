@@ -93,8 +93,12 @@ class TeamModel {
         WHERE ps.TeamID = @TeamID AND ps.SeasonID = @SeasonID
       `;
       mQuery = `
-        SELECT m.*, c.Name AS CategoryName FROM Matches m
+        SELECT m.*, c.Name AS CategoryName,
+               tLocal.Name AS LocalTeamName, tVisitor.Name AS VisitorTeamName
+        FROM Matches m
         INNER JOIN Categories c ON m.CategoryID = c.CategoryID
+        INNER JOIN Teams tLocal ON m.LocalTeamID = tLocal.TeamID
+        INNER JOIN Teams tVisitor ON m.VisitorTeamID = tVisitor.TeamID
         WHERE (m.LocalTeamID = @TeamID OR m.VisitorTeamID = @TeamID) AND m.SeasonID = @SeasonID
         ORDER BY m.MatchDate DESC
       `;
@@ -109,8 +113,12 @@ class TeamModel {
         WHERE ps.TeamID = @TeamID AND s.IsActive = 1
       `;
       mQuery = `
-        SELECT m.*, c.Name AS CategoryName FROM Matches m
+        SELECT m.*, c.Name AS CategoryName,
+               tLocal.Name AS LocalTeamName, tVisitor.Name AS VisitorTeamName
+        FROM Matches m
         INNER JOIN Categories c ON m.CategoryID = c.CategoryID
+        INNER JOIN Teams tLocal ON m.LocalTeamID = tLocal.TeamID
+        INNER JOIN Teams tVisitor ON m.VisitorTeamID = tVisitor.TeamID
         INNER JOIN Seasons s ON m.SeasonID = s.SeasonID
         WHERE (m.LocalTeamID = @TeamID OR m.VisitorTeamID = @TeamID) AND s.IsActive = 1
         ORDER BY m.MatchDate DESC

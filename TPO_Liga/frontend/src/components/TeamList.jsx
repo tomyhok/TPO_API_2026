@@ -11,6 +11,7 @@ import Input from './ui/Input';
 import Modal from './ui/Modal';
 import TeamLogo from './ui/TeamLogo';
 import TeamDetailsWidget from './widgets/TeamDetailsWidget';
+import styles from '../styles/components/TeamList.module.css';
 
 const TeamList = () => {
   const [teams, setTeams] = useState([]);
@@ -102,7 +103,7 @@ const TeamList = () => {
   };
 
   return (
-    <div className="animate-fade-in">
+    <div className={styles.container}>
       <PageHeader 
         title="Equipos" 
         subtitle="Listado de equipos registrados en la liga" 
@@ -111,58 +112,57 @@ const TeamList = () => {
       <Alert message={error} />
 
       {loading ? (
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <div className={styles.loadingGrid}>
           {[1, 2, 3, 4, 5, 6].map((i) => (
-            <Card key={i} className="h-32">
-              <Skeleton className="h-6 w-3/4 mb-4" />
-              <Skeleton className="h-4 w-1/2" />
+            <Card key={i} className={styles.skeletonCard}>
+              <Skeleton className={styles.skeletonText1} />
+              <Skeleton className={styles.skeletonText2} />
             </Card>
           ))}
         </div>
       ) : teams.length === 0 ? (
-        <Card className="text-center py-12">
-          <div className="text-4xl mb-4 opacity-50">🛡️</div>
-          <p className="text-lg text-stone-600">No hay equipos cargados actualmente.</p>
+        <Card className={styles.emptyCard}>
+          <div className={styles.emptyIcon}>🛡️</div>
+          <p className={styles.emptyText}>No hay equipos cargados actualmente.</p>
         </Card>
       ) : (
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3">
+        <div className={styles.gridContainer}>
           {teams.map((team, idx) => {
             const teamName = team.TeamName || team.Equipo || team.Name || 'Equipo Sin Nombre';
-            const bgClass = 'from-white to-orange-500/10';
 
             return (
               <Card 
                 key={team.TeamID} 
-                className={`relative overflow-hidden group hover:-translate-y-1 transition-transform duration-300 cursor-pointer`}
+                className={styles.teamCard}
                 onClick={() => handleViewTeam(team)}
               >
-                <div className={`absolute inset-0 bg-gradient-to-br ${bgClass} opacity-50`}></div>
+                <div className={styles.teamCardBg}></div>
                 
                 {isAdmin && (
-                  <div className="absolute top-3 right-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity z-20">
-                    <button onClick={(e) => { e.stopPropagation(); openModal(team); }} className="p-1.5 rounded-lg bg-stone-200/80 text-orange-400 hover:bg-stone-300 hover:text-orange-300 transition-colors backdrop-blur-sm border border-stone-300/50">
+                  <div className={styles.teamCardActions}>
+                    <button onClick={(e) => { e.stopPropagation(); openModal(team); }} className={`${styles.actionBtn} ${styles.actionBtnEdit}`}>
                       ✏️
                     </button>
-                    <button onClick={(e) => { e.stopPropagation(); handleDelete(team.TeamID); }} className="p-1.5 rounded-lg bg-stone-200/80 text-red-500 hover:bg-stone-300 hover:text-red-400 transition-colors backdrop-blur-sm border border-stone-300/50">
+                    <button onClick={(e) => { e.stopPropagation(); handleDelete(team.TeamID); }} className={`${styles.actionBtn} ${styles.actionBtnDelete}`}>
                       🗑️
                     </button>
                   </div>
                 )}
                 
-                <div className="relative z-10 flex items-start gap-4">
+                <div className={styles.contentContainer}>
                   <TeamLogo 
                     src={team.LogoURL} 
                     alt={teamName}
-                    className="flex-shrink-0 w-12 h-12 rounded-xl shadow-lg group-hover:scale-110 transition-transform"
-                    fallbackClassName="flex-shrink-0 w-12 h-12 rounded-xl shadow-lg group-hover:scale-110 transition-transform text-xl"
+                    className={styles.teamLogo}
+                    fallbackClassName={styles.teamLogoFallback}
                   />
                   <div>
-                    <h3 className="font-bold text-lg text-stone-900 group-hover:text-orange-300 transition-colors leading-tight" title={teamName}>
+                    <h3 className={styles.teamName} title={teamName}>
                       {teamName}
                     </h3>
                     {team.Coach && (
-                      <p className="text-sm font-medium text-stone-500 mt-1 flex items-center gap-1">
-                        <span className="opacity-70">DT:</span> {team.Coach}
+                      <p className={styles.coachText}>
+                        <span className={styles.coachLabel}>DT:</span> {team.Coach}
                       </p>
                     )}
                   </div>
@@ -178,7 +178,7 @@ const TeamList = () => {
         onClose={() => setIsModalOpen(false)} 
         title={editingTeam ? 'Editar Equipo' : 'Nuevo Equipo'}
       >
-        <form onSubmit={handleSave} className="space-y-4">
+        <form onSubmit={handleSave} className={styles.formContainer}>
           <Input 
             label="Nombre del Equipo" 
             value={formData.Name} 
@@ -203,7 +203,7 @@ const TeamList = () => {
             value={formData.StadiumName} 
             onChange={e => setFormData({...formData, StadiumName: e.target.value})} 
           />
-          <div className="flex justify-end gap-3 mt-6">
+          <div className={styles.formActions}>
             <Button variant="ghost" type="button" onClick={() => setIsModalOpen(false)}>Cancelar</Button>
             <Button type="submit" disabled={saving}>
               {saving ? 'Guardando...' : 'Guardar'}

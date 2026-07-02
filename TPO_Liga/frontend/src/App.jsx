@@ -13,6 +13,7 @@ import { clearToken, getToken } from './services/api';
 import { useEffect, useState } from 'react';
 import { useSeason } from './contexts/SeasonContext';
 import { useRightPanel } from './contexts/RightPanelContext';
+import styles from './styles/App.module.css';
 
 const navItems = [
   { to: '/', label: 'Inicio' },
@@ -43,14 +44,14 @@ function Layout() {
   };
 
   return (
-    <div className="min-h-screen bg-stone-50 text-stone-900 flex flex-col lg:flex-row font-sans selection:bg-orange-500/30">
+    <div className={styles.layout}>
       
       {/* Mobile Header */}
-      <header className="lg:hidden glass-panel sticky top-0 z-50 flex flex-col gap-2 px-6 py-4">
-        <div className="flex items-center justify-between">
-          <h1 className="text-xl font-bold tracking-tight text-gradient">{token ? 'LNB Admin' : 'LNB'}</h1>
+      <header className={styles.mobileHeader}>
+        <div className={styles.mobileHeaderTop}>
+          <h1 className={styles.mobileTitle}>{token ? 'LNB Admin' : 'LNB'}</h1>
           {token && (
-            <Button variant="ghost" onClick={onLogout} className="!px-3 !py-1 text-xs">
+            <Button variant="ghost" onClick={onLogout} className={styles.mobileLogoutBtn}>
               Salir
             </Button>
           )}
@@ -58,7 +59,7 @@ function Layout() {
         {/* Mobile Season Selector */}
         {!seasonLoading && seasons.length > 0 && (
           <select 
-            className="w-full bg-stone-100/50 border border-stone-300/50 text-stone-700 text-xs rounded-lg px-2 py-1.5 focus:border-orange-500/50 appearance-none text-center"
+            className={styles.mobileSelect}
             value={selectedSeasonId || ''}
             onChange={(e) => setSelectedSeasonId(Number(e.target.value))}
           >
@@ -72,21 +73,21 @@ function Layout() {
       </header>
 
       {/* Sidebar (Desktop) */}
-      <aside className="lg:w-64 lg:h-screen lg:sticky lg:top-0 lg:flex lg:flex-col glass-panel border-r border-stone-200/50 hidden lg:block flex-shrink-0">
-        <div className="p-8 pb-4">
-          <h1 className="text-2xl font-bold tracking-tight text-gradient leading-tight">
+      <aside className={styles.sidebar}>
+        <div className={styles.sidebarHeader}>
+          <h1 className={styles.sidebarTitle}>
             Liga<br />Juvenil
           </h1>
         </div>
         
         {/* Desktop Season Selector */}
-        <div className="px-6 mb-6">
+        <div className={styles.sidebarSelectContainer}>
           {seasonLoading ? (
-            <div className="h-10 bg-stone-200/50 animate-pulse rounded-xl"></div>
+            <div className={styles.sidebarSelectSkeleton}></div>
           ) : seasons.length > 0 ? (
-            <div className="relative">
+            <div className={styles.sidebarSelectWrapper}>
               <select 
-                className="w-full bg-stone-100/80 border border-stone-300/50 text-stone-700 text-sm font-semibold rounded-xl pl-4 pr-10 py-2.5 focus:border-orange-500/50 focus:ring-1 focus:ring-orange-500/50 transition-colors cursor-pointer appearance-none shadow-inner"
+                className={styles.sidebarSelect}
                 value={selectedSeasonId || ''}
                 onChange={(e) => setSelectedSeasonId(Number(e.target.value))}
               >
@@ -96,12 +97,12 @@ function Layout() {
                   </option>
                 ))}
               </select>
-              <div className="absolute right-3 top-1/2 -translate-y-1/2 text-xs opacity-50 pointer-events-none">▼</div>
+              <div className={styles.sidebarSelectIcon}>▼</div>
             </div>
           ) : null}
         </div>
         
-        <nav className="flex-1 px-4 space-y-2">
+        <nav className={styles.nav}>
           {navItems.map((item) => {
             if (item.guestOnly && token) return null;
             if (item.adminOnly && !token) return null;
@@ -110,11 +111,7 @@ function Layout() {
                 key={item.to}
                 to={item.to}
                 className={({ isActive }) =>
-                  `flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all duration-300 ${
-                    isActive
-                      ? 'bg-gradient-to-r from-orange-500/20 to-amber-500/10 text-orange-300 border border-orange-500/20 shadow-lg shadow-orange-500/5'
-                      : 'text-stone-600 hover:bg-stone-200/50 hover:text-stone-800'
-                  }`
+                  isActive ? `${styles.navItem} ${styles.navItemActive}` : styles.navItem
                 }
               >
                 {item.label}
@@ -124,8 +121,8 @@ function Layout() {
         </nav>
 
         {token && (
-          <div className="p-4 mt-auto">
-            <Button variant="secondary" onClick={onLogout} className="w-full justify-center">
+          <div className={styles.sidebarFooter}>
+            <Button variant="secondary" onClick={onLogout} className={styles.sidebarLogoutBtn}>
               Cerrar sesión
             </Button>
           </div>
@@ -133,8 +130,8 @@ function Layout() {
       </aside>
 
       {/* Main Content (Center) */}
-      <main className="flex-1 flex justify-center w-full min-w-0">
-        <div className="w-full max-w-5xl px-4 py-8 sm:px-8 xl:px-12">
+      <main className={styles.main}>
+        <div className={styles.mainContainer}>
           <Routes>
             <Route path="/" element={<HomePage />} />
             <Route path="/standings" element={<Standings />} />
@@ -149,15 +146,15 @@ function Layout() {
       </main>
 
       {/* Right Panel (Desktop) */}
-      <aside className="hidden xl:flex xl:w-80 2xl:w-96 border-l border-stone-200/50 bg-stone-50/50 h-screen sticky top-0 flex-col overflow-y-auto flex-shrink-0">
-        <div className="p-6 h-full flex flex-col">
+      <aside className={styles.rightPanelDesktop}>
+        <div className={styles.rightPanelContent}>
           {panelContent ? (
             <>
-              <div className="flex justify-between items-center mb-6 pb-2 border-b border-stone-200/50">
-                <h3 className="font-bold text-stone-900 text-lg">Detalles</h3>
-                <Button variant="ghost" onClick={closePanel} className="!p-2 text-stone-600 hover:text-stone-900 bg-stone-100/50 hover:bg-stone-200 rounded-lg transition-colors">✕</Button>
+              <div className={styles.rightPanelHeader}>
+                <h3 className={styles.rightPanelTitle}>Detalles</h3>
+                <Button variant="ghost" onClick={closePanel} className={styles.rightPanelCloseBtn}>✕</Button>
               </div>
-              <div className="flex-1">
+              <div className={styles.rightPanelBody}>
                 {panelContent}
               </div>
             </>
@@ -169,14 +166,14 @@ function Layout() {
 
       {/* Right Panel (Mobile Overlay) */}
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex justify-end xl:hidden">
-          <div className="absolute inset-0 bg-stone-900/40 backdrop-blur-sm" onClick={closePanel}></div>
-          <div className="relative w-full max-w-md bg-stone-50 border-l border-stone-200 h-full overflow-y-auto animate-slide-in-right shadow-2xl">
-            <div className="sticky top-0 bg-stone-100/90 backdrop-blur border-b border-stone-200 p-4 flex justify-between items-center z-10">
-              <h3 className="font-bold text-stone-900">Detalles</h3>
-              <Button variant="ghost" onClick={closePanel} className="!p-2 text-stone-600 hover:text-stone-900">✕</Button>
+        <div className={styles.mobileOverlay}>
+          <div className={styles.mobileBackdrop} onClick={closePanel}></div>
+          <div className={styles.mobilePanel}>
+            <div className={styles.mobilePanelHeader}>
+              <h3 className={styles.mobilePanelTitle}>Detalles</h3>
+              <Button variant="ghost" onClick={closePanel} className={styles.mobilePanelCloseBtn}>✕</Button>
             </div>
-            <div className="p-4">
+            <div className={styles.mobilePanelBody}>
               {panelContent}
             </div>
           </div>
@@ -184,7 +181,7 @@ function Layout() {
       )}
 
       {/* Mobile Bottom Nav */}
-      <nav className="lg:hidden glass-panel fixed bottom-0 left-0 right-0 z-50 flex justify-around p-3 pb-safe">
+      <nav className={styles.mobileBottomNav}>
         {navItems.map((item) => {
            if (item.guestOnly && token) return null;
            if (item.adminOnly && !token) return null;
@@ -193,18 +190,16 @@ function Layout() {
               key={item.to}
               to={item.to}
               className={({ isActive }) =>
-                `flex flex-col items-center gap-1 p-2 rounded-lg transition-colors ${
-                  isActive ? 'text-orange-400' : 'text-stone-500 hover:text-stone-700'
-                }`
+                isActive ? styles.mobileNavItemActive : styles.mobileNavItem
               }
             >
-              <span className="text-[10px] font-medium">{item.label}</span>
+              <span className={styles.mobileNavText}>{item.label}</span>
             </NavLink>
            );
         })}
       </nav>
       {/* Padding for mobile bottom nav */}
-      <div className="h-20 lg:hidden"></div>
+      <div className={styles.mobileNavPadding}></div>
     </div>
   );
 }

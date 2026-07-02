@@ -4,9 +4,9 @@ import Alert from './ui/Alert';
 import Button from './ui/Button';
 import Card from './ui/Card';
 import Input from './ui/Input';
-import PageHeader from './ui/PageHeader';
 import Spinner from './ui/Spinner';
 import { ApiError, login, setToken } from '../services/api';
+import styles from '../styles/components/LoginForm.module.css';
 
 const LoginForm = ({ onLoginSuccess }) => {
   const navigate = useNavigate();
@@ -55,19 +55,19 @@ const LoginForm = ({ onLoginSuccess }) => {
   };
 
   return (
-    <div className="flex min-h-[80vh] items-center justify-center animate-fade-in relative">
+    <div className={styles.container}>
       {/* Decorative blurred blobs */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-orange-500/20 rounded-full blur-[100px] pointer-events-none"></div>
-      <div className="absolute top-1/3 left-1/3 -translate-x-1/2 -translate-y-1/2 w-72 h-72 bg-amber-500/20 rounded-full blur-[80px] pointer-events-none"></div>
+      <div className={styles.blob1}></div>
+      <div className={styles.blob2}></div>
 
-      <div className="w-full max-w-md relative z-10">
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold tracking-tight text-gradient mb-2">Bienvenido</h1>
-          <p className="text-stone-600">Ingresa tus credenciales para continuar</p>
+      <div className={styles.formWrapper}>
+        <div className={styles.header}>
+          <h1 className={styles.title}>Bienvenido</h1>
+          <p className={styles.subtitle}>Ingresa tus credenciales para continuar</p>
         </div>
 
-        <Card className="!p-8 backdrop-blur-xl bg-stone-100/60 border-stone-300/50 shadow-2xl">
-          <form onSubmit={handleLogin} className="space-y-6">
+        <Card className={styles.card}>
+          <form onSubmit={handleLogin} className={styles.form}>
             <Alert message={error} />
             
             <Input
@@ -89,9 +89,9 @@ const LoginForm = ({ onLoginSuccess }) => {
               placeholder="••••••••"
             />
             
-            <Button type="submit" className="w-full !py-3 !text-base mt-2" disabled={loading}>
-              <span className="inline-flex items-center justify-center gap-2">
-                {loading && <Spinner className="h-5 w-5" />}
+            <Button type="submit" className={styles.submitBtn} disabled={loading}>
+              <span className={styles.btnContent}>
+                {loading && <Spinner className={styles.spinner} />}
                 {loading ? 'Ingresando...' : 'Entrar'}
               </span>
             </Button>

@@ -1,0 +1,4 @@
+.container { @apply rounded-lg border p-3 text-sm; }
+.error { @apply border-red-500/30 bg-red-500/10 text-red-200; }
+.info { @apply border-red-500/30 bg-red-500/10 text-blue-200; }
+.success { @apply border-emerald-500/30 bg-emerald-500/10 text-emerald-200; }

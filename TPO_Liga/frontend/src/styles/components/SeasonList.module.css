@@ -1,0 +1,46 @@
+.container { @apply animate-fade-in; }
+.loadingGrid { @apply grid gap-6 sm:grid-cols-2 lg:grid-cols-3; }
+.skeletonCard { @apply h-32; }
+.skeletonText1 { @apply h-6 w-3/4 mb-4; }
+.skeletonText2 { @apply h-4 w-1/2; }
+.emptyCard { @apply text-center py-12; }
+.emptyIcon { @apply text-4xl mb-4 opacity-50; }
+.emptyText { @apply text-lg text-stone-600; }
+.listContainer { @apply flex flex-col gap-4; }
+.seasonCard { @apply relative overflow-hidden transition-transform duration-300 cursor-pointer; }
+.seasonCard:hover { transform: translateY(-0.25rem); }
+.seasonCardActive { @apply border-orange-500/50 shadow-lg shadow-orange-500/5; }
+.seasonCardBg { @apply absolute inset-0 bg-gradient-to-br from-orange-500/10 to-amber-500/5 opacity-50; }
+.seasonCardActions { @apply absolute top-1/2 -translate-y-1/2 right-4 flex gap-2 opacity-0 transition-opacity z-20; }
+.seasonCard:hover .seasonCardActions { @apply opacity-100; }
+.actionBtn { @apply p-1.5 rounded-lg bg-stone-200/80 transition-colors backdrop-blur-sm border border-stone-300/50; }
+.actionBtnEdit { @apply text-orange-400; }
+.actionBtnEdit:hover { @apply bg-stone-300 text-orange-300; }
+.actionBtnDelete { @apply text-red-500; }
+.actionBtnDelete:hover { @apply bg-stone-300 text-red-400; }
+.contentContainer { @apply relative z-10 flex flex-row items-center gap-6 h-full w-full; }
+.iconContainer { @apply flex items-center gap-4; }
+.iconBox { @apply flex-shrink-0 w-12 h-12 rounded-xl flex items-center justify-center text-xl shadow-lg transition-transform; }
+.iconBoxActive { @apply bg-orange-500/20 text-orange-400 border border-orange-500/30; }
+.iconBoxInactive { @apply bg-stone-200/80 border border-stone-300; }
+.activeBadgeDesktop { @apply text-xs font-bold text-orange-400 bg-orange-500/10 px-2 py-1 rounded whitespace-nowrap hidden sm:inline-block; }
+.activeBadgeMobile { @apply text-[10px] font-bold text-orange-400 bg-orange-500/10 px-1.5 py-0.5 rounded sm:hidden; }
+.infoContainer { @apply flex-1 min-w-0 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pr-16; }
+.title { @apply font-bold text-lg text-stone-900 transition-colors line-clamp-1 flex items-center gap-2; }
+.seasonCard:hover .title { @apply text-orange-300; }
+.subtitle { @apply text-sm font-medium text-stone-500 mt-1; }
+.subtitleHighlight { @apply text-orange-400/80; }
+.datesContainer { @apply text-xs text-stone-600 flex flex-col sm:text-right gap-1; }
+.dateLabel { @apply font-semibold text-stone-400 uppercase tracking-wider text-[10px]; }
+.form { @apply space-y-4; }
+.formRow { @apply grid grid-cols-2 gap-4; }
+.checkboxContainer { @apply flex items-center gap-3 mt-4 bg-stone-100/50 p-4 rounded-xl border border-stone-300/50; }
+.checkbox { @apply w-5 h-5 rounded border-stone-300 text-orange-500 focus:ring-orange-500/20 bg-stone-200; }
+.checkboxLabel { @apply text-sm font-semibold text-stone-700 cursor-pointer select-none; }
+.noteText { @apply text-xs text-amber-500/80 italic pl-1; }
+.migrationContainer { @apply space-y-3 mt-4 bg-stone-100/50 p-4 rounded-xl border border-stone-300/50; }
+.migrationTitle { @apply text-sm font-semibold text-stone-700 mb-2; }
+.migrationRow { @apply flex items-center gap-3; }
+.migrationLabelActive { @apply text-sm text-stone-600 cursor-pointer select-none; }
+.migrationLabelInactive { @apply text-sm text-stone-400 cursor-pointer select-none; }
+.formActions { @apply flex justify-end gap-3 mt-6; }

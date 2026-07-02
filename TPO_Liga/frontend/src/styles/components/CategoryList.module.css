@@ -1,0 +1,14 @@
+.loading { @apply text-center p-12 text-stone-600; }
+.container { @apply space-y-6; }
+.header { @apply flex items-center justify-between; }
+.title { @apply text-2xl font-bold; }
+.panel { @apply bg-stone-100/50 backdrop-blur-md border border-stone-300/50 shadow-xl p-6 rounded-2xl; }
+.form { @apply flex gap-4 items-end mb-8; }
+.inputGroup { @apply flex-1; }
+.label { @apply block text-sm font-medium text-stone-600 mb-1; }
+.input { @apply w-full bg-stone-100/50 border border-stone-300/50 rounded-xl px-4 py-2 focus:outline-none focus:border-orange-500/50; }
+.btn { @apply whitespace-nowrap; }
+.list { @apply space-y-2; }
+.empty { @apply text-stone-500 text-center py-4; }
+.item { @apply flex items-center justify-between p-4 bg-stone-100/30 border border-stone-200/50 rounded-xl hover:bg-stone-200/30 transition-colors; }
+.itemName { @apply font-medium text-lg; }
