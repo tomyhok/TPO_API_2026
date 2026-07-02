@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { apiRequest } from '../../services/api';
 import { useSeason } from '../../contexts/SeasonContext';
 import { useCategories } from '../../contexts/CategoryContext';
+import TeamLogo from '../ui/TeamLogo';
 
 const StandingsWidget = ({ seasonId: propSeasonId, hideTitle = false }) => {
   const [standings, setStandings] = useState([]);
@@ -89,7 +90,15 @@ const StandingsWidget = ({ seasonId: propSeasonId, hideTitle = false }) => {
                   }`}>{index + 1}</span>
                 </td>
                 <td className="py-2.5 font-semibold text-stone-700 group-hover:text-stone-900 truncate max-w-[150px]" title={team.Equipo || team.TeamName}>
-                  {team.Equipo || team.TeamName}
+                  <div className="flex items-center gap-2">
+                    <TeamLogo 
+                      src={team.LogoURL} 
+                      alt={team.Equipo || team.TeamName}
+                      className="w-5 h-5 rounded-full"
+                      fallbackClassName="w-5 h-5 rounded-full shadow-inner text-[10px]"
+                    />
+                    <span className="truncate">{team.Equipo || team.TeamName}</span>
+                  </div>
                 </td>
                 <td className="py-2.5 text-right font-bold text-stone-800">
                   {team.Puntos ?? '-'}
