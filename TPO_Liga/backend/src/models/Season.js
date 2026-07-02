@@ -104,25 +104,49 @@ class SeasonModel {
           
           let baseDate = StartDate ? new Date(StartDate) : new Date();
           
+          let insertValues = [];
+          
           for (const match of allMatches) {
             let matchDate = new Date(baseDate);
-            matchDate.setDate(matchDate.getDate() + (match.round - 1) * 7); // 1 week per round
+            matchDate.setDate(matchDate.getDate() + (match.round - 1) * 7);
             const dateString = matchDate.toISOString().split('T')[0];
             
             for (const cat of categories) {
-              const req = transaction.request();
-              await req
-                .input('LocTeamID', sql.Int, match.home)
-                .input('VisTeamID', sql.Int, match.away)
-                .input('SeaID', sql.Int, newSeason.SeasonID)
-                .input('CatID', sql.Int, cat)
-                .input('RndNumber', sql.Int, match.round)
-                .input('MDate', sql.Date, dateString)
-                .query(`
-                  INSERT INTO Matches (LocalTeamID, VisitorTeamID, SeasonID, CategoryID, RoundNumber, MatchDate) 
-                  VALUES (@LocTeamID, @VisTeamID, @SeaID, @CatID, @RndNumber, @MDate)
-                `);
+              insertValues.push({
+                LocTeamID: match.home,
+                VisTeamID: match.away,
+                SeaID: newSeason.SeasonID,
+                CatID: cat,
+                RndNumber: match.round,
+                MDate: dateString
+              });
             }
+          }
+          
+          // Chunk inserts to avoid exceeding the 2100 parameter limit in SQL Server
+          // We have 6 parameters per row, so max rows per chunk is 350.
+          const chunkSize = 300;
+          for (let i = 0; i < insertValues.length; i += chunkSize) {
+            const chunk = insertValues.slice(i, i + chunkSize);
+            const req = transaction.request();
+            
+            let valuesClauses = [];
+            chunk.forEach((row, idx) => {
+              req.input(`loc${idx}`, sql.Int, row.LocTeamID);
+              req.input(`vis${idx}`, sql.Int, row.VisTeamID);
+              req.input(`sea${idx}`, sql.Int, row.SeaID);
+              req.input(`cat${idx}`, sql.Int, row.CatID);
+              req.input(`rnd${idx}`, sql.Int, row.RndNumber);
+              req.input(`mdate${idx}`, sql.Date, row.MDate);
+              
+              valuesClauses.push(`(@loc${idx}, @vis${idx}, @sea${idx}, @cat${idx}, @rnd${idx}, @mdate${idx})`);
+            });
+            
+            const query = `
+              INSERT INTO Matches (LocalTeamID, VisitorTeamID, SeasonID, CategoryID, RoundNumber, MatchDate) 
+              VALUES ${valuesClauses.join(', ')}
+            `;
+            await req.query(query);
           }
         }
       }
