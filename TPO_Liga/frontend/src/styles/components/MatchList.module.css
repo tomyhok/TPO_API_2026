@@ -43,30 +43,30 @@
 .dayLineRight { @apply flex-1 h-px bg-stone-200; }
 
 .matchList { @apply bg-stone-100/40 border border-stone-200/50 rounded-xl overflow-hidden divide-y divide-stone-200/50; }
-.matchRow { @apply flex items-center p-3 hover:bg-stone-200/50 transition-colors cursor-pointer relative; }
-.matchLeft { @apply w-28 flex-shrink-0 text-center pr-4 border-r border-stone-200 flex flex-col justify-center items-center gap-1; }
+.matchRow { @apply flex flex-col sm:flex-row items-start sm:items-center p-3 hover:bg-stone-200/50 transition-colors cursor-pointer relative gap-3 sm:gap-0; }
+.matchLeft { @apply w-full sm:w-28 flex-shrink-0 text-left sm:text-center sm:pr-4 sm:border-r border-stone-200 flex flex-row sm:flex-col justify-start sm:justify-center items-center gap-2 sm:gap-1; }
 .matchStatusFinal { @apply text-xs font-bold text-stone-500 bg-stone-200/50 px-2 py-0.5 rounded; }
 .matchTime { @apply text-sm font-bold text-stone-700; }
-.matchLocation { @apply text-[10px] text-stone-400 font-medium tracking-tight leading-tight text-center w-full px-1 line-clamp-2; }
+.matchLocation { @apply text-[10px] text-stone-400 font-medium tracking-tight leading-tight sm:text-center w-auto sm:w-full px-1 line-clamp-2; }
 
-.matchCenter { @apply flex-1 flex flex-col justify-center px-4 space-y-2 py-1; }
+.matchCenter { @apply flex-1 flex flex-col justify-center px-0 sm:px-4 space-y-2 py-1 w-full; }
 .teamRow { @apply flex items-center justify-between; }
-.teamInfo { @apply flex items-center gap-3; }
-.teamLogo { @apply w-5 h-5 rounded; }
-.teamLogoFallback { @apply w-5 h-5 rounded text-[10px]; }
-.teamName { @apply text-sm font-medium; }
+.teamInfo { @apply flex items-center gap-3 min-w-0; }
+.teamLogo { @apply w-5 h-5 rounded flex-shrink-0; }
+.teamLogoFallback { @apply w-5 h-5 rounded text-[10px] flex-shrink-0; }
+.teamName { @apply text-sm font-medium leading-tight; }
 .teamNameWon { @apply text-stone-900 font-bold; }
 .teamNameLost { @apply text-stone-700; }
-.teamScore { @apply text-sm font-bold; }
+.teamScore { @apply text-sm font-bold flex-shrink-0 ml-2; }
 .teamScoreWon { @apply text-orange-400; }
 .teamScoreLost { @apply text-stone-700; }
 
-.matchActions { @apply absolute right-4 top-1/2 -translate-y-1/2 flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-opacity; }
-.actionBtn { @apply p-1 rounded bg-stone-200 text-xs shadow; }
+.matchActions { @apply flex w-full sm:w-auto justify-end gap-2 mt-2 sm:mt-0 pt-3 sm:pt-0 border-t sm:border-none border-stone-200/50 flex-shrink-0; }
+.actionBtn { @apply px-3 py-1.5 font-semibold rounded bg-stone-200 text-xs shadow transition-colors; }
 .actionBtnEdit { @apply text-orange-400 hover:bg-stone-300; }
 .actionBtnDelete { @apply text-red-500 hover:bg-stone-300; }
 
-.errorAlert { @apply mb-4 p-3 bg-red-500/10 border border-red-500/20 text-red-400 rounded-lg text-sm font-medium; }
+.errorAlert { @apply mb-4 p-3 bg-red-500/10 border border-red-500/20 text-red-700 rounded-lg text-sm font-medium; }
 .form { @apply space-y-4; }
 .formRow { @apply grid grid-cols-2 gap-4; }
 .formGroup { @apply space-y-1; }

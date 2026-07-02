@@ -45,15 +45,14 @@
   @apply absolute inset-0 bg-gradient-to-br from-white to-orange-500/10 opacity-50;
 }
 
+.teamCardInner { @apply relative z-10 flex flex-col w-full; }
+
 .teamCardActions {
-  @apply absolute top-3 right-3 flex gap-2 opacity-0 transition-opacity z-20;
-}
-.teamCard:hover .teamCardActions {
-  @apply opacity-100;
+  @apply flex justify-end gap-2 pt-3 mt-3 border-t border-stone-200/50 w-full;
 }
 
 .actionBtn {
-  @apply p-1.5 rounded-lg bg-stone-200/80 transition-colors backdrop-blur-sm border border-stone-300/50;
+  @apply px-3 py-1.5 font-semibold rounded-lg bg-stone-200/80 transition-colors backdrop-blur-sm border border-stone-300/50 text-sm;
 }
 
 .actionBtnEdit {
@@ -71,7 +70,7 @@
 }
 
 .contentContainer {
-  @apply relative z-10 flex items-start gap-4;
+  @apply flex items-start gap-4 w-full;
 }
 
 .teamLogo {
@@ -109,4 +108,8 @@
 
 .formActions {
   @apply flex justify-end gap-3 mt-6;
+}
+
+.errorAlert {
+  @apply mb-4 p-3 bg-red-500/10 border border-red-500/20 text-red-700 rounded-lg text-sm font-medium;
 }

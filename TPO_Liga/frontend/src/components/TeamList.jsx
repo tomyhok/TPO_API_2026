@@ -16,7 +16,8 @@ import styles from '../styles/components/TeamList.module.css';
 const TeamList = () => {
   const [teams, setTeams] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [pageError, setPageError] = useState('');
+  const [formError, setFormError] = useState('');
   const isAdmin = !!getToken();
   const { selectedSeasonId, loading: seasonLoading } = useSeason();
   const { openPanel } = useRightPanel();
@@ -35,12 +36,12 @@ const TeamList = () => {
 
     const fetchTeams = async () => {
       setLoading(true);
-      setError('');
+      setPageError('');
       try {
         const data = await apiRequest(`/api/teams?seasonId=${selectedSeasonId}`);
         setTeams(Array.isArray(data) ? data : []);
       } catch (err) {
-        setError(err.message || 'No se pudieron cargar los equipos.');
+        setPageError(err.message || 'No se pudieron cargar los equipos.');
       } finally {
         setLoading(false);
       }
@@ -61,13 +62,14 @@ const TeamList = () => {
       setEditingTeam(null);
       setFormData({ Name: '', Coach: '', LogoURL: '', StadiumName: '' });
     }
+    setFormError('');
     setIsModalOpen(true);
   };
 
   const handleSave = async (e) => {
     e.preventDefault();
     setSaving(true);
-    setError('');
+    setFormError('');
     try {
       if (editingTeam) {
         const res = await apiRequest(`/api/teams/${editingTeam.TeamID}`, {
@@ -86,7 +88,7 @@ const TeamList = () => {
       }
       setIsModalOpen(false);
     } catch (err) {
-      setError(err.message || 'Error al guardar el equipo.');
+      setFormError(err.message || 'Error al guardar el equipo.');
     } finally {
       setSaving(false);
     }
@@ -98,7 +100,7 @@ const TeamList = () => {
       await apiRequest(`/api/teams/${id}`, { method: 'DELETE', auth: true });
       setTeams(teams.filter(t => t.TeamID !== id));
     } catch (err) {
-      setError(err.message || 'Error al eliminar el equipo.');
+      setPageError(err.message || 'Error al eliminar el equipo.');
     }
   };
 
@@ -109,7 +111,7 @@ const TeamList = () => {
         subtitle="Listado de equipos registrados en la liga" 
         action={isAdmin && <Button onClick={() => openModal()}>+ Nuevo Equipo</Button>}
       />
-      <Alert message={error} />
+      <Alert message={pageError} />
 
       {loading ? (
         <div className={styles.loadingGrid}>
@@ -138,34 +140,36 @@ const TeamList = () => {
               >
                 <div className={styles.teamCardBg}></div>
                 
-                {isAdmin && (
-                  <div className={styles.teamCardActions}>
-                    <button onClick={(e) => { e.stopPropagation(); openModal(team); }} className={`${styles.actionBtn} ${styles.actionBtnEdit}`}>
-                      ✏️
-                    </button>
-                    <button onClick={(e) => { e.stopPropagation(); handleDelete(team.TeamID); }} className={`${styles.actionBtn} ${styles.actionBtnDelete}`}>
-                      🗑️
-                    </button>
+                <div className={styles.teamCardInner}>
+                  <div className={styles.contentContainer}>
+                    <TeamLogo 
+                      src={team.LogoURL} 
+                      alt={teamName}
+                      className={styles.teamLogo}
+                      fallbackClassName={styles.teamLogoFallback}
+                    />
+                    <div>
+                      <h3 className={styles.teamName} title={teamName}>
+                        {teamName}
+                      </h3>
+                      {team.Coach && (
+                        <p className={styles.coachText}>
+                          <span className={styles.coachLabel}>DT:</span> {team.Coach}
+                        </p>
+                      )}
+                    </div>
                   </div>
-                )}
-                
-                <div className={styles.contentContainer}>
-                  <TeamLogo 
-                    src={team.LogoURL} 
-                    alt={teamName}
-                    className={styles.teamLogo}
-                    fallbackClassName={styles.teamLogoFallback}
-                  />
-                  <div>
-                    <h3 className={styles.teamName} title={teamName}>
-                      {teamName}
-                    </h3>
-                    {team.Coach && (
-                      <p className={styles.coachText}>
-                        <span className={styles.coachLabel}>DT:</span> {team.Coach}
-                      </p>
-                    )}
-                  </div>
+
+                  {isAdmin && (
+                    <div className={styles.teamCardActions}>
+                      <button onClick={(e) => { e.stopPropagation(); openModal(team); }} className={`${styles.actionBtn} ${styles.actionBtnEdit}`}>
+                        Editar
+                      </button>
+                      <button onClick={(e) => { e.stopPropagation(); handleDelete(team.TeamID); }} className={`${styles.actionBtn} ${styles.actionBtnDelete}`}>
+                        Eliminar
+                      </button>
+                    </div>
+                  )}
                 </div>
               </Card>
             );
@@ -178,6 +182,7 @@ const TeamList = () => {
         onClose={() => setIsModalOpen(false)} 
         title={editingTeam ? 'Editar Equipo' : 'Nuevo Equipo'}
       >
+        {formError && <div className={styles.errorAlert}>{formError}</div>}
         <form onSubmit={handleSave} className={styles.formContainer}>
           <Input 
             label="Nombre del Equipo" 

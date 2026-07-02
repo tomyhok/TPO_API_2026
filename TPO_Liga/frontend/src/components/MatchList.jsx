@@ -16,7 +16,8 @@ const MatchList = () => {
   const [matches, setMatches] = useState([]);
   const [teams, setTeams] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [pageError, setPageError] = useState('');
+  const [formError, setFormError] = useState('');
   const [activeCategoryId, setActiveCategoryId] = useState(null);
   const [activeRound, setActiveRound] = useState(1);
   const isAdmin = !!getToken();
@@ -50,7 +51,7 @@ const MatchList = () => {
 
     const fetchData = async () => {
       setLoading(true);
-      setError('');
+      setPageError('');
       try {
         const [matchesData, teamsData] = await Promise.all([
           apiRequest(`/api/matches?seasonId=${selectedSeasonId}`),
@@ -59,7 +60,7 @@ const MatchList = () => {
         setMatches(Array.isArray(matchesData) ? matchesData : []);
         setTeams(Array.isArray(teamsData) ? teamsData : []);
       } catch (err) {
-        setError(err.message || 'No se pudieron cargar los datos.');
+        setPageError(err.message || 'No se pudieron cargar los datos.');
       } finally {
         setLoading(false);
       }
@@ -98,16 +99,17 @@ const MatchList = () => {
       setEditingMatch(null);
       setFormData({ LocalTeamID: '', VisitorTeamID: '', MatchDate: '', MatchTime: '', LocalPoints: '', VisitorPoints: '', Status: '', CategoryID: activeCategoryId || '', RoundNumber: activeRound || '', Location: '' });
     }
+    setFormError('');
     setIsModalOpen(true);
   };
 
   const handleSave = async (e) => {
     e.preventDefault();
     setSaving(true);
-    setError('');
+    setFormError('');
 
     if (formData.LocalTeamID === formData.VisitorTeamID) {
-      setError('El equipo local y el equipo visitante no pueden ser el mismo.');
+      setFormError('El equipo local y el equipo visitante no pueden ser el mismo.');
       setSaving(false);
       return;
     }
@@ -135,7 +137,7 @@ const MatchList = () => {
       }
       setIsModalOpen(false);
     } catch (err) {
-      setError(err.message || 'Error al guardar el partido.');
+      setFormError(err.message || 'Error al guardar el partido.');
     } finally {
       setSaving(false);
     }
@@ -148,7 +150,7 @@ const MatchList = () => {
       await apiRequest(`/api/matches/${id}`, { method: 'DELETE', auth: true });
       setMatches(matches.filter(m => m.MatchID !== id));
     } catch (err) {
-      setError(err.message || 'Error al eliminar el partido.');
+      setPageError(err.message || 'Error al eliminar el partido.');
     }
   };
 
@@ -212,7 +214,7 @@ const MatchList = () => {
         </div>
       </div>
       
-      <Alert message={error} />
+      <Alert message={pageError} />
 
       {loading || categoriesLoading ? (
         <div className={styles.loadingWrapper}>
@@ -326,8 +328,8 @@ const MatchList = () => {
                       {/* Admin Actions */}
                       {isAdmin && (
                         <div className={styles.matchActions}>
-                          <button onClick={(e) => openModal(match, e)} className={`${styles.actionBtn} ${styles.actionBtnEdit}`}>✏️</button>
-                          <button onClick={(e) => handleDelete(match.MatchID, e)} className={`${styles.actionBtn} ${styles.actionBtnDelete}`}>🗑️</button>
+                          <button onClick={(e) => openModal(match, e)} className={`${styles.actionBtn} ${styles.actionBtnEdit}`}>Editar</button>
+                          <button onClick={(e) => handleDelete(match.MatchID, e)} className={`${styles.actionBtn} ${styles.actionBtnDelete}`}>Eliminar</button>
                         </div>
                       )}
                     </div>
@@ -346,7 +348,7 @@ const MatchList = () => {
         onClose={() => setIsModalOpen(false)} 
         title={editingMatch ? 'Editar Partido' : 'Nuevo Partido'}
       >
-        {error && <div className={styles.errorAlert}>{error}</div>}
+        {formError && <div className={styles.errorAlert}>{formError}</div>}
         <form onSubmit={handleSave} className={styles.form}>
           <div className={styles.formRow}>
             <div className={styles.formGroup}>

@@ -22,16 +22,17 @@
 .listContainer { @apply space-y-8; }
 .playerCard { @apply hover:-translate-y-1 transition-transform duration-300 relative overflow-hidden cursor-pointer; }
 .playerGlow { @apply absolute -top-10 -right-10 w-32 h-32 bg-orange-500/10 rounded-full blur-2xl group-hover:bg-orange-500/20 transition-colors; }
-.playerActions { @apply absolute top-2 right-2 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity z-20; }
-.actionBtn { @apply p-1 rounded bg-stone-200/80 transition-colors backdrop-blur-sm border border-stone-300/50 text-sm; }
+.playerCardInner { @apply relative z-10 flex flex-col w-full; }
+.playerActions { @apply flex justify-end gap-2 pt-3 mt-3 border-t border-stone-200/50 w-full; }
+.actionBtn { @apply px-3 py-1.5 font-semibold rounded bg-stone-200/80 transition-colors backdrop-blur-sm border border-stone-300/50 text-sm; }
 .actionBtnEdit { @apply text-orange-400 hover:bg-stone-300 hover:text-orange-300; }
 .actionBtnDelete { @apply text-red-500 hover:bg-stone-300 hover:text-red-400; }
 
-.playerContent { @apply flex items-center gap-4 w-full relative z-10; }
+.playerContent { @apply flex items-center gap-4 w-full; }
 .avatarContainer { @apply flex-shrink-0 w-14 h-14 rounded-full border border-stone-300 shadow-inner overflow-hidden bg-stone-100 flex items-center justify-center; }
 .avatarImg { @apply w-full h-full object-cover; }
 .playerInfo { @apply flex-1 min-w-0; }
-.playerName { @apply text-lg font-bold text-stone-900 truncate group-hover:text-orange-300 transition-colors; }
+.playerName { @apply text-lg font-bold text-stone-900 group-hover:text-orange-300 transition-colors leading-tight; }
 .badgesContainer { @apply flex items-center gap-2 mt-1 flex-wrap; }
 .badge { @apply inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium border; }
 .badgeDefault { @apply bg-stone-200/80 text-stone-600 border-stone-300; }

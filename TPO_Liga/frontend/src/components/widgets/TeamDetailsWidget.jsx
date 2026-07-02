@@ -83,7 +83,7 @@ const TeamDetailsWidget = ({ team }) => {
                   <li key={m.MatchID} className={styles.listItem}>
                     <div className={styles.matchInfo}>
                       <span className={styles.matchDate}>
-                        {new Date(m.MatchDate).toLocaleDateString()} • {isLocal ? '🏠 Local' : '✈️ Visitante'}
+                        {new Date(m.MatchDate).toLocaleDateString()} • {isLocal ? 'Local' : 'Visitante'}
                       </span>
                       <span className={styles.matchOpponent}>
                         vs {opponentName}
@@ -232,7 +232,14 @@ const TeamDetailsWidget = ({ team }) => {
                   {teamData.Players.filter(p => String(p.CategoryID) === String(activeCategoryId)).map(p => (
                     <li key={p.PlayerID} className={styles.listItem}>
                       <div className={styles.playerInfo}>
-                        <div className={styles.playerAvatar}>🧑‍🚀</div>
+                        <div className={styles.playerAvatar}>
+                          <img 
+                            src={p.PhotoURL || 'https://images.fifaindex.com/fifa22/players/205340.png'} 
+                            alt={`${p.FirstName} ${p.LastName}`} 
+                            className={styles.avatarImg} 
+                            onError={(e) => { e.target.src = 'https://images.fifaindex.com/fifa22/players/205340.png'; }}
+                          />
+                        </div>
                         <span className={styles.playerName}>{p.FirstName} {p.LastName}</span>
                       </div>
                       <div className={styles.playerMeta}>

@@ -10,6 +10,9 @@ exports.createTeam = async (req, res) => {
     res.status(201).json(team);
   } catch (error) {
     console.error('Error creating team:', error);
+    if (error.number === 2627 || error.number === 2601) {
+      return res.status(400).json({ message: 'Ya existe un equipo registrado con ese nombre.' });
+    }
     res.status(500).json({ message: 'Internal server error.' });
   }
 };
@@ -54,6 +57,9 @@ exports.updateTeam = async (req, res) => {
     res.json(updatedTeam);
   } catch (error) {
     console.error('Error updating team:', error);
+    if (error.number === 2627 || error.number === 2601) {
+      return res.status(400).json({ message: 'Ya existe un equipo registrado con ese nombre.' });
+    }
     res.status(500).json({ message: 'Internal server error.' });
   }
 };

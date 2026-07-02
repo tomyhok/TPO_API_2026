@@ -165,20 +165,7 @@ const SeasonList = () => {
                 <div className={styles.seasonCardBg}></div>
               )}
               
-              {isAdmin && (
-                <div className={styles.seasonCardActions}>
-                  <button onClick={(e) => { e.stopPropagation(); openModal(season); }} className={`${styles.actionBtn} ${styles.actionBtnEdit}`}>
-                    ✏️
-                  </button>
-                  {!season.IsActive && (
-                    <button onClick={(e) => { e.stopPropagation(); handleDelete(season); }} className={`${styles.actionBtn} ${styles.actionBtnDelete}`}>
-                      🗑️
-                    </button>
-                  )}
-                </div>
-              )}
-              
-              <div className={styles.contentContainer}>
+              <div className={styles.seasonCardInner}>
                 <div className={styles.iconContainer}>
                    <div className={`${styles.iconBox} ${season.IsActive ? styles.iconBoxActive : styles.iconBoxInactive}`}>
                     {season.IsActive ? '⭐' : '🗓️'}
@@ -189,22 +176,34 @@ const SeasonList = () => {
                 </div>
                 
                 <div className={styles.infoContainer}>
-                  <div>
-                    <h3 className={styles.title}>
-                      {season.Name}
-                      {season.IsActive && (
-                         <span className={styles.activeBadgeMobile}>Activa</span>
-                      )}
-                    </h3>
-                    <p className={styles.subtitle}>
-                      ID: <span className={styles.subtitleHighlight}>{season.SeasonID}</span>
-                    </p>
-                  </div>
-                  <div className={styles.datesContainer}>
-                    <span><span className={styles.dateLabel}>Inicio:</span> {season.StartDate ? new Date(season.StartDate).toLocaleDateString('es-ES') : 'N/A'}</span>
-                    <span><span className={styles.dateLabel}>Fin:</span> {season.EndDate ? new Date(season.EndDate).toLocaleDateString('es-ES') : 'N/A'}</span>
-                  </div>
+                  <h3 className={styles.title}>
+                    {season.Name}
+                    {season.IsActive && (
+                       <span className={styles.activeBadgeMobile}>Activa</span>
+                    )}
+                  </h3>
+                  <p className={styles.subtitle}>
+                    ID: <span className={styles.subtitleHighlight}>{season.SeasonID}</span>
+                  </p>
                 </div>
+
+                <div className={styles.datesContainer}>
+                  <span><span className={styles.dateLabel}>Inicio:</span> {season.StartDate ? new Date(season.StartDate).toLocaleDateString('es-ES') : 'N/A'}</span>
+                  <span><span className={styles.dateLabel}>Fin:</span> {season.EndDate ? new Date(season.EndDate).toLocaleDateString('es-ES') : 'N/A'}</span>
+                </div>
+
+                {isAdmin && (
+                  <div className={styles.seasonCardActions}>
+                    <button onClick={(e) => { e.stopPropagation(); openModal(season); }} className={`${styles.actionBtn} ${styles.actionBtnEdit}`}>
+                      Editar
+                    </button>
+                    {!season.IsActive && (
+                      <button onClick={(e) => { e.stopPropagation(); handleDelete(season); }} className={`${styles.actionBtn} ${styles.actionBtnDelete}`}>
+                        Eliminar
+                      </button>
+                    )}
+                  </div>
+                )}
               </div>
             </Card>
           ))}

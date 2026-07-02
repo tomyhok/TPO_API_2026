@@ -222,46 +222,48 @@ const PlayerList = () => {
                     <div className={styles.playerGlow}></div>
                   )}
                   
-                  {isAdmin && (
-                    <div className={styles.playerActions}>
-                      <button onClick={(e) => { e.stopPropagation(); openModal(player); }} className={`${styles.actionBtn} ${styles.actionBtnEdit}`}>
-                        ✏️
-                      </button>
-                      <button onClick={(e) => { e.stopPropagation(); handleDelete(player.PlayerID); }} className={`${styles.actionBtn} ${styles.actionBtnDelete}`}>
-                        🗑️
-                      </button>
-                    </div>
-                  )}
-                  
-                  <div className={styles.playerContent}>
-                    <div className={styles.avatarContainer}>
-                      <img 
-                        src={player.PhotoURL || 'https://images.fifaindex.com/fifa22/players/205340.png'} 
-                        alt={displayName} 
-                        className={styles.avatarImg} 
-                        onError={(e) => { e.target.src = 'https://images.fifaindex.com/fifa22/players/205340.png'; }}
-                      />
-                    </div>
-                    <div className={styles.playerInfo}>
-                      <p className={styles.playerName}>
-                        {displayName}
-                      </p>
-                      <div className={styles.badgesContainer}>
-                        {player.JerseyNumber && (
-                          <span className={`${styles.badge} ${styles.badgeDefault}`}>
-                            #{player.JerseyNumber}
+                  <div className={styles.playerCardInner}>
+                    <div className={styles.playerContent}>
+                      <div className={styles.avatarContainer}>
+                        <img 
+                          src={player.PhotoURL || 'https://images.fifaindex.com/fifa22/players/205340.png'} 
+                          alt={displayName} 
+                          className={styles.avatarImg} 
+                          onError={(e) => { e.target.src = 'https://images.fifaindex.com/fifa22/players/205340.png'; }}
+                        />
+                      </div>
+                      <div className={styles.playerInfo}>
+                        <p className={styles.playerName}>
+                          {displayName}
+                        </p>
+                        <div className={styles.badgesContainer}>
+                          {player.JerseyNumber && (
+                            <span className={`${styles.badge} ${styles.badgeDefault}`}>
+                              #{player.JerseyNumber}
+                            </span>
+                          )}
+                          <span className={`${styles.badge} ${styles.badgeDefault} uppercase`}>
+                            {player.Position || 'N/A'}
                           </span>
-                        )}
-                        <span className={`${styles.badge} ${styles.badgeDefault} uppercase`}>
-                          {player.Position || 'N/A'}
-                        </span>
-                        {teamName && (
-                          <span className={`${styles.badge} ${styles.badgeTeam}`} title={teamName}>
-                            {teamName}
-                          </span>
-                        )}
+                          {teamName && (
+                            <span className={`${styles.badge} ${styles.badgeTeam}`} title={teamName}>
+                              {teamName}
+                            </span>
+                          )}
+                        </div>
                       </div>
                     </div>
+
+                    {isAdmin && (
+                      <div className={styles.playerActions}>
+                        <button onClick={(e) => { e.stopPropagation(); openModal(player); }} className={`${styles.actionBtn} ${styles.actionBtnEdit}`}>
+                          Editar
+                        </button>
+                        <button onClick={(e) => { e.stopPropagation(); handleDelete(player.PlayerID); }} className={`${styles.actionBtn} ${styles.actionBtnDelete}`}>
+                          Eliminar
+                        </button>
+                      </div>
+                    )}
                   </div>
                 </Card>
               );
