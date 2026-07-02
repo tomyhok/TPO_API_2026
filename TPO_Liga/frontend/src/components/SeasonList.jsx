@@ -121,6 +121,32 @@ const SeasonList = () => {
     }
   };
 
+  const handleFinishSeason = async (season) => {
+    if (window.confirm(`¿Estás seguro de finalizar la temporada "${season.Name}"?\n\nLos equipos que estén en el primer puesto de la tabla serán declarados campeones automáticamente y agregados al historial.`)) {
+      try {
+        await apiRequest(`/api/seasons/${season.SeasonID}/finish`, { method: 'POST', auth: true });
+        await fetchSeasonsData();
+        await fetchSeasons();
+        alert("Temporada finalizada exitosamente.");
+      } catch (err) {
+        setError(err.message || 'Error al finalizar la temporada.');
+      }
+    }
+  };
+
+  const handleRevertFinish = async (season) => {
+    if (window.confirm(`¿Estás seguro de revertir la finalización de "${season.Name}"?\n\nEsto eliminará del historial de los equipos los campeonatos ganados en esta temporada.`)) {
+      try {
+        await apiRequest(`/api/seasons/${season.SeasonID}/revert-finish`, { method: 'POST', auth: true });
+        await fetchSeasonsData();
+        await fetchSeasons();
+        alert("Finalización revertida exitosamente.");
+      } catch (err) {
+        setError(err.message || 'Error al revertir la finalización.');
+      }
+    }
+  };
+
   return (
     <div className={styles.container}>
       <PageHeader 
@@ -200,6 +226,15 @@ const SeasonList = () => {
                     {!season.IsActive && (
                       <button onClick={(e) => { e.stopPropagation(); handleDelete(season); }} className={`${styles.actionBtn} ${styles.actionBtnDelete}`}>
                         Eliminar
+                      </button>
+                    )}
+                    {!season.IsFinished ? (
+                      <button onClick={(e) => { e.stopPropagation(); handleFinishSeason(season); }} className={`${styles.actionBtn} ${styles.actionBtnFinish}`}>
+                        Finalizar
+                      </button>
+                    ) : (
+                      <button onClick={(e) => { e.stopPropagation(); handleRevertFinish(season); }} className={`${styles.actionBtn} ${styles.actionBtnRevert}`}>
+                        Revertir Cierre
                       </button>
                     )}
                   </div>

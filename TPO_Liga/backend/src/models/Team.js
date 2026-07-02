@@ -138,6 +138,17 @@ class TeamModel {
     team.PendingMatches = allMatches.filter(m => m.LocalPoints === null || m.VisitorPoints === null);
     team.Results = team.PlayedMatches;
 
+    // 4. Obtener campeonatos del equipo
+    const champQuery = `
+      SELECT tc.ChampionshipID, tc.CategoryName, tc.SeasonID, s.Name AS SeasonName, s.StartDate
+      FROM TeamChampionships tc
+      INNER JOIN Seasons s ON tc.SeasonID = s.SeasonID
+      WHERE tc.TeamID = @TeamID
+      ORDER BY s.StartDate DESC
+    `;
+    const champResult = await request.query(champQuery);
+    team.Championships = champResult.recordset;
+
     return team;
   }
 

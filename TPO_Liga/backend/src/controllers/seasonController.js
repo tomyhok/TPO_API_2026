@@ -81,3 +81,25 @@ exports.deleteSeason = async (req, res) => {
     res.status(500).json({ error: 'Error al eliminar la temporada' });
   }
 };
+
+exports.finishSeason = async (req, res) => {
+  try {
+    const { id } = req.params;
+    await SeasonModel.finishSeason(id);
+    res.json({ message: 'Temporada finalizada exitosamente. Los campeones han sido registrados.' });
+  } catch (err) {
+    console.error('Error finishing season:', err);
+    res.status(400).json({ error: err.message || 'Error al finalizar la temporada' });
+  }
+};
+
+exports.revertFinishSeason = async (req, res) => {
+  try {
+    const { id } = req.params;
+    await SeasonModel.revertFinish(id);
+    res.json({ message: 'Finalización de temporada revertida. Los campeones registrados fueron eliminados.' });
+  } catch (err) {
+    console.error('Error reverting season finish:', err);
+    res.status(400).json({ error: err.message || 'Error al revertir la finalización' });
+  }
+};

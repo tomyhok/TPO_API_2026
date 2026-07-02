@@ -195,6 +195,83 @@ class SeasonModel {
       throw err;
     }
   }
+
+  static async finishSeason(id) {
+    const pool = await poolPromise;
+    const transaction = new sql.Transaction(pool);
+    await transaction.begin();
+
+    try {
+      // Check if already finished
+      const checkRes = await transaction.request().input('SeasonID', sql.Int, id).query('SELECT IsFinished FROM Seasons WHERE SeasonID = @SeasonID');
+      if (checkRes.recordset.length === 0 || checkRes.recordset[0].IsFinished) {
+        throw new Error('Season already finished or not found.');
+      }
+
+      // 1. Mark as finished
+      await transaction.request()
+        .input('SeasonID2', sql.Int, id)
+        .query('UPDATE Seasons SET IsFinished = 1, IsActive = 0 WHERE SeasonID = @SeasonID2');
+
+      // 2. Determine champions
+      // Use v_Standings to get the top team per category
+      const standingsRes = await transaction.request()
+        .input('SeasonID3', sql.Int, id)
+        .query('SELECT TeamID, CategoryName FROM v_Standings WHERE SeasonID = @SeasonID3 ORDER BY CategoryID, Puntos DESC, DiferenciaDeTantos DESC, TantosAFavor DESC');
+      
+      const standings = standingsRes.recordset;
+      const categoriesProcessed = new Set();
+      
+      for (const row of standings) {
+        if (!categoriesProcessed.has(row.CategoryName)) {
+          // Top team for this category
+          categoriesProcessed.add(row.CategoryName);
+          
+          await transaction.request()
+            .input('TeamID', sql.Int, row.TeamID)
+            .input('SeasonID4', sql.Int, id)
+            .input('CatName', sql.NVarChar, row.CategoryName)
+            .query('INSERT INTO TeamChampionships (TeamID, SeasonID, CategoryName) VALUES (@TeamID, @SeasonID4, @CatName)');
+        }
+      }
+
+      await transaction.commit();
+      return true;
+    } catch (err) {
+      await transaction.rollback();
+      throw err;
+    }
+  }
+
+  static async revertFinish(id) {
+    const pool = await poolPromise;
+    const transaction = new sql.Transaction(pool);
+    await transaction.begin();
+
+    try {
+      // Check if finished
+      const checkRes = await transaction.request().input('SeasonID', sql.Int, id).query('SELECT IsFinished FROM Seasons WHERE SeasonID = @SeasonID');
+      if (checkRes.recordset.length === 0 || !checkRes.recordset[0].IsFinished) {
+        throw new Error('Season is not finished or not found.');
+      }
+
+      // 1. Delete championships for this season
+      await transaction.request()
+        .input('SeasonID2', sql.Int, id)
+        .query('DELETE FROM TeamChampionships WHERE SeasonID = @SeasonID2');
+
+      // 2. Mark as not finished (we can make it active again if we want, but let's just make it not finished, user can activate manually if needed)
+      await transaction.request()
+        .input('SeasonID3', sql.Int, id)
+        .query('UPDATE Seasons SET IsFinished = 0 WHERE SeasonID = @SeasonID3');
+
+      await transaction.commit();
+      return true;
+    } catch (err) {
+      await transaction.rollback();
+      throw err;
+    }
+  }
 }
 
 module.exports = SeasonModel;

@@ -142,6 +142,38 @@ const TeamDetailsWidget = ({ team }) => {
     );
   };
 
+  const renderHistoria = () => {
+    if (!teamData || !teamData.Championships) return null;
+    const championships = teamData.Championships;
+
+    return (
+      <div className={styles.historyContainer}>
+        <h5 className={styles.sectionTitle}>Historial de Campeonatos</h5>
+        {championships.length > 0 ? (
+          <ul className={styles.championshipList}>
+            {championships.map(champ => (
+              <li key={champ.ChampionshipID} className={styles.championshipItem}>
+                <div className={styles.trophyIcon}>🏆</div>
+                <div className={styles.champInfo}>
+                  <span className={styles.champSeason}>{champ.SeasonName}</span>
+                  <span className={styles.champCategory}>{champ.CategoryName}</span>
+                </div>
+                <div className={styles.champYear}>
+                  {new Date(champ.StartDate).getFullYear()}
+                </div>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <div className={styles.emptyHistoryState}>
+            <div className={styles.emptyHistoryIcon}>🏅</div>
+            <p>Este equipo aún no registra campeonatos oficiales.</p>
+          </div>
+        )}
+      </div>
+    );
+  };
+
   return (
     <div className={styles.container}>
       <div className={styles.headerContainer}>
@@ -223,6 +255,12 @@ const TeamDetailsWidget = ({ team }) => {
             >
               Partidos
             </button>
+            <button
+              onClick={() => setActiveSection('historia')}
+              className={`${styles.sectionTabBtn} ${activeSection === 'historia' ? styles.sectionTabBtnActive : ''}`}
+            >
+              Historia
+            </button>
           </div>
 
           <div className={styles.listContainer}>
@@ -254,8 +292,10 @@ const TeamDetailsWidget = ({ team }) => {
                   No hay jugadores registrados en esta categoría.
                 </p>
               )
-            ) : (
+            ) : activeSection === 'partidos' ? (
               renderPartidos()
+            ) : (
+              renderHistoria()
             )}
           </div>
         </div>

@@ -229,3 +229,43 @@
 .emptyMatchState {
   @apply text-stone-500 text-xs italic bg-stone-100/30 p-3 rounded-lg border border-stone-200/50 text-center;
 }
+
+.historyContainer {
+  @apply space-y-4;
+}
+
+.championshipList {
+  @apply space-y-2;
+}
+
+.championshipItem {
+  @apply flex items-center gap-3 bg-gradient-to-r from-amber-50 to-orange-50 p-3 rounded-lg border border-amber-200 shadow-sm transition-transform hover:-translate-y-0.5;
+}
+
+.trophyIcon {
+  @apply text-2xl flex-shrink-0 drop-shadow-md;
+}
+
+.champInfo {
+  @apply flex flex-col flex-1;
+}
+
+.champSeason {
+  @apply font-bold text-stone-800 text-sm leading-tight;
+}
+
+.champCategory {
+  @apply text-[10px] uppercase font-bold tracking-wider text-amber-600;
+}
+
+.champYear {
+  @apply text-xl font-black text-amber-500/80 pr-2 italic;
+}
+
+.emptyHistoryState {
+  @apply flex flex-col items-center justify-center py-8 text-stone-400 bg-stone-50/50 rounded-xl border border-stone-100;
+}
+
+.emptyHistoryIcon {
+  @apply text-4xl mb-2 opacity-50 grayscale;
+}

@@ -18,6 +18,10 @@
 .actionBtnEdit:hover { @apply bg-stone-300 text-orange-300; }
 .actionBtnDelete { @apply text-red-500; }
 .actionBtnDelete:hover { @apply bg-stone-300 text-red-400; }
+.actionBtnFinish { @apply text-green-600 bg-green-500/10 border-green-500/30; }
+.actionBtnFinish:hover { @apply bg-green-500/20; }
+.actionBtnRevert { @apply text-stone-500 bg-stone-200/50 border-stone-300; }
+.actionBtnRevert:hover { @apply bg-stone-300/80; }
 .iconContainer { @apply flex items-center gap-4 flex-shrink-0; }
 .iconBox { @apply flex-shrink-0 w-12 h-12 rounded-xl flex items-center justify-center text-xl shadow-lg transition-transform; }
 .iconBoxActive { @apply bg-orange-500/20 text-orange-400 border border-orange-500/30; }
