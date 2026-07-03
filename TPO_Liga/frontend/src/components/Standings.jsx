@@ -98,6 +98,7 @@ const Standings = () => {
                       <th className={styles.thDefault}>Pts</th>
                       <th className={styles.thDefault}>PJ</th>
                       <th className={styles.thWins}>PG</th>
+                      <th className={styles.thDefault}>PE</th>
                       <th className={styles.thLosses}>PP</th>
                       <th className={styles.thDefault}>PF</th>
                       <th className={styles.thDefault}>PC</th>
@@ -142,6 +143,9 @@ const Standings = () => {
                       </td>
                       <td className={`${styles.tdDefault} ${styles.pg}`}>
                         {team.PartidosGanados ?? '-'}
+                      </td>
+                      <td className={`${styles.tdDefault} ${styles.pe}`}>
+                        {team.PartidosEmpatados ?? '-'}
                       </td>
                       <td className={`${styles.tdDefault} ${styles.pp}`}>
                         {team.PartidosPerdidos ?? '-'}
