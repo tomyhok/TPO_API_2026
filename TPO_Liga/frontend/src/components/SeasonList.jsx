@@ -214,8 +214,8 @@ const SeasonList = () => {
                 </div>
 
                 <div className={styles.datesContainer}>
-                  <span><span className={styles.dateLabel}>Inicio:</span> {season.StartDate ? new Date(season.StartDate).toLocaleDateString('es-ES') : 'N/A'}</span>
-                  <span><span className={styles.dateLabel}>Fin:</span> {season.EndDate ? new Date(season.EndDate).toLocaleDateString('es-ES') : 'N/A'}</span>
+                  <span><span className={styles.dateLabel}>Inicio:</span> {season.StartDate ? new Date(season.StartDate).toLocaleDateString('es-ES', { timeZone: 'UTC' }) : 'N/A'}</span>
+                  <span><span className={styles.dateLabel}>Fin:</span> {season.EndDate ? new Date(season.EndDate).toLocaleDateString('es-ES', { timeZone: 'UTC' }) : 'N/A'}</span>
                 </div>
 
                 {isAdmin && (

@@ -117,7 +117,7 @@ const MatchDetailsWidget = ({ match, getTeamName, getTeamLogo }) => {
             <div className="flex justify-between items-center border-b border-stone-200/50 pb-3">
               <span className="text-stone-500 text-sm">Fecha</span>
               <span className="text-stone-800 font-medium">
-                {match.MatchDate ? new Date(match.MatchDate).toLocaleDateString('es-ES', { weekday: 'short', year: 'numeric', month: 'long', day: 'numeric' }) : 'No asignada'}
+                {match.MatchDate ? new Date(match.MatchDate).toLocaleDateString('es-ES', { timeZone: 'UTC', weekday: 'short', year: 'numeric', month: 'long', day: 'numeric' }) : 'No asignada'}
               </span>
             </div>
             <div className="flex justify-between items-center border-b border-stone-200/50 pb-3">

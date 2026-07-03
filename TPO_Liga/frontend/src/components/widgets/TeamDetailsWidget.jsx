@@ -89,7 +89,7 @@ const TeamDetailsWidget = ({ team }) => {
                   <li key={m.MatchID} className={styles.listItem}>
                     <div className={styles.matchInfo}>
                       <span className={styles.matchDate}>
-                        {new Date(m.MatchDate).toLocaleDateString()} • {isLocal ? 'Local' : 'Visitante'}
+                        {new Date(m.MatchDate).toLocaleDateString('es-ES', { timeZone: 'UTC' })} • {isLocal ? 'Local' : 'Visitante'}
                       </span>
                       <span className={styles.matchOpponent}>
                         vs {opponentName}
@@ -127,7 +127,7 @@ const TeamDetailsWidget = ({ team }) => {
                   <li key={m.MatchID} className={styles.matchItemPending}>
                     <div className={styles.matchInfo}>
                       <span className={styles.matchDate}>
-                        {new Date(m.MatchDate).toLocaleDateString()} • {isLocal ? 'Local' : 'Visitante'}
+                        {new Date(m.MatchDate).toLocaleDateString('es-ES', { timeZone: 'UTC' })} • {isLocal ? 'Local' : 'Visitante'}
                       </span>
                       <span className={styles.matchOpponent}>
                         vs {opponentName}
