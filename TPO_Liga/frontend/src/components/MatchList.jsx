@@ -88,7 +88,7 @@ const MatchList = () => {
         LocalTeamID: match.LocalTeamID || '', 
         VisitorTeamID: match.VisitorTeamID || '', 
         MatchDate: match.MatchDate ? match.MatchDate.substring(0, 10) : '', 
-        MatchTime: match.MatchTime && !match.MatchTime.startsWith('1970') ? new Date(match.MatchTime).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit', timeZone: 'UTC' }) : '',
+        MatchTime: match.MatchTime && !match.MatchTime.startsWith('0001') ? new Date(match.MatchTime).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit', timeZone: 'UTC' }) : '',
         LocalPoints: match.LocalPoints ?? '', 
         VisitorPoints: match.VisitorPoints ?? '', 
         Status: match.Status || '',
@@ -301,7 +301,12 @@ const MatchList = () => {
                   const localScore = match.HomeScore ?? match.LocalPoints ?? match.HomePoints;
                   const visitorScore = match.AwayScore ?? match.VisitorPoints ?? match.AwayPoints;
                   
-                  const timeStr = match.MatchTime && !match.MatchTime.startsWith('1970') && !match.MatchTime.startsWith('0001') ? new Date(match.MatchTime).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }) : '-';
+                  const formatTime = (timeString) => {
+                    if (!timeString || timeString.startsWith('0001')) return '-';
+                    if (timeString.includes('T')) return timeString.split('T')[1].substring(0, 5);
+                    return timeString.substring(0, 5);
+                  };
+                  const timeStr = formatTime(match.MatchTime);
                   const locationStr = match.Location || 'Sede sin definir';
                   
                   const hasScore = localScore !== null && localScore !== undefined;

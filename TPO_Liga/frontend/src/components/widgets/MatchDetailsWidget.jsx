@@ -123,7 +123,7 @@ const MatchDetailsWidget = ({ match, getTeamName, getTeamLogo }) => {
             <div className="flex justify-between items-center border-b border-stone-200/50 pb-3">
               <span className="text-stone-500 text-sm">Hora</span>
               <span className="text-stone-800 font-medium">
-                {match.MatchTime && !match.MatchTime.startsWith('1970') && !match.MatchTime.startsWith('0001') ? new Date(match.MatchTime).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }) : 'No asignada'}
+                {match.MatchTime && !match.MatchTime.startsWith('0001') ? (match.MatchTime.includes('T') ? match.MatchTime.split('T')[1].substring(0, 5) : match.MatchTime.substring(0, 5)) : 'No asignada'}
               </span>
             </div>
             <div className="flex justify-between items-center">
