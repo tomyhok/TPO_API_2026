@@ -1,14 +1,16 @@
-// Importa la biblioteca mssql configurada con el controlador msnodesqlv8 para soporte nativo de SQL Server (permite Autenticación de Windows)
-const sql = require('mssql/msnodesqlv8');
-// Carga las variables de entorno desde el archivo .env hacia process.env
+const sql = require('mssql');
 require('dotenv').config();
 
-// Define el objeto de configuración para el pool de conexiones de SQL Server
 const config = {
-  // Usa una cadena de conexión porque msnodesqlv8 la requiere para la Autenticación de Windows
-  // Construye dinámicamente la cadena usando DB_SERVER y DB_NAME desde .env, o valores por defecto si no se proporcionan
-  // Trusted_Connection=yes indica que se usa la Autenticación de Windows
-  connectionString: `Driver={ODBC Driver 17 for SQL Server};Server=${process.env.DB_SERVER || 'localhost'};Database=${process.env.DB_NAME || 'YouthBasketballLeague'};Trusted_Connection=yes;`
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  server: process.env.DB_SERVER,
+  database: process.env.DB_NAME,
+  port: parseInt(process.env.DB_PORT, 10) || 1433,
+  options: {
+    encrypt: true, // Requerido para Azure SQL
+    trustServerCertificate: false 
+  }
 };
 
 // Crea una nueva instancia de ConnectionPool con la configuración e intenta conectarse inmediatamente
@@ -16,7 +18,7 @@ const poolPromise = new sql.ConnectionPool(config)
   .connect() // .connect() devuelve una promesa que se resuelve cuando la conexión se establece
   .then(pool => {
     // Si la conexión es exitosa, registra un mensaje de éxito en la consola
-    console.log('Connected to SQL Server successfully using Windows Authentication!');
+    console.log('Connected to SQL Server successfully!');
     // Devuelve el objeto pool conectado para que pueda ser usado por otras partes de la aplicación
     return pool;
   })

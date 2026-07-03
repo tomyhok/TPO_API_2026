@@ -1,0 +1,115 @@
+.container {
+  @apply animate-fade-in;
+}
+
+.loadingGrid {
+  @apply grid gap-6 sm:grid-cols-2 lg:grid-cols-3;
+}
+
+.skeletonCard {
+  @apply h-32;
+}
+
+.skeletonText1 {
+  @apply h-6 w-3/4 mb-4;
+}
+
+.skeletonText2 {
+  @apply h-4 w-1/2;
+}
+
+.emptyCard {
+  @apply text-center py-12;
+}
+
+.emptyIcon {
+  @apply text-4xl mb-4 opacity-50;
+}
+
+.emptyText {
+  @apply text-lg text-stone-600;
+}
+
+.gridContainer {
+  @apply grid gap-6 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3;
+}
+
+.teamCard {
+  @apply relative overflow-hidden transition-transform duration-300 cursor-pointer;
+}
+.teamCard:hover {
+  transform: translateY(-0.25rem);
+}
+
+.teamCardBg {
+  @apply absolute inset-0 bg-gradient-to-br from-white to-orange-500/10 opacity-50;
+}
+
+.teamCardInner { @apply relative z-10 flex flex-col w-full; }
+
+.teamCardActions {
+  @apply flex justify-end gap-2 pt-3 mt-3 border-t border-stone-200/50 w-full;
+}
+
+.actionBtn {
+  @apply px-3 py-1.5 font-semibold rounded-lg bg-stone-200/80 transition-colors backdrop-blur-sm border border-stone-300/50 text-sm;
+}
+
+.actionBtnEdit {
+  @apply text-orange-400;
+}
+.actionBtnEdit:hover {
+  @apply bg-stone-300 text-orange-300;
+}
+
+.actionBtnDelete {
+  @apply text-red-500;
+}
+.actionBtnDelete:hover {
+  @apply bg-stone-300 text-red-400;
+}
+
+.contentContainer {
+  @apply flex items-start gap-4 w-full;
+}
+
+.teamLogo {
+  @apply flex-shrink-0 w-12 h-12 rounded-xl shadow-lg transition-transform;
+}
+.teamCard:hover .teamLogo {
+  transform: scale(1.1);
+}
+
+.teamLogoFallback {
+  @apply flex-shrink-0 w-12 h-12 rounded-xl shadow-lg transition-transform text-xl;
+}
+.teamCard:hover .teamLogoFallback {
+  transform: scale(1.1);
+}
+
+.teamName {
+  @apply font-bold text-lg text-stone-900 transition-colors leading-tight;
+}
+.teamCard:hover .teamName {
+  @apply text-orange-400;
+}
+
+.coachText {
+  @apply text-sm font-medium text-stone-500 mt-1 flex items-center gap-1;
+}
+
+.coachLabel {
+  @apply opacity-70;
+}
+
+.formContainer {
+  @apply space-y-4;
+}
+
+.formActions {
+  @apply flex justify-end gap-3 mt-6;
+}
+
+.errorAlert {
+  @apply mb-4 p-3 bg-red-500/10 border border-red-500/20 text-red-700 rounded-lg text-sm font-medium;
+}

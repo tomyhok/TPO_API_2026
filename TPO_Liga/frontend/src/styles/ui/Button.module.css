@@ -1,0 +1,9 @@
+.btn { @apply rounded-xl px-5 py-2.5 text-sm font-semibold tracking-wide transition-all duration-300 transform active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 disabled:active:scale-100 cursor-pointer; }
+.primary { @apply bg-gradient-to-r from-orange-500 to-amber-600 text-stone-900 shadow-lg shadow-orange-500/25 border border-orange-400/30; }
+.primary:hover { @apply shadow-orange-500/40 from-orange-400 to-amber-500; }
+.secondary { @apply bg-stone-200/80 backdrop-blur-sm text-orange-300 border border-orange-500/30 shadow-lg; }
+.secondary:hover { @apply shadow-orange-500/20 bg-stone-200 text-orange-200; }
+.ghost { @apply bg-transparent text-stone-700; }
+.ghost:hover { @apply text-stone-900 bg-stone-200/50; }
+.danger { @apply bg-gradient-to-r from-rose-500 to-red-600 text-stone-900 shadow-lg shadow-rose-500/25 border border-rose-400/30; }
+.danger:hover { @apply shadow-rose-500/40; }

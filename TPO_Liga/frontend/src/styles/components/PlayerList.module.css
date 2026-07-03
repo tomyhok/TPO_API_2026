@@ -1,0 +1,52 @@
+.container { @apply animate-fade-in; }
+.filtersContainer { @apply flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 mb-6; }
+.tabsWrapper { @apply flex border-b border-stone-200/80 overflow-x-auto w-full sm:w-auto; scrollbar-width: none; -ms-overflow-style: none; }
+.tabsWrapper::-webkit-scrollbar { display: none; }
+.tab { @apply px-6 py-4 font-semibold text-sm whitespace-nowrap transition-all border-b-2; }
+.tabActive { @apply border-orange-500 text-orange-400 bg-orange-500/5; }
+.tabInactive { @apply border-transparent text-stone-600 hover:text-stone-800 hover:bg-stone-200/30; }
+.selectWrapper { @apply w-full sm:w-auto; }
+.select { @apply w-full sm:w-64 rounded-xl border border-stone-300 bg-stone-100/50 px-4 py-2.5 text-sm text-stone-900 focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 shadow-sm transition-all; }
+
+.playerGrid { @apply grid gap-6 sm:grid-cols-2 xl:grid-cols-3; }
+.skeletonCard { @apply h-32 flex items-center gap-4; }
+.skeletonAvatar { @apply h-16 w-16 rounded-full; }
+.skeletonInfo { @apply flex-1 space-y-2; }
+.skeletonText1 { @apply h-5 w-3/4; }
+.skeletonText2 { @apply h-4 w-1/2; }
+
+.emptyCard { @apply mt-4 text-center py-12; }
+.emptyIcon { @apply text-4xl mb-4 opacity-50; }
+.emptyText { @apply text-lg text-stone-600; }
+
+.listContainer { @apply space-y-8; }
+.playerCard { @apply hover:-translate-y-1 transition-transform duration-300 relative overflow-hidden cursor-pointer; }
+.playerGlow { @apply absolute -top-10 -right-10 w-32 h-32 bg-orange-500/10 rounded-full blur-2xl group-hover:bg-orange-500/20 transition-colors; }
+.playerCardInner { @apply relative z-10 flex flex-col w-full; }
+.playerActions { @apply flex justify-end gap-2 pt-3 mt-3 border-t border-stone-200/50 w-full; }
+.actionBtn { @apply px-3 py-1.5 font-semibold rounded bg-stone-200/80 transition-colors backdrop-blur-sm border border-stone-300/50 text-sm; }
+.actionBtnEdit { @apply text-orange-400 hover:bg-stone-300 hover:text-orange-300; }
+.actionBtnDelete { @apply text-red-500 hover:bg-stone-300 hover:text-red-400; }
+
+.playerContent { @apply flex items-center gap-4 w-full; }
+.avatarContainer { @apply flex-shrink-0 w-14 h-14 rounded-full border border-stone-300 shadow-inner overflow-hidden bg-stone-100 flex items-center justify-center; }
+.avatarImg { @apply w-full h-full object-cover; }
+.playerInfo { @apply flex-1 min-w-0; }
+.playerName { @apply text-lg font-bold text-stone-900 group-hover:text-orange-300 transition-colors leading-tight; }
+.badgesContainer { @apply flex items-center gap-2 mt-1 flex-wrap; }
+.badge { @apply inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium border; }
+.badgeDefault { @apply bg-stone-200/80 text-stone-600 border-stone-300; }
+.badgeTeam { @apply bg-orange-500/10 text-orange-500 border-orange-500/20; }
+
+.pagination { @apply flex justify-center items-center gap-4 mt-8 bg-stone-100/50 py-3 px-6 rounded-2xl w-fit mx-auto border border-stone-200 shadow-sm; }
+.pageBtn { @apply bg-white hover:bg-stone-50 border border-stone-200 shadow-sm; }
+.pageInfo { @apply flex flex-col items-center px-4; }
+.pageLabel { @apply text-xs font-bold text-orange-500 uppercase tracking-widest; }
+.pageNumbers { @apply font-black text-stone-800 text-lg leading-tight; }
+
+.form { @apply space-y-4; }
+.formRow { @apply grid grid-cols-2 gap-4; }
+.formGroup { @apply space-y-1; }
+.formLabel { @apply text-sm font-semibold text-stone-700; }
+.formSelect { @apply w-full rounded-xl border border-stone-300 bg-stone-100/50 px-4 py-3 text-stone-900 placeholder:text-stone-500 focus:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500/20 transition-all; }
+.formActions { @apply flex justify-end gap-3 mt-6; }

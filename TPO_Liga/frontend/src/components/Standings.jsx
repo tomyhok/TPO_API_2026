@@ -1,91 +1,179 @@
 import { useState, useEffect } from 'react';
+import { apiRequest } from '../services/api';
+import { useSeason } from '../contexts/SeasonContext';
+import { useCategories } from '../contexts/CategoryContext';
+import { useRightPanel } from '../contexts/RightPanelContext';
+import Alert from './ui/Alert';
+import Card from './ui/Card';
+import PageHeader from './ui/PageHeader';
+import Skeleton from './ui/Skeleton';
+import TeamLogo from './ui/TeamLogo';
+import TeamDetailsWidget from './widgets/TeamDetailsWidget';
+import styles from '../styles/components/Standings.module.css';
 
 const Standings = () => {
   const [standings, setStandings] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState('');
+  const [activeCategoryId, setActiveCategoryId] = useState(null);
+
+  const { selectedSeasonId, loading: seasonLoading } = useSeason();
+  const { categories, categoriesLoading } = useCategories();
+  const { openPanel } = useRightPanel();
 
   useEffect(() => {
+    if (!selectedSeasonId) {
+      if (!seasonLoading) setLoading(false);
+      return;
+    }
+
     const fetchStandings = async () => {
+      setLoading(true);
+      setError('');
       try {
-        const response = await fetch('http://localhost:3000/api/standings');
-        if (!response.ok) {
-          throw new Error('Failed to fetch standings data');
-        }
-        const data = await response.json();
-        setStandings(data);
+        const data = await apiRequest(`/api/standings?seasonId=${selectedSeasonId}`);
+        setStandings(Array.isArray(data) ? data : []);
       } catch (err) {
-        setError(err.message);
+        setError(err.message || 'No se pudo cargar la tabla.');
       } finally {
         setLoading(false);
       }
     };
 
     fetchStandings();
-  }, []);
+  }, [selectedSeasonId, seasonLoading]);
 
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center h-40">
-        <div className="text-xl text-blue-400 font-semibold animate-pulse">Loading standings...</div>
-      </div>
-    );
-  }
+  useEffect(() => {
+    if (!activeCategoryId && categories.length > 0) {
+      setActiveCategoryId(categories[0].CategoryID);
+    }
+  }, [categories, activeCategoryId]);
 
-  if (error) {
-    return (
-      <div className="flex justify-center items-center h-40">
-        <div className="text-lg text-red-500 bg-red-500/10 px-6 py-4 rounded-lg border border-red-500/20 shadow-sm">
-          <span className="font-bold">Error:</span> {error}
-        </div>
-      </div>
-    );
-  }
+  const filteredStandings = standings.filter(s => String(s.CategoryID) === String(activeCategoryId));
 
   return (
-    <div className="overflow-x-auto rounded-xl shadow-2xl border border-gray-700/50 mx-auto max-w-5xl mt-6 bg-gray-800/50 backdrop-blur-sm">
-      <table className="w-full text-left text-sm text-gray-300">
-        <thead className="bg-gray-800 text-xs uppercase text-gray-400 border-b border-gray-700">
-          <tr>
-            <th className="px-6 py-5 font-semibold tracking-wider">Rank</th>
-            <th className="px-6 py-5 font-semibold tracking-wider">Team Name</th>
-            <th className="px-6 py-5 font-semibold tracking-wider">Points</th>
-            <th className="px-6 py-5 font-semibold tracking-wider">Games Played</th>
-            <th className="px-6 py-5 font-semibold tracking-wider">Wins</th>
-            <th className="px-6 py-5 font-semibold tracking-wider">Losses</th>
-            <th className="px-6 py-5 font-semibold tracking-wider">Point Diff</th>
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-gray-700/50">
-          {standings.map((team, index) => (
-            <tr 
-              key={team.TeamID} 
-              className="bg-gray-900/40 hover:bg-gray-800/80 transition-all duration-200 ease-in-out"
-            >
-              <td className="px-6 py-4">
-                <span className={`inline-flex items-center justify-center w-8 h-8 rounded-full font-bold shadow-inner ${index === 0 ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30' : index === 1 ? 'bg-gray-400/20 text-gray-300 border border-gray-400/30' : index === 2 ? 'bg-amber-700/20 text-amber-500 border border-amber-700/30' : 'text-gray-400'}`}>
-                  {index + 1}
-                </span>
-              </td>
-              <td className="px-6 py-4 font-semibold text-gray-100">{team.Equipo}</td>
-              <td className="px-6 py-4 text-blue-400 font-bold text-base">{team.Puntos}</td>
-              <td className="px-6 py-4 font-medium text-gray-400">{team.PartidosJugados}</td>
-              <td className="px-6 py-4 text-emerald-400 font-semibold">{team.PartidosGanados}</td>
-              <td className="px-6 py-4 text-rose-400 font-semibold">{team.PartidosPerdidos}</td>
-              <td className={`px-6 py-4 font-bold ${team.DiferenciaDeTantos > 0 ? 'text-emerald-500' : team.DiferenciaDeTantos < 0 ? 'text-rose-500' : 'text-gray-400'}`}>
-                {team.DiferenciaDeTantos > 0 ? '+' : ''}{team.DiferenciaDeTantos}
-              </td>
-            </tr>
-          ))}
-          {standings.length === 0 && (
-            <tr>
-              <td colSpan="7" className="px-6 py-8 text-center text-gray-500 italic">
-                No standings data available yet.
-              </td>
-            </tr>
-          )}
-        </tbody>
-      </table>
+    <div className={styles.container}>
+      <PageHeader title="Tabla de Posiciones" subtitle="Clasificación general y rendimiento de equipos" />
+      <Alert message={error} />
+
+      <Card className={styles.card}>
+        {categoriesLoading || seasonLoading ? (
+          <div className={styles.loadingContainer}>
+            <Skeleton className="h-12 w-full" />
+            <Skeleton className="h-12 w-full" />
+          </div>
+        ) : (
+          <>
+            {/* Category Tabs */}
+            <div className={styles.tabsContainer}>
+              {categories.map(cat => (
+                <button
+                  key={cat.CategoryID}
+                  onClick={() => setActiveCategoryId(cat.CategoryID)}
+                  className={`${styles.tabBtn} ${activeCategoryId === cat.CategoryID ? styles.tabBtnActive : ''}`}
+                >
+                  {cat.Name}
+                </button>
+              ))}
+            </div>
+
+            {loading ? (
+              <div className={styles.loadingContainer}>
+                <Skeleton className="h-12 w-full" />
+                <Skeleton className="h-12 w-full" />
+                <Skeleton className="h-12 w-full" />
+              </div>
+            ) : filteredStandings.length === 0 ? (
+              <div className={styles.emptyContainer}>
+                <div className={styles.emptyIcon}>🏆</div>
+                <p className={styles.emptyText}>No hay datos de posiciones para esta categoría.</p>
+              </div>
+            ) : (
+              <div className={styles.tableContainer}>
+                <table className={styles.table}>
+                  <thead className={styles.thead}>
+                    <tr>
+                      <th className={styles.thPos}>Pos</th>
+                      <th className={styles.thLeft}>Equipo</th>
+                      <th className={styles.thDefault}>Pts</th>
+                      <th className={styles.thDefault}>PJ</th>
+                      <th className={styles.thWins}>PG</th>
+                      <th className={styles.thDefault}>PE</th>
+                      <th className={styles.thLosses}>PP</th>
+                      <th className={styles.thDefault}>PF</th>
+                      <th className={styles.thDefault}>PC</th>
+                      <th className={styles.thDefault}>Dif</th>
+                    </tr>
+                  </thead>
+                  <tbody className={styles.tbody}>
+                    {filteredStandings.map((team, index) => {
+                  const isTop3 = index < 3;
+                  const medal = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : '';
+                  
+                  return (
+                    <tr 
+                      key={team.TeamID || index} 
+                      onClick={() => openPanel(<TeamDetailsWidget team={{ TeamID: team.TeamID, TeamName: team.Equipo || team.TeamName }} />)}
+                      className={`${styles.tr} ${isTop3 ? styles.trTop3 : ''}`}
+                    >
+                      <td className={styles.tdDefault}>
+                        <div className={`${styles.posBadgeBase} ${
+                          index === 0 ? styles.posBadgeGold :
+                          index === 1 ? styles.posBadgeSilver :
+                          index === 2 ? styles.posBadgeBronze :
+                          styles.posBadgeDefault
+                        }`}>
+                          {medal ? <span className={styles.medalText}>{medal}</span> : index + 1}
+                        </div>
+                      </td>
+                      <td className={styles.teamCell}>
+                        <TeamLogo 
+                          src={team.LogoURL} 
+                          alt={team.Equipo || team.TeamName}
+                          className={styles.teamLogo}
+                          fallbackClassName={styles.teamLogoFallback}
+                        />
+                        <span>{team.Equipo || team.TeamName || '-'}</span>
+                      </td>
+                      <td className={`${styles.tdDefault} ${styles.pts}`}>
+                        {team.Puntos ?? '-'}
+                      </td>
+                      <td className={`${styles.tdDefault} ${styles.pj}`}>
+                        {team.PartidosJugados ?? '-'}
+                      </td>
+                      <td className={`${styles.tdDefault} ${styles.pg}`}>
+                        {team.PartidosGanados ?? '-'}
+                      </td>
+                      <td className={`${styles.tdDefault} ${styles.pe}`}>
+                        {team.PartidosEmpatados ?? '-'}
+                      </td>
+                      <td className={`${styles.tdDefault} ${styles.pp}`}>
+                        {team.PartidosPerdidos ?? '-'}
+                      </td>
+                      <td className={`${styles.tdDefault} ${styles.pf}`}>
+                        {team.TantosAFavor ?? '-'}
+                      </td>
+                      <td className={`${styles.tdDefault} ${styles.pc}`}>
+                        {team.TantosEnContra ?? '-'}
+                      </td>
+                      <td className={`${styles.tdDefault} ${styles.difCell}`}>
+                        <span className={`${styles.difBadgeBase} ${
+                          (team.DiferenciaDeTantos || 0) > 0 ? styles.difBadgePositive : 
+                          (team.DiferenciaDeTantos || 0) < 0 ? styles.difBadgeNegative : styles.difBadgeNeutral
+                        }`}>
+                          {(team.DiferenciaDeTantos > 0 ? '+' : '')}{team.DiferenciaDeTantos ?? '-'}
+                        </span>
+                      </td>
+                    </tr>
+                  );
+                })}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </>
+        )}
+      </Card>
     </div>
   );
 };

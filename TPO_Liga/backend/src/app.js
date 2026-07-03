@@ -21,6 +21,8 @@ const playerRoutes = require('./routes/playerRoutes');
 const matchRoutes = require('./routes/matchRoutes');
 const standingsRoutes = require('./routes/standingsRoutes');
 const authRoutes = require('./routes/authRoutes');
+const seasonRoutes = require('./routes/seasonRoutes');
+const categoryRoutes = require('./routes/categoryRoutes');
 
 // --- Rutas Base ---
 // Define una ruta GET raíz simple para verificar si la API está funcionando
@@ -41,6 +43,8 @@ app.use('/api/matches', matchRoutes);
 app.use('/api/standings', standingsRoutes);
 // Cualquier solicitud que comience con '/api/auth' será manejada por authRoutes
 app.use('/api/auth', authRoutes);
+app.use('/api/seasons', seasonRoutes);
+app.use('/api/categories', categoryRoutes);
 
 // Exporta la instancia de la aplicación express completamente configurada para que pueda ser iniciada por server.js o usada en pruebas
 module.exports = app;
