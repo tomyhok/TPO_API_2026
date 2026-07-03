@@ -20,7 +20,7 @@ const TeamList = () => {
   const [formError, setFormError] = useState('');
   const isAdmin = !!getToken();
   const { selectedSeasonId, currentSeason, loading: seasonLoading } = useSeason();
-  const canEdit = isAdmin && (!currentSeason || !currentSeason.IsFinished);
+  const canEdit = isAdmin && currentSeason && !currentSeason.IsFinished;
   const { openPanel } = useRightPanel();
   
   // Modal & Form State

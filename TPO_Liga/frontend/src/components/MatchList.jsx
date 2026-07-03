@@ -23,7 +23,7 @@ const MatchList = () => {
   const [isRoundDropdownOpen, setIsRoundDropdownOpen] = useState(false);
   const isAdmin = !!getToken();
   const { selectedSeasonId, loading: seasonLoading, currentSeason } = useSeason();
-  const canEdit = isAdmin && (!currentSeason || !currentSeason.IsFinished);
+  const canEdit = isAdmin && currentSeason && !currentSeason.IsFinished;
   const { categories, categoriesLoading } = useCategories();
   const { openPanel } = useRightPanel();
   

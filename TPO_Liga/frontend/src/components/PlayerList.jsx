@@ -24,7 +24,7 @@ const PlayerList = () => {
   const itemsPerPage = 18;
   const isAdmin = !!getToken();
   const { selectedSeasonId, currentSeason, loading: seasonLoading } = useSeason();
-  const canEdit = isAdmin && (!currentSeason || !currentSeason.IsFinished);
+  const canEdit = isAdmin && currentSeason && !currentSeason.IsFinished;
   const { categories, categoriesLoading } = useCategories();
   const { openPanel } = useRightPanel();
   
