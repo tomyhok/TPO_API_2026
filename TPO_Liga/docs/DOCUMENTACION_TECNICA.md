@@ -403,16 +403,18 @@ await pool.request()
 ## 7. Configuración y Ejecución del Proyecto
 
 ### 7.1 Variables de Entorno (`.env`)
-Para que el backend pueda conectarse a la base de datos y firmar los tokens JWT, requiere un archivo `.env` en la raíz del directorio `/backend`.
+Por estándares de seguridad, el archivo `.env` original (que contiene las credenciales de la base de datos y las claves privadas) **se excluye del control de versiones** (no se sube a GitHub). 
+Para levantar el proyecto localmente, debes solicitar el archivo `.env` válido al administrador del proyecto o crear uno propio en la raíz del directorio `/backend` usando la siguiente estructura de ejemplo:
 
 ```env
 PORT=3000
-DB_USER=usuario_azure
-DB_PASSWORD=password_seguro
-DB_SERVER=server-db.database.windows.net
-DB_NAME=tpo_liga_db
-JWT_SECRET=secreto_muy_seguro_jwt_2026
+DB_USER=<TU_USUARIO_SQL>
+DB_PASSWORD=<TU_CONTRASEÑA_SQL>
+DB_SERVER=<TU_SERVIDOR_AZURE>.database.windows.net
+DB_NAME=<NOMBRE_DE_TU_BD>
+JWT_SECRET=<TU_CLAVE_SECRETA_JWT>
 ```
+*Nota: Asegúrate de nunca hacer un `git commit` de tus credenciales reales.*
 
 ### 7.2 Comandos de Ejecución Local
 La estructura de este repositorio requiere levantar ambos entornos (front y back) simultáneamente o configurar un script para ello.
