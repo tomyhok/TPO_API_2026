@@ -404,16 +404,17 @@ await pool.request()
 
 ### 7.1 Variables de Entorno (`.env`)
 Por estándares de seguridad, el archivo `.env` original (que contiene las credenciales de la base de datos y las claves privadas) **se excluye del control de versiones** (no se sube a GitHub). 
-Para levantar el proyecto localmente, debes solicitar el archivo `.env` válido al administrador del proyecto o crear uno propio en la raíz del directorio `/backend` usando la siguiente estructura de ejemplo:
+Para levantar el proyecto localmente, debes crear el archivo `.env` la raíz del directorio `/backend` como lo indica en el siguiente ejemplo:
 
 ```env
-DB_USER=<TU_USUARIO_SQL>
-DB_PASSWORD=<TU_CONTRASEÑA_SQL>
-DB_SERVER=<TU_SERVIDOR_AZURE>.database.windows.net
-DB_NAME=<NOMBRE_DE_TU_BD>
-JWT_SECRET=<TU_CLAVE_SECRETA_JWT>
+PORT=3000
+DB_SERVER=apisuade.database.windows.net
+DB_PORT=1433
+DB_NAME=LigaJuvenilUade
+DB_USER=sqladmin
+DB_PASSWORD=TpoApis2026!
+JWT_SECRET=supersecret_youth_league_key
 ```
-*Nota: Asegúrate de nunca hacer un `git commit` de tus credenciales reales. El puerto del backend no se especifica aquí para que tome el `3000` por defecto, ya que el proxy del frontend (`vite.config.js`) está apuntado hacia ese puerto específicamente.*
 
 ### 7.2 Comandos de Ejecución Local
 La estructura de este repositorio incluye un entorno `root` que administra ambos sub-proyectos (frontend y backend) de manera centralizada.
