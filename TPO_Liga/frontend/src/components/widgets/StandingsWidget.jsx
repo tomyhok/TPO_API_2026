@@ -61,7 +61,7 @@ const StandingsWidget = ({ seasonId: propSeasonId, hideTitle = false }) => {
         {!hideTitle && <h3 className="font-bold text-lg text-stone-900">Clasificación</h3>}
         {categories && categories.length > 0 && (
           <select 
-            className="bg-stone-100 border border-stone-300 text-stone-700 text-xs rounded-md px-2 py-1 focus:border-orange-500/50 appearance-none max-w-[120px]"
+            className="bg-stone-100 border border-stone-300 text-stone-700 text-sm rounded-lg px-3 py-1.5 focus:border-orange-500/50 appearance-none max-w-[160px] shadow-sm cursor-pointer"
             value={activeCategoryId || ''}
             onChange={(e) => setActiveCategoryId(Number(e.target.value))}
           >
