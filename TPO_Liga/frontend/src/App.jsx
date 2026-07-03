@@ -49,7 +49,10 @@ function Layout() {
       {/* Mobile Header */}
       <header className={styles.mobileHeader}>
         <div className={styles.mobileHeaderTop}>
-          <h1 className={styles.mobileTitle}>{token ? 'LNB Admin' : 'LNB'}</h1>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <img src="/basketball.png" alt="Logo" style={{ width: '28px', height: '28px', objectFit: 'contain' }} />
+            <h1 className={styles.mobileTitle}>{token ? 'LNB Admin' : 'LNB'}</h1>
+          </div>
           {token && (
             <Button variant="ghost" onClick={onLogout} className={styles.mobileLogoutBtn}>
               Salir
@@ -74,8 +77,9 @@ function Layout() {
 
       {/* Sidebar (Desktop) */}
       <aside className={styles.sidebar}>
-        <div className={styles.sidebarHeader}>
-          <h1 className={styles.sidebarTitle}>
+        <div className={styles.sidebarHeader} style={{ display: 'flex', alignItems: 'center', gap: '12px', paddingBottom: '16px' }}>
+          <img src="/basketball.png" alt="Logo" style={{ width: '48px', height: '48px', objectFit: 'contain' }} />
+          <h1 className={styles.sidebarTitle} style={{ margin: 0 }}>
             Liga<br />Juvenil
           </h1>
         </div>
