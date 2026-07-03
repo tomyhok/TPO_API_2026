@@ -20,6 +20,7 @@ const MatchList = () => {
   const [formError, setFormError] = useState('');
   const [activeCategoryId, setActiveCategoryId] = useState(null);
   const [activeRound, setActiveRound] = useState(1);
+  const [isRoundDropdownOpen, setIsRoundDropdownOpen] = useState(false);
   const isAdmin = !!getToken();
   const { selectedSeasonId, loading: seasonLoading } = useSeason();
   const { categories, categoriesLoading } = useCategories();
@@ -245,7 +246,34 @@ const MatchList = () => {
             </Button>
             <div className={styles.roundInfo}>
               <span className={styles.roundLabel}>Competición</span>
-              <span className={styles.roundValue}>Jornada {activeRound}</span>
+              <div className={styles.customSelectContainer}>
+                <button 
+                  className={styles.customSelectTrigger} 
+                  onClick={() => setIsRoundDropdownOpen(!isRoundDropdownOpen)}
+                >
+                  <span className={styles.customSelectValue}>Jornada {activeRound}</span>
+                  <span className={styles.customSelectArrow}>▼</span>
+                </button>
+                {isRoundDropdownOpen && (
+                  <>
+                    <div className={styles.customSelectOverlay} onClick={() => setIsRoundDropdownOpen(false)} />
+                    <div className={styles.customSelectList}>
+                      {Array.from({ length: 38 }, (_, i) => i + 1).map(round => (
+                        <button
+                          key={round}
+                          className={`${styles.customSelectOption} ${activeRound === round ? styles.customSelectOptionActive : ''}`}
+                          onClick={() => {
+                            setActiveRound(round);
+                            setIsRoundDropdownOpen(false);
+                          }}
+                        >
+                          Jornada {round}
+                        </button>
+                      ))}
+                    </div>
+                  </>
+                )}
+              </div>
             </div>
             <Button variant="ghost" onClick={handleNextRound} disabled={activeRound === 38} className={styles.roundBtn}>
               Siguiente →

@@ -31,6 +31,16 @@
 .roundInfo { @apply flex flex-col items-center; }
 .roundLabel { @apply text-xs font-bold text-orange-500 uppercase tracking-widest; }
 .roundValue { @apply text-xl font-black text-stone-800; }
+.customSelectContainer { @apply relative; }
+.customSelectTrigger { @apply flex items-center justify-center gap-2 px-4 py-2 hover:bg-stone-200/50 rounded-lg cursor-pointer transition-colors outline-none; }
+.customSelectValue { @apply text-xl font-black text-stone-800; }
+.customSelectArrow { @apply text-[10px] text-stone-500 font-bold transition-transform; }
+.customSelectOverlay { @apply fixed inset-0 z-40; }
+.customSelectList { @apply absolute top-full mt-2 left-1/2 -translate-x-1/2 w-72 max-h-64 overflow-y-auto bg-white rounded-xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.3)] border border-stone-200 z-50 py-3 grid grid-cols-2 gap-1.5 px-3; }
+.customSelectList::-webkit-scrollbar { @apply w-1.5; }
+.customSelectList::-webkit-scrollbar-thumb { @apply bg-stone-300 rounded-full hover:bg-stone-400; }
+.customSelectOption { @apply text-sm font-bold text-stone-600 px-3 py-2.5 rounded-lg hover:bg-orange-50 hover:text-orange-600 transition-colors text-center shadow-sm border border-transparent hover:border-orange-100 whitespace-nowrap; }
+.customSelectOptionActive { @apply bg-orange-100 text-orange-600 border-orange-200 shadow-inner; }
 
 .emptyCard { @apply text-center py-12 bg-stone-100/30 rounded-xl border border-stone-200; }
 .emptyIcon { @apply text-4xl mb-4 opacity-50; }
