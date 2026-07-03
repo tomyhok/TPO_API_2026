@@ -29,7 +29,7 @@ Para tu comodidad, el proyecto incluye un entorno de ejecución concurrente en l
 
 ### Forma Rápida (Recomendada)
 1. Abre una terminal en la carpeta raíz del proyecto (`/TPO_Liga`).
-2. Instala las dependencias globales y locales: `npm install`
+2. Instala todas las dependencias (el script `postinstall` se encargará de instalar automáticamente las del frontend y backend): `npm install`
 3. Inicia ambos servidores simultáneamente: `npm run dev`
 4. La interfaz web se abrirá automáticamente o estará disponible en `http://localhost:5173`. El backend estará escuchando en `http://localhost:3000`.
 

@@ -17,7 +17,7 @@ Para poder gestionar (crear, editar o eliminar) información de la liga, debes i
 
 1. Ve a la sección **Login** en el menú de navegación.
 2. Ingresa tus credenciales de administrador.
-   - *Nota: Si estás evaluando el proyecto, utiliza las credenciales de prueba provistas en la documentación técnica (`README.md`).*
+   - *Nota: Si estás probando el proyecto, utiliza las credenciales de prueba provistas en la documentación técnica (`README.md`).*
 3. Tras un inicio de sesión exitoso, aparecerán nuevas opciones en el menú lateral como **Temporadas** y **Categorías**, y se habilitarán los botones de edición en toda la plataforma.
 
 ## 3. Gestión de la Liga (Sólo Administradores)
@@ -33,6 +33,10 @@ Una vez iniciada la sesión, tendrás control total sobre los datos:
 - Ve a la sección **Jugadores**.
 - Selecciona **+ Nuevo Jugador**. Deberás indicar sus datos personales, la categoría y asignarle un equipo.
 - Al igual que con los equipos, puedes editar su perfil o eliminarlo de la liga.
+
+### Carga de Imágenes (Logos y Fotos)
+- Para mantener la plataforma rápida y ligera, tanto el escudo (logo) de los equipos como la foto de perfil de los jugadores se cargan mediante **URL**.
+- Cuando crees o edites un equipo/jugador, simplemente busca una imagen en internet (por ejemplo, en Google Imágenes), haz clic derecho sobre ella, selecciona "Copiar dirección de la imagen" y pega ese enlace en el campo correspondiente.
 
 ### Gestión de Partidos y Resultados
 - En la sección **Inicio**, verás un botón **+ Nuevo Partido**.

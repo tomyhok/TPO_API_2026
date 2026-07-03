@@ -407,23 +407,22 @@ Por estándares de seguridad, el archivo `.env` original (que contiene las crede
 Para levantar el proyecto localmente, debes solicitar el archivo `.env` válido al administrador del proyecto o crear uno propio en la raíz del directorio `/backend` usando la siguiente estructura de ejemplo:
 
 ```env
-PORT=3000
 DB_USER=<TU_USUARIO_SQL>
 DB_PASSWORD=<TU_CONTRASEÑA_SQL>
 DB_SERVER=<TU_SERVIDOR_AZURE>.database.windows.net
 DB_NAME=<NOMBRE_DE_TU_BD>
 JWT_SECRET=<TU_CLAVE_SECRETA_JWT>
 ```
-*Nota: Asegúrate de nunca hacer un `git commit` de tus credenciales reales.*
+*Nota: Asegúrate de nunca hacer un `git commit` de tus credenciales reales. El puerto del backend no se especifica aquí para que tome el `3000` por defecto, ya que el proxy del frontend (`vite.config.js`) está apuntado hacia ese puerto específicamente.*
 
 ### 7.2 Comandos de Ejecución Local
-La estructura de este repositorio requiere levantar ambos entornos (front y back) simultáneamente o configurar un script para ello.
+La estructura de este repositorio incluye un entorno `root` que administra ambos sub-proyectos (frontend y backend) de manera centralizada.
 
-1. **Instalación de dependencias**:
+1. **Instalación de dependencias (Automatizada)**:
+   Al ejecutar la instalación en la raíz, un script `postinstall` se encarga de instalar automáticamente las dependencias del backend y frontend.
    ```bash
-   # En la raíz (si existe package.json que maneja ambos) o independientemente:
-   cd backend && npm install
-   cd ../frontend && npm install
+   # En la raíz del proyecto
+   npm install
    ```
 
 2. **Ejecutar Entorno de Desarrollo (Dev)**:
@@ -431,6 +430,6 @@ La estructura de este repositorio requiere levantar ambos entornos (front y back
    # En la raíz del proyecto (npm run dev ejecuta ambos concurrentemente)
    npm run dev
    ```
-   *Esto iniciará el backend en el puerto 3000 y el frontend Vite en el puerto 5173.*
+   *Esto iniciará el backend en el puerto `3000` y el frontend Vite en el puerto `5173` (sus puertos por defecto). Si necesitas cambiar el puerto del backend, recuerda actualizar también la regla de `proxy` en `frontend/vite.config.js`.*
 
 Con este profundo análisis, el software demuestra aplicar conceptos de bases de datos complejas, patrones de ingeniería de software, y seguridad informática integral.
