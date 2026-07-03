@@ -33,8 +33,10 @@ export function SeasonProvider({ children }) {
     fetchSeasons();
   }, []);
 
+  const currentSeason = seasons.find(s => s.SeasonID === selectedSeasonId) || null;
+
   return (
-    <SeasonContext.Provider value={{ seasons, selectedSeasonId, setSelectedSeasonId, fetchSeasons, loading }}>
+    <SeasonContext.Provider value={{ seasons, selectedSeasonId, setSelectedSeasonId, fetchSeasons, loading, currentSeason }}>
       {children}
     </SeasonContext.Provider>
   );

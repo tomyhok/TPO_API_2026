@@ -22,7 +22,8 @@ const MatchList = () => {
   const [activeRound, setActiveRound] = useState(1);
   const [isRoundDropdownOpen, setIsRoundDropdownOpen] = useState(false);
   const isAdmin = !!getToken();
-  const { selectedSeasonId, loading: seasonLoading } = useSeason();
+  const { selectedSeasonId, loading: seasonLoading, currentSeason } = useSeason();
+  const canEdit = isAdmin && (!currentSeason || !currentSeason.IsFinished);
   const { categories, categoriesLoading } = useCategories();
   const { openPanel } = useRightPanel();
   
@@ -203,7 +204,7 @@ const MatchList = () => {
             </p>
           </div>
           
-          {isAdmin && (
+          {canEdit && (
             <div className={styles.heroActions}>
               <Button 
                 onClick={() => openModal()}
@@ -360,7 +361,7 @@ const MatchList = () => {
                       </div>
 
                       {/* Admin Actions */}
-                      {isAdmin && (
+                      {canEdit && (
                         <div className={styles.matchActions}>
                           <button onClick={(e) => openModal(match, e)} className={`${styles.actionBtn} ${styles.actionBtnEdit}`}>Editar</button>
                           <button onClick={(e) => handleDelete(match.MatchID, e)} className={`${styles.actionBtn} ${styles.actionBtnDelete}`}>Eliminar</button>

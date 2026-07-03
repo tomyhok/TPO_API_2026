@@ -23,7 +23,8 @@ const PlayerList = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 18;
   const isAdmin = !!getToken();
-  const { selectedSeasonId, loading: seasonLoading } = useSeason();
+  const { selectedSeasonId, currentSeason, loading: seasonLoading } = useSeason();
+  const canEdit = isAdmin && (!currentSeason || !currentSeason.IsFinished);
   const { categories, categoriesLoading } = useCategories();
   const { openPanel } = useRightPanel();
   
@@ -127,7 +128,7 @@ const PlayerList = () => {
       <PageHeader 
         title="Jugadores" 
         subtitle="Listado general de jugadores registrados" 
-        action={isAdmin && <Button onClick={() => openModal()}>+ Nuevo Jugador</Button>}
+        action={canEdit && <Button onClick={() => openModal()}>+ Nuevo Jugador</Button>}
       />
       <Alert message={error} />
 
@@ -254,7 +255,7 @@ const PlayerList = () => {
                       </div>
                     </div>
 
-                    {isAdmin && (
+                    {canEdit && (
                       <div className={styles.playerActions}>
                         <button onClick={(e) => { e.stopPropagation(); openModal(player); }} className={`${styles.actionBtn} ${styles.actionBtnEdit}`}>
                           Editar

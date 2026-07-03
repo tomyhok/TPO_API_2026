@@ -69,14 +69,14 @@ exports.deleteTeam = async (req, res) => {
     const { id } = req.params;
     const success = await TeamModel.delete(id);
     if (!success) {
-      return res.status(404).json({ message: 'Team not found.' });
+      return res.status(404).json({ message: 'Equipo no encontrado.' });
     }
-    res.json({ message: 'Team deleted successfully.' });
+    res.json({ message: 'Equipo eliminado exitosamente.' });
   } catch (error) {
     console.error('Error deleting team:', error);
     if (error.number === 547) {
-      return res.status(400).json({ message: 'Cannot delete team because it has associated players or matches.' });
+      return res.status(400).json({ message: 'No se puede eliminar este equipo porque tiene jugadores o partidos históricos asociados.' });
     }
-    res.status(500).json({ message: 'Internal server error.' });
+    res.status(500).json({ message: 'Error interno del servidor.' });
   }
 };

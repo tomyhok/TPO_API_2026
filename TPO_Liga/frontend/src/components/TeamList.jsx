@@ -19,7 +19,8 @@ const TeamList = () => {
   const [pageError, setPageError] = useState('');
   const [formError, setFormError] = useState('');
   const isAdmin = !!getToken();
-  const { selectedSeasonId, loading: seasonLoading } = useSeason();
+  const { selectedSeasonId, currentSeason, loading: seasonLoading } = useSeason();
+  const canEdit = isAdmin && (!currentSeason || !currentSeason.IsFinished);
   const { openPanel } = useRightPanel();
   
   // Modal & Form State
@@ -109,7 +110,7 @@ const TeamList = () => {
       <PageHeader 
         title="Equipos" 
         subtitle="Listado de equipos registrados en la liga" 
-        action={isAdmin && <Button onClick={() => openModal()}>+ Nuevo Equipo</Button>}
+        action={canEdit && <Button onClick={() => openModal()}>+ Nuevo Equipo</Button>}
       />
       <Alert message={pageError} />
 
@@ -160,7 +161,7 @@ const TeamList = () => {
                     </div>
                   </div>
 
-                  {isAdmin && (
+                  {canEdit && (
                     <div className={styles.teamCardActions}>
                       <button onClick={(e) => { e.stopPropagation(); openModal(team); }} className={`${styles.actionBtn} ${styles.actionBtnEdit}`}>
                         Editar
