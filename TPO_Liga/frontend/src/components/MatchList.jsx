@@ -198,7 +198,8 @@ const MatchList = () => {
               LIGA <span className={styles.heroTitleHighlight}>JUVENIL</span>
             </h1>
             <p className={styles.heroSubtitle}>
-              Sigue de cerca todos los resultados, las estadísticas al instante y el calendario completo de los próximos encuentros.
+              La plataforma principal para el desarrollo y seguimiento de los futuros talentos del básquetbol. 
+              Aquí podrás encontrar toda la información sobre equipos, jugadores, estadísticas y próximos partidos de cada temporada.
             </p>
           </div>
           
