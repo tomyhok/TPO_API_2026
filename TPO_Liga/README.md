@@ -24,20 +24,19 @@ El repositorio está dividido en dos aplicaciones principales y una carpeta de d
 
 ## Instrucciones de Instalación y Ejecución
 
-Para poder evaluar el proyecto localmente, es necesario levantar ambos servidores (Frontend y Backend).
+Para poder evaluar el proyecto localmente, es necesario levantar ambos servidores (Frontend y Backend). 
+Para tu comodidad, el proyecto incluye un entorno de ejecución concurrente en la raíz.
 
-### 1. Levantar el Backend (API REST)
-1. Abre una terminal y navega a la carpeta del backend: `cd backend`
-2. Instala las dependencias: `npm install`
-3. Asegúrate de tener el archivo `.env` configurado (el código entregado ya incluye la conexión a la base de datos de prueba en Azure).
-4. Inicia el servidor de desarrollo: `npm run dev`
-5. La API estará escuchando peticiones (típicamente en `http://localhost:3000`).
+### Forma Rápida (Recomendada)
+1. Abre una terminal en la carpeta raíz del proyecto (`/TPO_Liga`).
+2. Instala las dependencias globales y locales: `npm install`
+3. Inicia ambos servidores simultáneamente: `npm run dev`
+4. La interfaz web se abrirá automáticamente o estará disponible en `http://localhost:5173`. El backend estará escuchando en `http://localhost:3000`.
 
-### 2. Levantar el Frontend (Cliente React)
-1. Abre una nueva terminal y navega a la carpeta del frontend: `cd frontend`
-2. Instala las dependencias: `npm install`
-3. Inicia el servidor de desarrollo de Vite: `npm run dev`
-4. Abre la URL que indica la terminal (usualmente `http://localhost:5173`) en tu navegador web.
+### Forma Manual (Independiente)
+Si deseas levantar los entornos por separado para ver los logs aislados:
+- **Backend:** `cd backend`, `npm install`, luego `npm run dev`.
+- **Frontend:** `cd frontend`, `npm install`, luego `npm run dev`.
 
 ---
 

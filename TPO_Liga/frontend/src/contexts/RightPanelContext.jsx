@@ -6,15 +6,15 @@ export function RightPanelProvider({ children }) {
   const [panelContent, setPanelContent] = useState(null);
   const [isOpen, setIsOpen] = useState(false); // For mobile bottom sheet later
 
-  const openPanel = (content) => {
+  const openPanel = React.useCallback((content) => {
     setPanelContent(content);
     setIsOpen(true);
-  };
+  }, []);
 
-  const closePanel = () => {
+  const closePanel = React.useCallback(() => {
     setIsOpen(false);
     setPanelContent(null);
-  };
+  }, []);
 
   return (
     <RightPanelContext.Provider value={{ panelContent, openPanel, closePanel, isOpen }}>

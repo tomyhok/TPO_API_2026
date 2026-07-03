@@ -72,7 +72,7 @@ const StandingsWidget = ({ seasonId: propSeasonId, hideTitle = false }) => {
         )}
       </div>
       
-      <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar">
+      <div className="flex-1 overflow-y-auto pr-2 scrollbar-hide">
         <table className="w-full text-sm text-left">
           <thead className="text-xs text-stone-500 uppercase border-b border-stone-200/50">
             <tr>

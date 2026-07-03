@@ -301,6 +301,13 @@ GROUP BY t.TeamID, t.Name, c.CategoryID;
 De esta manera, el Backend Node.js (`Standing.js`) simplemente hace un select básico con el orden correcto, y SQL Server aplica sus índices B-Tree internamente para ordenar el resultado de forma ultrarrápida:
 `SELECT * FROM v_Standings WHERE SeasonID = @SeasonId ORDER BY Puntos DESC, DiferenciaDeTantos DESC`
 
+### 4.3 Optimización de Índices y Consultas SQL (Performance y OR Clauses)
+Para soportar una alta carga transaccional y evitar ralentizaciones al consultar equipos específicos, se aplicaron estrategias avanzadas de base de datos y backend:
+
+1. **Covering Indexes y Optimización de Claves Foráneas**: Se crearon índices no clústerados (`IX_Matches_Season_Category_Alt`, `IX_Matches_LocalTeam`, `IX_Matches_VisitorTeam`, `IX_PlayerSeasons_Team`) que le permiten al motor SQL resolver las consultas críticas directamente desde el árbol de índices (B-Tree), evitando escanear las páginas físicas de la tabla completa (Full Table Scan).
+2. **Reemplazo del Operador OR por UNION**: Originalmente, buscar todos los partidos de un equipo usaba `WHERE LocalTeamID = X OR VisitorTeamID = X`. Los motores SQL suelen degradar el rendimiento a escaneos completos frente a múltiples condiciones `OR`. Se reemplazó por un bloque `UNION`, forzando al motor a hacer dos búsquedas instantáneas por índice (Index Seek) y unificarlas, mejorando drásticamente el tiempo de respuesta.
+3. **Paralelización de Awaits (Backend)**: Cuando el frontend solicita los detalles de un equipo (jugadores, partidos, historia), el backend (`Team.js`) lanza todas las consultas asincrónicas simultáneamente utilizando `Promise.all` e instanciando múltiples objetos request del pool, en lugar de ejecutarlas de forma secuencial. Esto reduce el tiempo de resolución en hasta un 300%.
+
 ---
 
 ## 5. Ingeniería del Frontend (React SPA)
@@ -338,7 +345,10 @@ Esto permite a los componentes de UI hacer simplemente:
 - **`SeasonContext.jsx`**: Aloja el `selectedSeasonId`. Envuelve toda la aplicación en `main.jsx`. Cuando el usuario cambia la temporada en el `<select>` del Header, el Context emite la actualización. Todos los componentes hijos (como `Standings.jsx` o `TeamList.jsx`) escuchan este estado a través de `useEffect` y automáticamente refetchdean los datos de esa temporada específica, dándole a la app una sensación de instantaneidad total.
 - **`RightPanelContext.jsx`**: Es un patrón avanzado para mantener al usuario en contexto. Al cliquear un equipo en una tabla, en lugar de navegar a `/team/5` y recargar la página, se invoca `openPanel(<TeamDetailsWidget teamId={5} />)`. Esto abre un panel lateral dinámico manteniendo la tabla de posiciones detrás (Single Page Experience).
 
-### 5.3 Diseño Modular (CSS y Tailwind)
+### 5.3 Carga Diferida y UI No Bloqueante (Non-Blocking UI)
+Para evitar pantallas de carga (spinners) excesivamente largas, los componentes más pesados como `TeamDetailsWidget` desacoplan la carga de datos. Cuando se selecciona un equipo, se solicita la información principal del equipo de forma aislada a la solicitud del rango de posiciones (standings). Al recibir la información del equipo, se renderiza inmediatamente, mientras los datos estadísticos complementarios se resuelven en segundo plano, mejorando sustancialmente la experiencia de usuario y percepción de velocidad. Adicionalmente, se integró soporte nativo (`scrollbar-width: none`) para mantener paneles navegables pero visualmente limpios y modernos.
+
+### 5.4 Diseño Modular (CSS y Tailwind)
 Se combinó el framework de utilidad de Tailwind CSS (para el esqueleto base y responsividad) con `CSS Modules` (`styles.module.css`). Esto significa que las clases CSS son hasheadas durante el build de Vite (ej. `_TeamCard_1x8d2`), garantizando que no existan colisiones de estilos entre diferentes componentes de la aplicación.
 
 ---

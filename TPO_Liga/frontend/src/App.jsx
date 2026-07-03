@@ -1,4 +1,4 @@
-import { NavLink, Navigate, Route, Routes, useNavigate } from 'react-router-dom';
+import { NavLink, Navigate, Route, Routes, useNavigate, useLocation } from 'react-router-dom';
 import TeamList from './components/TeamList';
 import MatchList from './components/MatchList';
 import PlayerList from './components/PlayerList';
@@ -37,6 +37,11 @@ function Layout() {
     return () => window.removeEventListener('storage', syncAuth);
   }, []);
 
+  const location = useLocation();
+  useEffect(() => {
+    closePanel();
+  }, [location.pathname]);
+
   const onLogout = () => {
     clearToken();
     setToken(null);
@@ -51,7 +56,7 @@ function Layout() {
         <div className={styles.mobileHeaderTop}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <img src="/basketball.png" alt="Logo" style={{ width: '28px', height: '28px', objectFit: 'contain' }} />
-            <h1 className={styles.mobileTitle}>{token ? 'LNB Admin' : 'LNB'}</h1>
+            <h1 className={styles.mobileTitle}>{token ? 'Liga Juvenil (Admin)' : 'Liga Juvenil'}</h1>
           </div>
           {token && (
             <Button variant="ghost" onClick={onLogout} className={styles.mobileLogoutBtn}>

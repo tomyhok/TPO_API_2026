@@ -42,5 +42,16 @@
 .mobileBottomNav { @apply lg:hidden bg-stone-100/50 backdrop-blur-md border-t border-stone-300/50 shadow-xl fixed bottom-0 left-0 right-0 z-50 flex justify-around p-3 pb-4; padding-bottom: max(1rem, env(safe-area-inset-bottom)); }
 .mobileNavItem { @apply flex flex-col items-center gap-1 p-2 rounded-lg transition-colors text-stone-500 hover:text-stone-700; }
 .mobileNavItemActive { @apply flex flex-col items-center gap-1 p-2 rounded-lg transition-colors text-orange-400; }
-.mobileNavText { @apply text-[10px] font-medium; }
+.mobileNavText { @apply text-xs font-medium; }
 .mobileNavPadding { @apply h-20 lg:hidden; }
+
+/* Hide scrollbars for right panels but allow scrolling */
+.rightPanelDesktop::-webkit-scrollbar,
+.mobilePanel::-webkit-scrollbar {
+  display: none;
+}
+.rightPanelDesktop,
+.mobilePanel {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}

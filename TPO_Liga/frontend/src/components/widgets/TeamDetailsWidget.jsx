@@ -23,20 +23,26 @@ const TeamDetailsWidget = ({ team }) => {
   useEffect(() => {
     if (!team || !selectedSeasonId) return;
 
-    const fetchTeam = async () => {
+    const fetchTeam = () => {
       setLoading(true);
-      try {
-        const [tData, sData] = await Promise.all([
-          apiRequest(`/api/teams/${team.TeamID}?seasonId=${selectedSeasonId}`),
-          apiRequest(`/api/standings?seasonId=${selectedSeasonId}`)
-        ]);
-        setTeamData(tData);
-        setStandingsData(Array.isArray(sData) ? sData : []);
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
+      
+      // Fetch team data
+      apiRequest(`/api/teams/${team.TeamID}?seasonId=${selectedSeasonId}`)
+        .then(tData => {
+          setTeamData(tData);
+          setLoading(false);
+        })
+        .catch(err => {
+          console.error(err);
+          setLoading(false);
+        });
+
+      // Fetch standings data independently so it doesn't block the UI
+      apiRequest(`/api/standings?seasonId=${selectedSeasonId}`)
+        .then(sData => {
+          setStandingsData(Array.isArray(sData) ? sData : []);
+        })
+        .catch(console.error);
     };
 
     fetchTeam();

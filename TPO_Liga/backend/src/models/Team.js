@@ -99,8 +99,16 @@ class TeamModel {
         INNER JOIN Categories c ON m.CategoryID = c.CategoryID
         INNER JOIN Teams tLocal ON m.LocalTeamID = tLocal.TeamID
         INNER JOIN Teams tVisitor ON m.VisitorTeamID = tVisitor.TeamID
-        WHERE (m.LocalTeamID = @TeamID OR m.VisitorTeamID = @TeamID) AND m.SeasonID = @SeasonID
-        ORDER BY m.MatchDate DESC
+        WHERE m.LocalTeamID = @TeamID AND m.SeasonID = @SeasonID
+        UNION
+        SELECT m.*, c.Name AS CategoryName,
+               tLocal.Name AS LocalTeamName, tVisitor.Name AS VisitorTeamName
+        FROM Matches m
+        INNER JOIN Categories c ON m.CategoryID = c.CategoryID
+        INNER JOIN Teams tLocal ON m.LocalTeamID = tLocal.TeamID
+        INNER JOIN Teams tVisitor ON m.VisitorTeamID = tVisitor.TeamID
+        WHERE m.VisitorTeamID = @TeamID AND m.SeasonID = @SeasonID
+        ORDER BY MatchDate DESC
       `;
     } else {
       // Default to active season
@@ -120,25 +128,30 @@ class TeamModel {
         INNER JOIN Teams tLocal ON m.LocalTeamID = tLocal.TeamID
         INNER JOIN Teams tVisitor ON m.VisitorTeamID = tVisitor.TeamID
         INNER JOIN Seasons s ON m.SeasonID = s.SeasonID
-        WHERE (m.LocalTeamID = @TeamID OR m.VisitorTeamID = @TeamID) AND s.IsActive = 1
-        ORDER BY m.MatchDate DESC
+        WHERE m.LocalTeamID = @TeamID AND s.IsActive = 1
+        UNION
+        SELECT m.*, c.Name AS CategoryName,
+               tLocal.Name AS LocalTeamName, tVisitor.Name AS VisitorTeamName
+        FROM Matches m
+        INNER JOIN Categories c ON m.CategoryID = c.CategoryID
+        INNER JOIN Teams tLocal ON m.LocalTeamID = tLocal.TeamID
+        INNER JOIN Teams tVisitor ON m.VisitorTeamID = tVisitor.TeamID
+        INNER JOIN Seasons s ON m.SeasonID = s.SeasonID
+        WHERE m.VisitorTeamID = @TeamID AND s.IsActive = 1
+        ORDER BY MatchDate DESC
       `;
     }
 
-    // 2. Obtener lista de jugadores del equipo
-    const playersResult = await request.query(pQuery);
-    team.Players = playersResult.recordset;
+    // Execute queries in parallel to drastically improve response time
+    const reqPlayers = pool.request().input('TeamID', sql.Int, id);
+    const reqMatches = pool.request().input('TeamID', sql.Int, id);
+    const reqChamps = pool.request().input('TeamID', sql.Int, id);
 
-    // 3. Obtener partidos asociados al equipo
-    const matchesResult = await request.query(mQuery);
-    const allMatches = matchesResult.recordset;
-    
-    // Clasificar partidos en jugados (tienen resultado) y pendientes (no tienen resultado)
-    team.PlayedMatches = allMatches.filter(m => m.LocalPoints !== null && m.VisitorPoints !== null);
-    team.PendingMatches = allMatches.filter(m => m.LocalPoints === null || m.VisitorPoints === null);
-    team.Results = team.PlayedMatches;
+    if (seasonId) {
+      reqPlayers.input('SeasonID', sql.Int, seasonId);
+      reqMatches.input('SeasonID', sql.Int, seasonId);
+    }
 
-    // 4. Obtener campeonatos del equipo
     const champQuery = `
       SELECT tc.ChampionshipID, tc.CategoryName, tc.SeasonID, s.Name AS SeasonName, s.StartDate
       FROM TeamChampionships tc
@@ -146,7 +159,25 @@ class TeamModel {
       WHERE tc.TeamID = @TeamID
       ORDER BY s.StartDate DESC
     `;
-    const champResult = await request.query(champQuery);
+
+    const [playersResult, matchesResult, champResult] = await Promise.all([
+      reqPlayers.query(pQuery),
+      reqMatches.query(mQuery),
+      reqChamps.query(champQuery)
+    ]);
+
+    // 2. Asignar lista de jugadores del equipo
+    team.Players = playersResult.recordset;
+
+    // 3. Asignar partidos asociados al equipo
+    const allMatches = matchesResult.recordset;
+    
+    // Clasificar partidos en jugados (tienen resultado) y pendientes (no tienen resultado)
+    team.PlayedMatches = allMatches.filter(m => m.LocalPoints !== null && m.VisitorPoints !== null);
+    team.PendingMatches = allMatches.filter(m => m.LocalPoints === null || m.VisitorPoints === null);
+    team.Results = team.PlayedMatches;
+
+    // 4. Asignar campeonatos del equipo
     team.Championships = champResult.recordset;
 
     return team;

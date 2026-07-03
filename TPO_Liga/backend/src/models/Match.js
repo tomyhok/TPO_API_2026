@@ -67,9 +67,13 @@ class MatchModel {
     const pool = await poolPromise;
     const request = pool.request();
     let query = `
-      SELECT m.*, c.Name AS CategoryName 
+      SELECT m.*, c.Name AS CategoryName,
+             tl.Name AS LocalTeamName, tl.LogoURL AS LocalTeamLogo,
+             tv.Name AS VisitorTeamName, tv.LogoURL AS VisitorTeamLogo
       FROM Matches m 
       INNER JOIN Categories c ON m.CategoryID = c.CategoryID
+      INNER JOIN Teams tl ON m.LocalTeamID = tl.TeamID
+      INNER JOIN Teams tv ON m.VisitorTeamID = tv.TeamID
     `;
     
     if (seasonId) {
@@ -77,9 +81,14 @@ class MatchModel {
       query += ' WHERE m.SeasonID = @SeasonID ORDER BY m.MatchDate DESC';
     } else {
       query = `
-        SELECT m.*, c.Name AS CategoryName FROM Matches m
+        SELECT m.*, c.Name AS CategoryName,
+               tl.Name AS LocalTeamName, tl.LogoURL AS LocalTeamLogo,
+               tv.Name AS VisitorTeamName, tv.LogoURL AS VisitorTeamLogo
+        FROM Matches m
         INNER JOIN Categories c ON m.CategoryID = c.CategoryID
         INNER JOIN Seasons s ON m.SeasonID = s.SeasonID
+        INNER JOIN Teams tl ON m.LocalTeamID = tl.TeamID
+        INNER JOIN Teams tv ON m.VisitorTeamID = tv.TeamID
         WHERE s.IsActive = 1
         ORDER BY m.MatchDate DESC
       `;
